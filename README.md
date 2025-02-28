@@ -8,6 +8,6 @@ cmake -S . -B target/
 
 cmake --build target/
 
-```
-
 ./target/ChicOS
+
+```
