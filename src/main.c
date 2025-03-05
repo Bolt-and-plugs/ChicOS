@@ -1,6 +1,8 @@
-#include "defines.h"
+#include "main.h"
+
+process BCP;
 
 int main(int argc, char **argv) {
-  printf("carlos do arrocha");
+  printf("current id %d", (int) getpid());
   return 0;
 }

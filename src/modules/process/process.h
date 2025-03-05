@@ -13,17 +13,20 @@ typedef enum {
   ZOMBIE = 5,
 } p_status;
 
+
 typedef struct process process;
-typedef struct BCP BCP;
 
 struct process {
-  int pid;
-  process *parent;
+  i32 pid;
+  i32 oid;
+  i32 parent_id;
+  char name[128];
+  process *child;
   p_status status;
-  int oid;
 };
 
-int *p_create();
-void p_kill(int pid);
+int p_create(i32 pid);
+void log_process(i32 pid);
+void p_kill(i32 pid);
 
 #endif
