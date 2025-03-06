@@ -26,7 +26,7 @@ struct process {
 };
 
 int p_create(i32 pid);
-void log_process(i32 pid);
+void log_process(i32 pid, process *process_list);
 void p_kill(i32 pid);
 
 #endif

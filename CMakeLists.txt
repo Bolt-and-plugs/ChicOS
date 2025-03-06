@@ -11,12 +11,13 @@ endif()
 
 set(CMAKE_C_FLAGS_DEBUG "-g3 -O0 -Wall -Wextra -Wpedantic")
 
+file(GLOB OS_MODULES src/modules/*/*.c)
 file(GLOB SRC_FILES src/*.c)
 file(GLOB TEST_FILES test/*.c)
 
 include_directories(src)
 
-add_executable(${project_name} ${SRC_FILES} ${TEST_FILES})
+add_executable(${project_name} ${SRC_FILES} ${TEST_FILES} ${OS_MODULES})
 
 #enable_testing()
 #add_test(NAME ${project_name}_test COMMAND ${project_name}_test)

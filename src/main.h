@@ -6,8 +6,6 @@
 
 typedef struct app app;
 
-process BCP;
-
 int main(int argc, char **argv);
 
 #endif
