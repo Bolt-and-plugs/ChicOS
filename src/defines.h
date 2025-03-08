@@ -1,12 +1,15 @@
 #ifndef _DEFINES
 #define _DEFINES
 
+#include <pthread.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <stdint.h>
-#include <pthread.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include "modules/log/log.h"
 
 typedef uint8_t u8;
 typedef uint16_t u16;

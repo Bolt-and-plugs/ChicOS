@@ -2,7 +2,7 @@
 #include "stdio.h"
 
 void log(log_status level, int status_code, const char *str, ...) {
-  puts("/---------------------/");
+  printf("\n/---------------------/\n");
   printf("LEVEL: ");
   if (level == ERROR) {
     printf("ERROR\n");

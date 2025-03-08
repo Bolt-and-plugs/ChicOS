@@ -1,5 +1,5 @@
 #include "process.h"
-#include "modules/log/log.h"
+#include "../log/log.h"
 
 int p_create(process *process_list) {
   process p;
@@ -10,10 +10,10 @@ int p_create(process *process_list) {
 
 void log_process(i32 pid, process *process_list) {
   if (!process_list) {
-    log(ERROR, 0, "s" , "No Process List", NULL);
+    log(ERROR, 0, "No Process List", NULL);
     exit(ERROR);
   }
-  log(INFO, 0, "s", "No Process List", NULL);
+
   process p;
   for (i32 i = 0; i < 10; i++) {
     if (process_list[i].pid == pid) {
@@ -21,5 +21,6 @@ void log_process(i32 pid, process *process_list) {
       break;
     }
   }
-  printf("Loggin process: %s\npid: %d\n", p.name, p.pid);
+
+  printf("Log process: %s\npid: %d\n", p.name, p.pid);
 }
