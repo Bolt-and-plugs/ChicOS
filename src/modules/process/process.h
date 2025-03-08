@@ -13,7 +13,6 @@ typedef enum {
   ZOMBIE = 5,
 } p_status;
 
-
 typedef struct process process;
 
 struct process {
@@ -25,7 +24,7 @@ struct process {
   p_status status;
 };
 
-int p_create(i32 pid);
+int p_create(process *process_list);
 void log_process(i32 pid, process *process_list);
 void p_kill(i32 pid);
 

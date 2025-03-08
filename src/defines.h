@@ -18,6 +18,8 @@ typedef int16_t i16;
 typedef int32_t i32;
 typedef int64_t i64;
 
-
+#ifdef CMAKE_BUILD_TYPE
+#define DEBUG 1
+#endif
 
 #endif

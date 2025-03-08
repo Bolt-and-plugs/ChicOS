@@ -4,7 +4,11 @@
 #include "defines.h"
 #include "modules/process/process.h"
 
-typedef struct app app;
+typedef struct OS OS;
+
+struct OS {
+  process process_list[10];
+};
 
 int main(int argc, char **argv);
 
