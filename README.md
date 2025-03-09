@@ -6,7 +6,11 @@ To test the project for yourself, simply run:
 
 ```sh
 
-cmake -S . -B target/
+# for debug mode
+cmake -DCMAKE_BUILD_TYPE=DEBUG -S . -B target/ 
+
+# for release mode
+cmake -DCMAKE_BUILD_TYPE=RELEASE  -S . -B target/ 
 
 cmake --build target/
 

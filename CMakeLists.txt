@@ -6,10 +6,14 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED True)
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE DEBUG)
+  set(CMAKE_BUILD_TYPE RELEASE)
 endif()
 
-set(CMAKE_C_FLAGS_DEBUG "-g3 -O0 -Wall -Wextra -Wpedantic")
+if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+  set(CMAKE_C_FLAGS_DEBUG "-g3 -O0 -Wall -Wextra -Wpedantic")
+endif()
+
+add_definitions(-DBUILD_TYPE="${CMAKE_BUILD_TYPE}")
 
 file(GLOB OS_MODULES src/modules/*/*.c)
 file(GLOB SRC_FILES src/*.c)
