@@ -1,21 +1,21 @@
 #include "chicos.h"
 
+log_level min_log_level;
+bool debug;
+
 bool set_envvar(const char *mode) {
   if (strcmp(mode, "Debug") == 0 || strcmp(mode, "DEBUG") == 0) {
-    setenv("DEBUG", "1", 1);
+    debug = true;
     return true;
   }
 
-  setenv("DEBUG", "0", 1);
+  debug = false;
   return false;
 }
-
-log_level min_log_level;
 
 int main(int argc, char **argv) {
   // set debug mode
 #ifdef BUILD_TYPE
-  printf("Build type%s", BUILD_TYPE);
   bool debug = set_envvar(BUILD_TYPE);
   if (debug)
     log(INFO, 200, "Debug mode set", NULL);

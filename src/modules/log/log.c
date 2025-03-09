@@ -2,9 +2,10 @@
 #include "stdio.h"
 
 extern log_level min_log_level;
+extern bool debug;
 
-log_level get_min_log_level() {
-  if (getenv("DEBUG"))
+log_level get_min_log_level(void) {
+  if (debug)
     return INFO;
   return WARN;
 }
