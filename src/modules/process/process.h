@@ -23,8 +23,8 @@ struct process {
   p_status status;
 };
 
-int p_create(process *process_list);
-void log_process(i32 pid, process *process_list);
+int p_create(void);
+void log_process(i32 pid);
 void p_kill(i32 pid);
 
 #endif

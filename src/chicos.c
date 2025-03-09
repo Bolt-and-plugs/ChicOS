@@ -2,6 +2,7 @@
 
 log_level min_log_level;
 bool debug;
+process process_list[10];
 
 bool set_envvar(const char *mode) {
   if (strcmp(mode, "Debug") == 0 || strcmp(mode, "DEBUG") == 0) {
@@ -23,11 +24,10 @@ int main(int argc, char **argv) {
   min_log_level = get_min_log_level();
 
   // main process
-  OS os;
   process p = {
       .name = "ChicOS", .pid = (i32)getpid(), .child = NULL, .status = READY};
-  os.process_list[0] = p;
-  log_process(os.process_list[0].pid, os.process_list);
+  process_list[0] = p;
+  log_process(process_list[0].pid);
 
   return 0;
 }
