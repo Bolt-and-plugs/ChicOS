@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 set(project_name ChicOS)
 project(${project_name} VERSION 0.0.1)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED True)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -10,7 +10,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES DEBUG)
-  set(CMAKE_C_FLAGS_DEBUG "-g3 -O0 -Wall -Wextra -Wpedantic")
+  set(CMAKE_C_FLAGS_DEBUG "-g3 -O0 -Wall -Wextra -Wpedantic -fsanitize=address ")
 endif()
 
 add_definitions(-DBUILD_TYPE="${CMAKE_BUILD_TYPE}")

@@ -17,5 +17,3 @@ cmake --build target/
 ./target/ChicOS
 
 ```
-
-
