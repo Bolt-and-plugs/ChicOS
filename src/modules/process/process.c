@@ -9,18 +9,18 @@ int p_create(void) {
 }
 
 void log_process(i32 pid) {
-  process *p = malloc(sizeof(process));
+  process p;
   for (i32 i = 0; i < 10; i++) {
     if (process_list[i].pid == pid) {
-      p = &process_list[i];
+      p = process_list[i];
       break;
     }
   }
 
-  if (!p) {
+  if (!p.pid) {
     log(WARN, 404, "No process with matching ID", NULL);
     return;
   }
 
-  printf("process: %s\npid: %d\n", p->name, p->pid);
+  printf("process: %s\npid: %d\n", p.name, p.pid);
 }

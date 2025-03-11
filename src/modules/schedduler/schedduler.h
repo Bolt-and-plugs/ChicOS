@@ -1,5 +1,5 @@
-#ifndef _SCHEDULER
-#define _SCHEDULER
+#ifndef _SCHEDDULER
+#define _SCHEDDULER
 
 #include "../process/process.h"
 

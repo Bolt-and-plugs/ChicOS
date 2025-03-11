@@ -10,13 +10,33 @@ log_level get_min_log_level(void) {
   return WARN;
 }
 
-void log(log_level level, int status_code, const char *str, ...) {
+void log(log_level level, status_code status, const char *str, ...) {
   if (level < min_log_level)
     return;
 
   printf("\n/---------------------/\n");
-  printf("LEVEL: ");
+  printf("STATUS CODE: ");
+  switch (status / 100) {
+  case 0:
+    printf("%d - SCHEDULER\n", status);
+    break;
+  case 1:
+    printf("%d - Process Handling Issue\n", status);
+    break;
+  case 2:
+    printf("%d - CPU Related Issue\n", status);
+    break;
+  case 3:
+    printf("%d - Memory Status Issue\n", status);
+    break;
+  case 5:
+    printf("%d - User Status Issue\n", status);
+    break;
+  default:
+    printf("%d - Unknown Status\n", status);
+  }
 
+  printf("LEVEL: ");
   switch (level) {
   case ERROR:
     puts("ERROR");
@@ -32,7 +52,6 @@ void log(log_level level, int status_code, const char *str, ...) {
     puts("INFO");
     break;
   }
-  printf("STATUS CODE: %03d\n", status_code);
 
   va_list arg;
   va_start(arg, str);
