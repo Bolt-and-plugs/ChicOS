@@ -18,6 +18,7 @@ typedef struct process process;
 struct process {
   i32 pid;
   i32 parent_id;
+  i32 tickets;
   char name[128];
   process *child;
   p_status status;

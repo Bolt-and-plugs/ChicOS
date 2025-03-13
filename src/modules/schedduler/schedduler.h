@@ -1,6 +1,8 @@
 #ifndef _SCHEDDULER
 #define _SCHEDDULER
 
-#include "../process/process.h"
+#include "../../defines.h"
+
+i32 get_winner();
 
 #endif
