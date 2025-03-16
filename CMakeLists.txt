@@ -13,6 +13,8 @@ if(CMAKE_BUILD_TYPE MATCHES DEBUG)
   set(CMAKE_C_FLAGS_DEBUG "-g3 -O0 -Wall -Wextra -Wpedantic -fsanitize=address ")
 endif()
 
+set(CMAKE_C_FLAGS "-lm")
+
 add_definitions(-DBUILD_TYPE="${CMAKE_BUILD_TYPE}")
 
 file(GLOB OS_MODULES src/modules/*/*.c)

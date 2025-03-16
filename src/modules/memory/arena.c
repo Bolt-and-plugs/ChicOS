@@ -1,9 +1,10 @@
 #include "arena.h"
 #include "assert.h"
 
-Arena create_arena() {
-  Arena a = {.buf = malloc(ARENA_MAX_SIZE),
-             .buf_len = ARENA_MAX_SIZE,
+Arena create_arena(i32 size) {
+  // TODO
+  Arena a = {.buf = 0, 
+             .buf_len = size,
              .curr_offset = 0,
              .prev_offset = 0};
   return a;

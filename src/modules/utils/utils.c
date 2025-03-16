@@ -1,15 +1,22 @@
 #include "utils.h"
 #include "assert.h"
+#include "math.h"
+#include "stdint.h"
 
-bool is_power_of_two(uintptr_t x) {
-	return (x & (x-1)) == 0;
-}
+bool is_power_of_two(uintptr_t x) { return (x & (x - 1)) == 0; }
 
 int parse_string_to_int(char *str) {
   int size = 0;
   int length = strlen(str);
+  int val;
   for (int i = 0, j = length - 1; i < length; i++, j--) {
-    size = size * 10 + (str[i] - '0');
+    val = (str[i] - '0');
+    if (val > 0 && val < INT32_MAX / pow(10, i))
+      size = size * 10 + val;
   }
+  if (size < 0 || val >= INT32_MAX)
+    return 0;
   return size;
 }
+
+bool valid_int(int v) { return (v > 0 && v < INT32_MAX) ? true : false; }

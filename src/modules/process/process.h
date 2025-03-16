@@ -2,6 +2,7 @@
 #define _PROCESS
 
 #include "../../defines.h"
+#include "../memory/arena.h"
 
 typedef enum {
   INACTIVE = -1,
@@ -22,6 +23,14 @@ struct process {
   char name[128];
   process *child;
   p_status status;
+  // Arena *address_space;
+  // decision -> separate heap, stack and code? handle this all as linear
+  // allocation?
+  //
+  // base and limit? even though this is hardware handled, we can implement it
+  // here as a logical abstraction layer.
+  // i32 base;
+  // i32 bounds;
 };
 
 int p_create(void);

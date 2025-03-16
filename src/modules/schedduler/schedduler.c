@@ -5,7 +5,7 @@
 
 extern process process_list[10];
 
-i32 get_winner() {
+i32 get_winner_proc(void) {
   // lottery
   int counter = 0;
   srand(time(NULL));

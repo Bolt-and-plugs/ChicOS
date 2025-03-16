@@ -3,6 +3,6 @@
 
 #include "../../defines.h"
 
-i32 get_winner();
+i32 get_winner_proc(void);
 
 #endif
