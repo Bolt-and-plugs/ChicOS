@@ -1,5 +1,7 @@
 #include "arena.h"
 #include "assert.h"
+#include "../log/log.h"
+#include "../utils/utils.h"
 
 Arena create_arena(i32 size) {
   // TODO
@@ -30,11 +32,11 @@ uintptr_t align_forward(uintptr_t ptr, size_t align) {
 
 void *alloc_arena(Arena a, size_t s) {
   if (s >= ARENA_MAX_SIZE) {
-    log(ERROR, MEM_STATUS, "Size bigger than arena max!", NULL);
+    c_log(ERROR, MEM_STATUS, "Size bigger than arena max!", NULL);
     return NULL;
   }
   if (s + a.curr_offset > ARENA_MAX_SIZE) {
-    log(ERROR, MEM_STATUS, "Allocating would break arena max size!", NULL);
+    c_log(ERROR, MEM_STATUS, "Allocating would break arena max size!", NULL);
     return NULL;
   }
   // TODO

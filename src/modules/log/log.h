@@ -20,7 +20,7 @@ typedef enum {
 log_level get_min_log_level();
 // when calling this function, DO NOT FORGET TO ADD A NULL INTO THE LAST
 // ARGUMENT, AFTER YOURS STRINGS, OK?
-// example log(INFO, 0, "Message I want to pass", NULL);
-void log(log_level level, status_code status_code, const char *str, ...);
+// example c_log(INFO, 0, "Message I want to pass", NULL);
+void c_log(log_level level, status_code status_code, const char *str, ...);
 
 #endif

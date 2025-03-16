@@ -1,4 +1,7 @@
 #include "chicos.h"
+#include "modules/log/log.h"
+#include "modules/schedduler/schedduler.h"
+#include "modules/utils/utils.h"
 
 log_level min_log_level;
 bool debug;
@@ -16,11 +19,10 @@ bool set_envvar(const char *mode) {
 }
 
 void init_app(int system_size) {
-  app = (App){.virtua_mem = create_arena(system_size)};
+  // app = (App){.virtua_mem = create_arena(system_size)};
 }
 
 void handle_args(int *args, int argc, char **argv) {
-  // printing tags if tags
   for (int i = 1; i < argc; i++) {
     if (argv[i][0] == '-' && strlen(argv[i]) > 1 && argv[i][2] != '-')
       printf("%s ", argv[i]);
@@ -31,7 +33,7 @@ void handle_args(int *args, int argc, char **argv) {
     if (strcmp(str_arg, "--sys-len") == 0 || strcmp(str_arg, "-sl") == 0) {
       int val = parse_string_to_int(argv[i + 1]);
       if (val == 0 || !valid_int(val)) {
-        log(ERROR, MEM_STATUS, "Bad system length", NULL);
+        c_log(ERROR, MEM_STATUS, "Bad system length", NULL);
         exit(0);
       }
       args[1] = val;
@@ -42,31 +44,35 @@ void handle_args(int *args, int argc, char **argv) {
 
 int main(int argc, char **argv) {
   int args[argc];
-  handle_args(args, argc, argv);
-  if (args[0] == 1) {
-    puts("Help thing");
-    return 0;
-  }
-  if (valid_int(args[1])) {
-    printf("Size of system being set to %d\n", args[1]);
-    init_app(args[1]);
+  if (argc > 1) {
+    handle_args(args, argc, argv);
+    if (args[0] == 1) {
+      puts("Help thing");
+      return 0;
+    }
+    if (valid_int(args[1])) {
+      printf("Size of system being set to %d\n", args[1]);
+      // init_app(args[1]);
+    }
   }
 
   //  set debug mode
 #ifdef BUILD_TYPE
   bool debug = set_envvar(BUILD_TYPE);
   if (debug)
-    log(INFO, 200, "Debug mode set", NULL);
+    c_log(INFO, 200, "Debug mode set", NULL);
 #endif
   min_log_level = get_min_log_level();
 
+  char *process_name[5] = {"ChicOS", "2kdgajkgad", "aiagkj3", "4sim", "TESTE"};
   // main process
-  process p = {.name = "ChicOS",
-               .pid = (i32)getpid(),
-               .child = NULL,
-               .status = READY,
-               .tickets = 50};
-  process_list[0] = p;
+  for (int i = 0; i < 5; i++) {
+    process_list[i] = (process){.name = process_name[i],
+                                .pid = (i32)getpid() + i,
+                                .child = NULL,
+                                .status = READY,
+                                .tickets = 100/5};
+  }
 
   for (int i = 0; i < 10; i++) {
     log_process(get_winner_proc());

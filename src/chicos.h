@@ -2,10 +2,8 @@
 #define _CHICOS
 
 #include "defines.h"
-#include "modules/log/log.h"
 #include "modules/memory/arena.h"
 #include "modules/process/process.h"
-#include "modules/schedduler/schedduler.h"
 
 typedef struct App App;
 

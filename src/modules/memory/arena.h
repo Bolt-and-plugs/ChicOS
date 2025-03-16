@@ -2,8 +2,6 @@
 #define _ARENA
 
 #include "../../defines.h"
-#include "../log/log.h"
-#include "../utils/utils.h"
 
 #define ARENA_MAX_SIZE 4096
 

@@ -10,7 +10,7 @@ log_level get_min_log_level(void) {
   return WARN;
 }
 
-void log(log_level level, status_code status, const char *str, ...) {
+void c_log(log_level level, status_code status, const char *str, ...) {
   if (level < min_log_level)
     return;
 
