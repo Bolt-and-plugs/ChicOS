@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
                                 .pid = (i32)getpid() + i,
                                 .child = NULL,
                                 .status = READY,
-                                .tickets = 100/5};
+                                .tickets = 100 / 5};
   }
 
   for (int i = 0; i < 10; i++) {

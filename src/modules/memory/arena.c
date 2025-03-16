@@ -1,14 +1,11 @@
 #include "arena.h"
-#include "assert.h"
 #include "../log/log.h"
 #include "../utils/utils.h"
+#include "assert.h"
 
 Arena create_arena(i32 size) {
   // TODO
-  Arena a = {.buf = 0, 
-             .buf_len = size,
-             .curr_offset = 0,
-             .prev_offset = 0};
+  Arena a = {.buf = 0, .buf_len = size, .curr_offset = 0, .prev_offset = 0};
   return a;
 }
 
@@ -42,7 +39,6 @@ void *alloc_arena(Arena a, size_t s) {
   // TODO
   align_forward(*a.buf, s);
   // handle arena alloc
-
 
   return malloc(100);
 }
