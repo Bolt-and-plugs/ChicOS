@@ -2,10 +2,23 @@
 #include "../log/log.h"
 #include "../utils/utils.h"
 #include "assert.h"
+#include <sys/mman.h>
 
 Arena create_arena(i32 size) {
-  // TODO
-  Arena a = {.buf = 0, .buf_len = size, .curr_offset = 0, .prev_offset = 0};
+  if (size < 0 || size > ARENA_MAX_SIZE * 4) {
+    size = ARENA_MAX_SIZE;
+    c_log(WARN, 0, "Fall back arena size to ARENA_MAX_SIZE", NULL);
+  }
+
+  // this is extremelly unsafe for now
+  void *ptr =
+      mmap(NULL, size, PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, -1, 0);
+
+  if (!ptr) {
+    ptr = NULL;
+    c_log(ERROR, MEM_STATUS, "Could not allocate Arena", NULL);
+  }
+  Arena a = {.buf = ptr, .buf_len = size, .curr_offset = 0, .prev_offset = 0};
   return a;
 }
 
