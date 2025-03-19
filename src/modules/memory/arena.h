@@ -14,7 +14,7 @@ struct Arena {
   size_t curr_offset;
 };
 
-Arena create_arena(i32 size);
+Arena* create_arena(i32 size);
 void *alloc_arena(Arena a, size_t size);
 uintptr_t align_forward(uintptr_t ptr, size_t align);
 void free_arena(Arena a);

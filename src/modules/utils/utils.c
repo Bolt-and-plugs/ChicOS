@@ -20,3 +20,29 @@ int parse_string_to_int(char *str) {
 }
 
 bool valid_int(int v) { return (v > 0 && v < INT32_MAX) ? true : false; }
+
+char *parse_int_to_string(int v, char *str) {
+  int i = 0;
+  int negative = v < 0 ? true : false;
+
+  if (v < 0)
+    v = -v;
+
+  while (v > 0) {
+    str[i++] = v % 10 + '0';
+    v /= 10;
+  }
+
+  if (negative)
+    str[i++] = '-';
+
+  str[i] = '\0';
+
+  for (int j = 0, k = i - 1; j < k; j++, k--) {
+    char temp = str[j];
+    str[j] = str[k];
+    str[k] = temp;
+  }
+
+  return str;
+}

@@ -79,5 +79,7 @@ int main(int argc, char **argv) {
     sleep(1);
   }
 
+  Arena *a = create_arena(64);
+
   return 0;
 }
