@@ -21,7 +21,6 @@ Arena *create_arena(i32 size) {
 
   char s[128];
   c_log(DEBUG, MEM_STATUS, "Allocated ", parse_int_to_string(size, s), NULL);
-  
 
   return ptr;
 }
@@ -44,20 +43,22 @@ uintptr_t align_forward(uintptr_t ptr, size_t align) {
   return p;
 }
 
-void *alloc_arena(Arena a, size_t s) {
-  if (s >= a.buf_len) {
-    c_log(ERROR, MEM_STATUS, "Size bigger than arena max!", NULL);
+void *alloc_arena(Arena *a, size_t s) {
+  if ((i32)s >= (i32)a->buf_len) {
+    char res[128];
+    c_log(ERROR, MEM_STATUS, "Size bigger than arena max!",
+          parse_int_to_string(s, res), parse_int_to_string(a->buf_len, res),
+          NULL);
     return NULL;
   }
-  if (s + a.curr_offset > a.buf_len) {
+  if (s + a->curr_offset > a->buf_len) {
     c_log(ERROR, MEM_STATUS, "Allocating would break arena max size!", NULL);
     return NULL;
   }
-  // TODO
-  align_forward(*a.buf, s);
-  // handle arena alloc
 
-  return malloc(100);
+  align_forward(*a->buf, s);
+
+  return a->buf + s;
 }
 
 void free_arena(Arena a) {
