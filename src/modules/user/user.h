@@ -10,4 +10,6 @@ struct user {
   char name[50];
 };
 
+void print_logo();
+
 #endif

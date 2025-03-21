@@ -3,6 +3,7 @@
 
 #include "../../defines.h"
 #include "../memory/arena.h"
+#include "../utils/list.h"
 
 typedef enum {
   INACTIVE = -1,
@@ -15,22 +16,20 @@ typedef enum {
 } p_status;
 
 typedef struct process process;
+typedef struct BCP BCP;
 
 struct process {
   const char *name;
   i32 pid;
-  i32 parent_id;
   i32 tickets;
-  process *child;
   p_status status;
-  // Arena *address_space;
-  // decision -> separate heap, stack and code? handle this all as linear
-  // allocation?
-  //
-  // base and limit? even though this is hardware handled, we can implement it
-  // here as a logical abstraction layer.
-  // i32 base;
-  // i32 bounds;
+  i32 time_to_run;
+  // yet to be done
+  Arena *address_space;
+};
+
+struct BCP {
+  List *processes;
 };
 
 int p_create(void);

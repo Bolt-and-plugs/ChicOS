@@ -2,11 +2,27 @@
 #include "../log/log.h"
 #include "../utils/utils.h"
 #include "assert.h"
+#include <sys/mman.h>
 
-Arena create_arena(i32 size) {
-  // TODO
-  Arena a = {.buf = 0, .buf_len = size, .curr_offset = 0, .prev_offset = 0};
-  return a;
+#define HEAP_SIZE 640000
+char heap[HEAP_SIZE] = {0};
+size_t heap_size = 0;
+
+Arena *create_arena(i32 size) {
+  if (size < 0 || size > ARENA_MAX_SIZE) {
+    size = ARENA_MAX_SIZE;
+    c_log(WARN, 0, "Fall back arena size to ARENA_MAX_SIZE", NULL);
+  }
+
+  assert(heap_size + size <= HEAP_SIZE);
+
+  void *ptr = heap + heap_size;
+  heap_size += size;
+
+  char s[128];
+  c_log(DEBUG, MEM_STATUS, "Allocated ", parse_int_to_string(size, s), NULL);
+
+  return ptr;
 }
 
 uintptr_t align_forward(uintptr_t ptr, size_t align) {
@@ -27,20 +43,22 @@ uintptr_t align_forward(uintptr_t ptr, size_t align) {
   return p;
 }
 
-void *alloc_arena(Arena a, size_t s) {
-  if (s >= ARENA_MAX_SIZE) {
-    c_log(ERROR, MEM_STATUS, "Size bigger than arena max!", NULL);
+void *alloc_arena(Arena *a, size_t s) {
+  if ((i32)s >= (i32)a->buf_len) {
+    char res[128];
+    c_log(ERROR, MEM_STATUS, "Size bigger than arena max!",
+          parse_int_to_string(s, res), parse_int_to_string(a->buf_len, res),
+          NULL);
     return NULL;
   }
-  if (s + a.curr_offset > ARENA_MAX_SIZE) {
+  if (s + a->curr_offset > a->buf_len) {
     c_log(ERROR, MEM_STATUS, "Allocating would break arena max size!", NULL);
     return NULL;
   }
-  // TODO
-  align_forward(*a.buf, s);
-  // handle arena alloc
 
-  return malloc(100);
+  align_forward(*a->buf, s);
+
+  return a->buf + s;
 }
 
 void free_arena(Arena a) {

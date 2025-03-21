@@ -4,7 +4,7 @@
 #include "../../defines.h"
 #include <stdarg.h>
 
-typedef enum { INFO, ERROR, WARN } log_level;
+typedef enum { DEBUG, INFO, ERROR, WARN } log_level;
 
 // this is just a todo status code, in order to make things easy to debug
 // Im gonna make this prefix reffers to a system part

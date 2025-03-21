@@ -4,7 +4,7 @@
 extern process process_list[10];
 
 int p_create(void) {
-  process p = {.parent_id = getpid(), .pid = getpid() + 1};
+  process p = {.pid = getpid() + 1};
   return p.pid;
 }
 
