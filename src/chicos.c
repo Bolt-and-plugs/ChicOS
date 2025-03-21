@@ -2,6 +2,7 @@
 #include "modules/log/log.h"
 #include "modules/schedduler/schedduler.h"
 #include "modules/utils/utils.h"
+#include "modules/user/user.h"
 
 log_level min_log_level;
 bool debug;
@@ -55,6 +56,8 @@ int main(int argc, char **argv) {
       // init_app(args[1]);
     }
   }
+
+  print_logo();
 
   //  set debug mode
 #ifdef BUILD_TYPE
