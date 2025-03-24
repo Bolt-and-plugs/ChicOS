@@ -10,9 +10,6 @@ typedef enum {
   RUNNING = 0,
   READY = 1,
   BLOCKED = 2,
-  SLEEP = 3,
-  AWAIT = 4,
-  ZOMBIE = 5,
 } p_status;
 
 typedef struct process process;
@@ -21,15 +18,16 @@ typedef struct BCP BCP;
 struct process {
   const char *name;
   i32 pid;
-  i32 tickets;
   p_status status;
-  i32 time_to_run;
+  i32 remaining_time;
   // yet to be done
+  // understand how to impl segments here
   Arena *address_space;
+  i32 tickets;
 };
 
 struct BCP {
-  List *processes;
+  process processes[10];
 };
 
 int p_create(void);

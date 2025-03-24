@@ -5,6 +5,7 @@ extern process process_list[10];
 
 int p_create(void) {
   process p = {.pid = getpid() + 1};
+  // handle process creation
   return p.pid;
 }
 
