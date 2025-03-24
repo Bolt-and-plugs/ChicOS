@@ -1,12 +1,11 @@
 #include "chicos.h"
 #include "modules/log/log.h"
 #include "modules/schedduler/schedduler.h"
-#include "modules/utils/utils.h"
 #include "modules/user/user.h"
+#include "modules/utils/utils.h"
 
 log_level min_log_level;
 bool debug;
-process process_list[10];
 App app;
 
 bool set_envvar(const char *mode) {
@@ -67,26 +66,27 @@ int main(int argc, char **argv) {
 #endif
   min_log_level = get_min_log_level();
 
-  //char *process_name[5] = {"ChicOS", "2kdgajkgad", "aiagkj3", "4sim", "TESTE"};
-  // main process
-  //for (int i = 0; i < 5; i++) {
-  //  process_list[i] = (process){.name = process_name[i],
-  //                              .pid = (i32)getpid() + i,
-  //                              .child = NULL,
-  //                              .status = READY,
-  //                              .tickets = 100 / 5};
-  //}
+  // char *process_name[5] = {"ChicOS", "2kdgajkgad", "aiagkj3", "4sim",
+  // "TESTE"};
+  //  main process
+  // for (int i = 0; i < 5; i++) {
+  //   process_list[i] = (process){.name = process_name[i],
+  //                               .pid = (i32)getpid() + i,
+  //                               .child = NULL,
+  //                               .status = READY,
+  //                               .tickets = 100 / 5};
+  // }
 
-  //for (int i = 0; i < 10; i++) {
-  //  log_process(get_winner_proc());
-  //  sleep(1);
-  //}
+  // for (int i = 0; i < 10; i++) {
+  //   log_process(get_winner_proc());
+  //   sleep(1);
+  // }
 
-  Arena *a = create_arena(ARENA_MAX_SIZE);
-  int *teste = alloc_arena(a, sizeof(int));
-  *teste = 5;
+  //Arena *a = create_arena(ARENA_MAX_SIZE);
+  //int *teste = alloc_arena(a, sizeof(int));
+  //*teste = 6;
 
-  printf("%d", *teste);
+  //printf("%d", *teste);
 
   return 0;
 }

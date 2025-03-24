@@ -9,7 +9,7 @@ typedef struct App App;
 
 struct App {
   Arena virtua_mem;
-  process *process_list;
+  BCP bcp;
 };
 
 bool set_envvar(const char *mode);
