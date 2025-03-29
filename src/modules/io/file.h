@@ -10,12 +10,13 @@ struct file_header {
   char *name;
   i32 priority;
   i32 seg_flag;
-  char *seg_size;
+  i32 seg_size;
   char *semaphores;
 };
 
 struct file_buffer {
   FILE *fp;
+  char adress[128];
   char mode;
 };
 

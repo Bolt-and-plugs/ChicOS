@@ -15,6 +15,9 @@ typedef enum {
   CPU_THING = 200,
   MEM_STATUS = 300,
   USER_STATUS = 500,
+  DISK_ERROR = 400,
+  DISK_FILE_READ_ERROR = 401,
+  DISK_FILE_WRITE_ERROR = 402
 } status_code;
 
 log_level get_min_log_level();

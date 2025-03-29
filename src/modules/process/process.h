@@ -5,6 +5,9 @@
 #include "../memory/arena.h"
 #include "../utils/list.h"
 
+#define MAX_SIZE_PROC_NAME 32
+#define MAX_SIZE_SEMAPHORES 32
+
 typedef enum {
   INACTIVE = -1,
   RUNNING = 0,
