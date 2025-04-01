@@ -3,6 +3,8 @@
 
 #include "../../defines.h"
 
+#define MAX_ADDRESS_SIZE 4096
+
 typedef struct file_buffer file_buffer;
 typedef struct file_header file_header;
 
@@ -16,8 +18,8 @@ struct file_header {
 
 struct file_buffer {
   FILE *fp;
-  char adress[128];
-  char mode;
+  char address[MAX_ADDRESS_SIZE];
+  char mode[2];
 };
 
 // create a synthetic file struct and another one for normal files (e.g we must

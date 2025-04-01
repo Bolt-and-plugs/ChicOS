@@ -3,6 +3,7 @@
 #include "modules/schedduler/schedduler.h"
 #include "modules/user/user.h"
 #include "modules/utils/utils.h"
+#include "modules/io/file.h"
 
 log_level min_log_level;
 bool debug;
@@ -65,6 +66,9 @@ int main(int argc, char **argv) {
     c_log(INFO, 200, "Debug mode set", NULL);
 #endif
   min_log_level = get_min_log_level();
+
+  exec_file(open_file("../resources/synthetic-program.txt", "r"));
+  return 1;
 
   // char *process_name[5] = {"ChicOS", "2kdgajkgad", "aiagkj3", "4sim",
   // "TESTE"};
