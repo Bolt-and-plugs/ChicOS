@@ -21,16 +21,16 @@ void c_log(log_level level, status_code status, const char *str, ...) {
     printf("%d - SCHEDULER\n", status);
     break;
   case 1:
-    printf("%d - Process Handling Issue\n", status);
+    printf("%d - Process Handling Context\n", status);
     break;
   case 2:
-    printf("%d - CPU Related Issue\n", status);
+    printf("%d - CPU Related Context\n", status);
     break;
   case 3:
-    printf("%d - Memory Status Issue\n", status);
+    printf("%d - Memory Status Context\n", status);
     break;
   case 5:
-    printf("%d - User Status Issue\n", status);
+    printf("%d - User Status Context\n", status);
     break;
   default:
     printf("%d - Unknown Status\n", status);

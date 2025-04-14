@@ -1,6 +1,7 @@
 #include "chicos.h"
 #include "modules/io/file.h"
 #include "modules/log/log.h"
+#include "modules/memory/mem.h"
 #include "modules/schedduler/schedduler.h"
 #include "modules/user/user.h"
 #include "modules/utils/utils.h"
@@ -67,6 +68,7 @@ int main(int argc, char **argv) {
 #endif
   min_log_level = get_min_log_level();
 
-  // exec_file(open_file("../resources/synthetic-program.txt", "r"));
+  init_mem();
+
   return 0;
 }

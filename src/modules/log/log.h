@@ -4,7 +4,7 @@
 #include "../../defines.h"
 #include <stdarg.h>
 
-typedef enum { DEBUG, INFO, ERROR, WARN } log_level;
+typedef enum { DEBUG, INFO, WARN, ERROR, CRIT_ERROR } log_level;
 
 // this is just a todo status code, in order to make things easy to debug
 // Im gonna make this prefix reffers to a system part
@@ -14,6 +14,7 @@ typedef enum {
   PROCESS_OUT_OF_LIST = 101,
   CPU_THING = 200,
   MEM_STATUS = 300,
+  MEM_ERROR = 301,
   USER_STATUS = 500,
   DISK_ERROR = 400,
   DISK_FILE_READ_ERROR = 401,

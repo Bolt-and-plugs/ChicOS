@@ -15,23 +15,26 @@ typedef enum {
   BLOCKED = 2,
 } p_status;
 
-typedef struct process process;
-typedef struct BCP BCP;
+typedef struct __page_table {
+  u32 base;
+  u32 bounds;
+  u8 magic_number;
+} page_table;
 
-struct process {
+typedef struct __process {
   const char *name;
   i32 pid;
   p_status status;
   i32 remaining_time;
   // yet to be done
   // understand how to impl segments here
-  Arena *address_space;
+  page_table pt;
   i32 tickets;
-};
+} process;
 
-struct BCP {
+typedef struct __BCP {
   process processes[10];
-};
+} BCP;
 
 int p_create(void);
 void log_process(i32 pid);

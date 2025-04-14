@@ -3,9 +3,11 @@
 
 #include "defines.h"
 #include "modules/process/process.h"
+#include "modules/memory/mem.h"
 
 typedef struct __App {
   BCP bcp;
+  memory *mem;
 } App;
 
 bool set_envvar(const char *mode);
