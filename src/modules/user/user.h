@@ -3,9 +3,9 @@
 
 #include "../../defines.h"
 
-typedef struct user user;
+typedef struct __user User;
 
-struct user {
+struct User {
   int id;
   char name[50];
 };

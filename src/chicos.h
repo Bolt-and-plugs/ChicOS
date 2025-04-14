@@ -2,15 +2,11 @@
 #define _CHICOS
 
 #include "defines.h"
-#include "modules/memory/arena.h"
 #include "modules/process/process.h"
 
-typedef struct App App;
-
-struct App {
-  Arena virtua_mem;
+typedef struct __App {
   BCP bcp;
-};
+} App;
 
 bool set_envvar(const char *mode);
 
