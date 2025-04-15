@@ -48,25 +48,25 @@ void exec_file(file_buffer *file) {
 
     if (identifier != NULL) {
       if (aux != NULL) {
-        if (strcmp(identifier, "exec")) {
+        if (strcmp(identifier, "exec") == 0) {
           int time = (atoi(aux) / 200) + 1;
           printf("Executing IO request...\n");
           sleep(time);
           printf("IO request finished\n");
         } else {
-          if (strcmp(identifier, "read")) {
+          if (strcmp(identifier, "read") == 0) {
             int k = atoi(aux);
             printf("Reading from disk on trail %d...\n", k);
             sleep(3);
             printf("Reading finished\n");
           } else {
-            if (strcmp(identifier, "write")) {
+            if (strcmp(identifier, "write") == 0) {
               int k = atoi(aux);
               printf("Writing in disk on trail %d...\n", k);
               sleep(3);
               printf("Writing finished\n");
             } else {
-              if (strcmp(identifier, "print")) {
+              if (strcmp(identifier, "print") == 0) {
                 int time = (atoi(aux) / 200) + 1;
                 printf("Printing...\n");
                 sleep(time);
