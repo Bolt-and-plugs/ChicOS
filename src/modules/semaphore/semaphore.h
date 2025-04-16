@@ -1,6 +1,8 @@
 #ifndef _SEMAPHORE
 #define _SEMAPHORE
 
+#include <semaphore.h>
+
 typedef enum {
   process_interrupt = 1, // interrupção gerada pela execução da função processCreate e pelo término de operações de E/S
   process_create = 2,    // chamada para iniciar a criação de um processo no BCP *
@@ -19,5 +21,8 @@ typedef enum {
 
 void interrupControl(void);
 void sysCall(void);
+
+void semaphoreP(sem_t *s);
+void semaphoreV(sem_t *s);
 
 #endif
