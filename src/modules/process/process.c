@@ -4,22 +4,18 @@
 
 extern App *app
 
-void p_create(int size) {
+int p_create(PCB* pcb, int size) {
   // handle process creation
-  if(app->bcp.curr >= MAX_PCB-1){
-    return; // error
+  if(pcb.curr == MAX_PCB-1){
+    return -1; // erro, padronizar dps
   }
   process p = {
     .pid = getpid() + 1,
     .status = NEW,
-    //.address_space = 
+    .address_space = create_arena(size)
   };
-
-  app->bcp.processes[curr] = p.pid;
-  app->bcp.curr++;
-
-  p.status = READY;
-  return;
+  pcb[pcb.curr] = p.pid;
+  pcb.curr++;
 }
 
 void log_process(i32 pid) {
