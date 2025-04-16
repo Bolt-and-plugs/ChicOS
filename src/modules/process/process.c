@@ -1,11 +1,22 @@
 #include "process.h"
 #include "../log/log.h"
+#include "chicos.h"
 
-extern process process_list[10];
+extern App *app
 
-int p_create(void) {
-  process p = {.pid = getpid() + 1};
+int p_create(PCB* pcb, int size) {
   // handle process creation
+  if(pcb.curr == MAX_PCB-1){
+    return -1; // erro, padronizar dps
+  }
+  process p = {
+    .pid = getpid() + 1,
+    .status = NEW,
+    .address_space = create_arena(size)
+  };
+  pcb[pcb.curr] = p.pid;
+  pcb.curr++;
+  
   return p.pid;
 }
 
