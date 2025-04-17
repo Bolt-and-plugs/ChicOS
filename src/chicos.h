@@ -2,8 +2,9 @@
 #define _CHICOS
 
 #include "defines.h"
-#include "modules/process/process.h"
 #include "modules/memory/mem.h"
+#include "modules/process/process.h"
+
 
 typedef struct __App {
   BCP bcp;

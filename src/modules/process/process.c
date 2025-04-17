@@ -19,7 +19,7 @@ void log_process(i32 pid) {
   }
 
   if (!p.pid) {
-    c_log(WARN, 404, "No process with matching ID", NULL);
+    c_warn(PROCESS_OUT_OF_LIST, "No process with matching ID");
     return;
   }
 

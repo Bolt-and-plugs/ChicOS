@@ -19,7 +19,7 @@ List *new_list(i32 data_size) {
 
 Node *alloc_node(List *l, void *d) {
   if (!l || !d) {
-    c_log(ERROR, MEM_STATUS, "list or data invalid!", NULL);
+    c_error(MEM_STATUS, "list or data invalid!");
     return NULL;
   }
 

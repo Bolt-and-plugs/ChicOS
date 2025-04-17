@@ -22,7 +22,7 @@ typedef struct __memory {
 } memory;
 
 //
-void init_mem();
+void init_mem(i32 mem_size);
 
 void clean_mem(memory *mem);
 
