@@ -9,6 +9,7 @@
 typedef struct __App {
   BCP bcp;
   memory *mem;
+  u64 quantum_time;
 } App;
 
 bool set_envvar(const char *mode);
