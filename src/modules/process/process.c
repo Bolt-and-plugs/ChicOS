@@ -4,6 +4,10 @@
 
 extern App *app;
 
+void init_pcb(void) {
+  // todo
+}
+
 i32 p_create(void) {
   // handle process creation
   if (app->pcb.curr == MAX_PCB - 1) {

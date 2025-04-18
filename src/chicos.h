@@ -5,11 +5,14 @@
 #include "modules/memory/mem.h"
 #include "modules/process/process.h"
 
-
 typedef struct __App {
   PCB pcb;
   memory *mem;
 } App;
+
+typedef enum {
+  HELP = 1
+} arguments;
 
 bool set_envvar(const char *mode);
 

@@ -41,6 +41,7 @@ typedef struct __PCB {
   u8 curr;
 } PCB;
 
+void init_pcb(void);
 i32 p_create(void);
 void p_finish(void);
 void log_process(i32 pid);
