@@ -6,7 +6,7 @@
 #define MB 1048576
 #define KB 1024
 
-#define MEMORY_SIZE MB
+#define DEFAULT_MEMORY_SIZE MB
 #define PAGE_SIZE KB
 #define PAGE_NUM 16
 
@@ -24,7 +24,7 @@ typedef struct __memory {
 //
 void init_mem(i32 mem_size);
 
-void clean_mem(memory *mem);
+void clear_mem(memory *mem);
 
 //
 page *alloc_pages();
