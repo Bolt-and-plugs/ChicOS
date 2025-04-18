@@ -1,7 +1,7 @@
 #include "mem.h"
 #include "../log/log.h"
 #include "../utils/utils.h"
-#include "chicos.h"
+#include "../../chicos.h"
 
 extern App app;
 
@@ -19,7 +19,7 @@ void init_mem(i32 mem_size) {
   mem->len = MEMORY_SIZE / PAGE_SIZE;
 
   char res[128];
-  c_info(strcat(parse_int_to_string(MB, res), "B allocated"));
+  c_info(strcat(parse_int_to_string(mem_size, res), "B allocated"));
 
   app.mem = mem;
 }
