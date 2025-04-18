@@ -2,13 +2,17 @@
 #define _PROCESS
 
 #include "../../defines.h"
-#include "../memory/arena.h"
+#include "../memory/mem.h"
 #include "../utils/list.h"
 
+#define MAX_PCB 10
 #define MAX_SIZE_PROC_NAME 32
 #define MAX_SIZE_SEMAPHORES 32
+#define MAX_SIZE_PROCESS 10
+#define QUANTUM_TIME (1000 / MAX_PCB)
 
 typedef enum {
+  NEW = -2,
   INACTIVE = -1,
   RUNNING = 0,
   READY = 1,
@@ -25,19 +29,24 @@ typedef struct __process {
   const char *name;
   i32 pid;
   p_status status;
-  i32 remaining_time;
+  i32 time_to_run;
   // yet to be done
   // understand how to impl segments here
   page_table pt;
   i32 tickets;
 } process;
 
-typedef struct __BCP {
-  process processes[10];
-} BCP;
+typedef struct __PCB {
+  process processes[MAX_PCB];
+  u8 curr;
+} PCB;
 
-int p_create(void);
+void init_pcb(void);
+i32 p_create(void);
+void p_finish(void);
 void log_process(i32 pid);
+void p_interrut(i32 pid);
 void p_kill(i32 pid);
+void p_interrupt(i32 pid);
 
 #endif

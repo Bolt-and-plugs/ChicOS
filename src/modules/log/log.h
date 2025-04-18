@@ -10,7 +10,7 @@ typedef enum { DEBUG, INFO, WARN, ERROR, CRIT_ERROR } log_level;
 // Im gonna make this prefix reffers to a system part
 // yet to change
 typedef enum {
-  DEFAULT_STATUS = -1,
+  DEFAULT_STATUS = -100,
   SCHEDDULER_THING = 000,
   PROCESS_OUT_OF_LIST = 101,
   CPU_THING = 200,
@@ -25,7 +25,6 @@ typedef enum {
   SEMAPHORE_POST_ERROR = 502,
   SEMAPHORE_WAIT_ERROR = 503
 } status_code;
-
 
 // defining correct macros for logging
 #define c_crit_error(s, ...)                                                   \

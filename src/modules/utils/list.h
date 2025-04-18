@@ -1,7 +1,7 @@
 #ifndef _LIST
 #define _LIST
 
-#include "defines.h"
+#include "../../defines.h"
 
 typedef struct Node Node;
 typedef struct List List;

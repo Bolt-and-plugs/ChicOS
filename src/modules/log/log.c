@@ -14,9 +14,32 @@ void c_log(log_level level, status_code status, const char *str, ...) {
   if (level < min_log_level)
     return;
 
-  printf("\n/---------------------/\n");
-  printf("STATUS CODE: ");
+  switch (level) {
+  case ERROR:
+    puts("\n/--------ERROR--------/");
+    break;
+  case WARN:
+    puts("\n/--------WARN--------/");
+    break;
+  case INFO:
+    puts("\n/--------INFO--------/");
+    break;
+  case DEBUG:
+    puts("\n/--------DEBUG--------/");
+    break;
+  case CRIT_ERROR:
+    puts("\n/--------CRIT_ERROR--------/");
+    break;
+  default:
+    break;
+  }
+
+  if ((status / 100) != -1) {
+    printf("STATUS CODE: ");
+  }
   switch (status / 100) {
+  case -1:
+    break;
   case 0:
     printf("%d - SCHEDULER\n", status);
     break;
@@ -36,28 +59,11 @@ void c_log(log_level level, status_code status, const char *str, ...) {
     printf("%d - Unknown Status\n", status);
   }
 
-  printf("LEVEL: ");
-  switch (level) {
-  case ERROR:
-    puts("ERROR");
-    break;
-
-  case WARN:
-    puts("WARN");
-    break;
-  case INFO:
-    puts("INFO");
-    break;
-  default:
-    puts("INFO");
-    break;
-  }
-
   va_list arg;
   va_start(arg, str);
 
   while (str) {
-    printf("Argument: %s\n", str);
+    printf("-> %s\n", str);
     str = va_arg(arg, const char *);
   }
 
