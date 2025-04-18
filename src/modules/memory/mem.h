@@ -21,15 +21,12 @@ typedef struct __memory {
   u32 free_page_num;
 } memory;
 
-//
 void init_mem(i32 mem_size);
 
-void clean_mem(memory *mem);
+void clear_mem(memory *mem);
 
-//
-page *alloc_pages();
+void *alloc(u32 bytes);
 
-//
-void free_page(page *p);
+void dealloc(void *mem);
 
 #endif

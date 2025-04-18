@@ -23,7 +23,7 @@ bool set_envvar(const char *mode) {
 void init_app(int mem_size) {
   printf("Size of system being set to %d\n", mem_size);
   init_mem(mem_size);
-  app.quantum_time = 0;
+  app.quantum_time = 0; // ms
   init_pcb();
   // init_cpu()
 }
@@ -37,7 +37,6 @@ void set_debug_mode() {
 #endif
   min_log_level = get_min_log_level();
 }
-
 
 void handle_args(int *args, int argc, char **argv) {
   char *str_arg;
