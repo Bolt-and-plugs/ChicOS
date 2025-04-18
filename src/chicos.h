@@ -2,10 +2,13 @@
 #define _CHICOS
 
 #include "defines.h"
+#include "modules/memory/mem.h"
 #include "modules/process/process.h"
 
+
 typedef struct __App {
-  BCP bcp;
+  PCB pcb;
+  memory *mem;
 } App;
 
 bool set_envvar(const char *mode);

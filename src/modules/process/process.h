@@ -2,17 +2,14 @@
 #define _PROCESS
 
 #include "../../defines.h"
-#include "../memory/memory.h"
+#include "../memory/mem.h"
 #include "../utils/list.h"
 
-<<<<<<< HEAD
 #define MAX_PCB 10
-=======
 #define MAX_SIZE_PROC_NAME 32
 #define MAX_SIZE_SEMAPHORES 32
 #define MAX_SIZE_PROCESS 10
-#define QUANTUM_TIME (1000 / MAX_SIZE_PROCESS)
->>>>>>> origin/semaphore
+#define QUANTUM_TIME (1000 / MAX_PCB)
 
 typedef enum {
   NEW = -2,
@@ -22,37 +19,33 @@ typedef enum {
   BLOCKED = 2,
 } p_status;
 
-typedef struct process process;
-typedef struct BCP BCP;
+typedef struct __page_table {
+  u32 base;
+  u32 bounds;
+  u8 magic_number;
+} page_table;
 
-struct process {
+typedef struct __process {
   const char *name;
   i32 pid;
   p_status status;
   i32 time_to_run;
   // yet to be done
   // understand how to impl segments here
-  void *address_space;
+  page_table pt;
   i32 tickets;
-};
+} process;
 
-struct BCP {
-<<<<<<< HEAD
+typedef struct __PCB {
   process processes[MAX_PCB];
   u8 curr;
-=======
-  process processes[MAX_SIZE_PROCESS];
->>>>>>> origin/semaphore
-};
+} PCB;
 
-int p_create(void);
+i32 p_create(void);
 void p_finish(void);
 void log_process(i32 pid);
-<<<<<<< HEAD
 void p_interrut(i32 pid);
-=======
 void p_kill(i32 pid);
 void p_interrupt(i32 pid);
->>>>>>> origin/semaphore
 
 #endif
