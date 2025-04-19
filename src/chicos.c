@@ -85,5 +85,10 @@ int main(int argc, char **argv) {
   // print_logo();
   set_debug_mode();
 
+  int *teste = alloc(sizeof(int));
+  printf("free mem: %2.f\n", retrieve_free_mem_percentage());
+  printf("used mem: %2.f\n", retrieve_used_mem_percentage());
+  dealloc(teste);
+
   return 0;
 }
