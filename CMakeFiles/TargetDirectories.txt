@@ -1,3 +1,0 @@
-/mnt/c/citrica/ChicOS/CMakeFiles/ChicOS.dir
-/mnt/c/citrica/ChicOS/CMakeFiles/edit_cache.dir
-/mnt/c/citrica/ChicOS/CMakeFiles/rebuild_cache.dir
