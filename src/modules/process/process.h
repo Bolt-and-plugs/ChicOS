@@ -41,6 +41,9 @@ typedef struct __process {
   page_table pt;
   void *address_space;
   i32 tickets;
+
+  // quantidade de read e write pro scheduler poder determinar quem vai ser executado primeiro
+  u16 qtd_read_write;
 } process;
 
 typedef struct __PCB {
