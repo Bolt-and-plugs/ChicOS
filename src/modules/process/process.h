@@ -19,6 +19,12 @@ typedef enum {
   BLOCKED = 2,
 } p_status;
 
+typedef enum segment {
+  CODE = 0x0000,
+  STACK = 0x0001,
+  HEAP = 0x0002,
+};
+
 typedef struct __page_table {
   u32 base;
   u32 bounds;
@@ -33,6 +39,7 @@ typedef struct __process {
   // yet to be done
   // understand how to impl segments here
   page_table pt;
+  void *address_space;
   i32 tickets;
 } process;
 

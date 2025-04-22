@@ -13,7 +13,7 @@ i32 p_create(void) {
   if (app->pcb.curr == MAX_PCB - 1) {
     return -1; // erro, padronizar dps
   }
-  process p = {.pid = getpid() + 1, .status = NEW};
+  process p = {.pid = getpid() + 1, .status = NEW, .address_space = alloc(KB)};
   app->pcb.processes[app->pcb.curr] = p;
   app->pcb.curr++;
   return p.pid;
@@ -57,8 +57,12 @@ process *find_p(i32 pid) {
 void p_kill(i32 pid) {
   // to kill the process: free the memory allocated to it
   process *p = find_p(pid);
+  if (!p) {
+    c_error(PROCESS_OUT_OF_LIST, "Could not find process");
+    return;
+  }
 
-  // deallocate_mem(p->address_space);
+  dealloc(p->address_space);
 }
 
 void p_interrupt(i32 pid) {
