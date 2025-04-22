@@ -47,16 +47,23 @@ void *alloc(u32 bytes) {
     return NULL;
   }
 
-  void *ptr = malloc(bytes);
-  alloc_header h_ptr = {}; // todo
+  void *ptr = malloc(sizeof(alloc_header) + bytes);
 
   if (!ptr) {
     c_error(MEM_ALLOC_FAIL, "Failed to allocate memory");
     return NULL;
   }
 
+  alloc_header *h_ptr = (alloc_header *)ptr;
+  h_ptr->page_num = num_pages;
+  h_ptr->size = bytes;
+
   app.mem->free_page_num -= num_pages;
-  return ptr;
+  return (void *)((char *)ptr + sizeof(alloc_header));
+}
+
+alloc_header *get_header(void *ptr) {
+  return (alloc_header *)((char *)ptr - sizeof(alloc_header));
 }
 
 void dealloc(void *mem) {
@@ -65,9 +72,15 @@ void dealloc(void *mem) {
             "Trying to deallocate a non allocated memory region");
     return;
   }
+  alloc_header *h_ptr = get_header(mem);
 
-  u32 num_pages = (sizeof(mem) + PAGE_SIZE - 1) / PAGE_SIZE;
-  app.mem->free_page_num += num_pages;
+  if (!(h_ptr->size > 0 && h_ptr->page_num > 0 &&
+        h_ptr->page_num < app.mem->len))
+    c_crit_error(MEM_DEALLOC_FAIL, "error");
+
+  app.mem->free_page_num += h_ptr->page_num;
+
+  free(h_ptr);
 }
 
 float retrieve_free_mem_percentage(void) {

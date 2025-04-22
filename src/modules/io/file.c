@@ -15,8 +15,6 @@ file_buffer *open_file(const char *address, const char *mode) {
   return fb;
 }
 
-file_header *get_header() {}
-
 // openning the sinthetic file to simulate the execution
 void exec_file(file_buffer *file) {
   file->fp = fopen(file->address, &file->mode[0]);

@@ -8,12 +8,6 @@
 
 #define DEFAULT_MEMORY_SIZE MB
 #define PAGE_SIZE KB
-#define PAGE_NUM 16
-
-typedef struct __page {
-  void *content;
-  char present;
-} page;
 
 typedef struct __memory {
   u32 len;
@@ -30,6 +24,8 @@ void init_mem(i32 mem_size);
 void clear_mem(memory *mem);
 
 void *alloc(u32 bytes);
+
+alloc_header *get_header(void *ptr);
 
 void dealloc(void *mem);
 
