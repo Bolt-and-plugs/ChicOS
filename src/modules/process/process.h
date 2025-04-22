@@ -33,14 +33,12 @@ typedef struct __page_table {
 
 typedef struct __process {
   const char *name;
-  i32 pid;
+  u32 pid;
   p_status status;
   i32 time_to_run;
-  // yet to be done
-  // understand how to impl segments here
   page_table pt;
   void *address_space;
-  i32 tickets;
+  u32 bounds;
 
   // quantidade de read e write pro scheduler poder determinar quem vai ser executado primeiro
   u16 qtd_read_write;
@@ -49,14 +47,15 @@ typedef struct __process {
 typedef struct __PCB {
   process processes[MAX_PCB];
   u8 curr;
+  u8 last;
 } PCB;
 
 void init_pcb(void);
-i32 p_create(void);
+u32 p_create(void);
 void p_finish(void);
-void log_process(i32 pid);
-void p_interrut(i32 pid);
-void p_kill(i32 pid);
-void p_interrupt(i32 pid);
+void log_process(u32 pid);
+void p_kill(u32 pid);
+void p_interrupt(u32 pid);
+process *p_find(u32 pid);
 
 #endif

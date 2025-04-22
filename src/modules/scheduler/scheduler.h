@@ -6,7 +6,7 @@
 #include "../process/process.h"
 #include "../../defines.h"
 
-void push_process(process proc);
-process pop_process(u16 pid);
+void push_process(process *proc);
+process *pop_process(u32 pid);
 
 #endif

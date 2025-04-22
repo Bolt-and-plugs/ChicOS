@@ -2,7 +2,8 @@
 #include "modules/io/file.h"
 #include "modules/log/log.h"
 #include "modules/memory/mem.h"
-#include "modules/schedduler/schedduler.h"
+#include "modules/scheduler/scheduler.h"
+#include "modules/process/process.h"
 #include "modules/user/user.h"
 #include "modules/utils/utils.h"
 
@@ -89,6 +90,9 @@ int main(int argc, char **argv) {
   printf("free mem: %2.2f%c \n", retrieve_free_mem_percentage(), '%');
   printf("used mem: %2.2f%c \n", retrieve_used_mem_percentage(), '%');
   dealloc(teste);
+
+  u32 p = p_create();
+  push_process(p_find(p));
 
   return 0;
 }
