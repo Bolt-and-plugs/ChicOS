@@ -3,13 +3,12 @@
 
 #include "../../defines.h"
 
-typedef struct __user User;
-
-struct User {
+typedef struct __User {
   int id;
   char name[50];
-};
+} User;
 
 void print_logo();
+void init_ui();
 
 #endif

@@ -19,21 +19,24 @@ void exec_program(file_buffer *sint, process *sint_process){
     while(!feof(sint->fp)){
         fgets(aux, sizeof(aux), sint->fp);
         command = strtok(aux, " ")
-        time = atoi(strok(NULL, " "))
         if(strcmp(command, "exec") == 0){
+            time = atoi(strok(NULL, " "))
             printf("Executing program for %dms...", time)
             sleep(time / 1000);
         }
         else if(strcmp(command, "write") == 0){
+            time = atoi(strok(NULL, " "))
             printf("Writing on dik for %dms...", time)
             sleep(time / 1000);
         }
         else if(strcmp(command, "read") == 0){
+            time = atoi(strok(NULL, " "))
             printf("Reading on dik for %dms...", time)
             sleep(time / 1000);
         }
         else if(strcmp(command, "P") == 0){
-
+            time = atoi(strok(NULL, " "))
+            printf("Reading on dik for %dms...", time)
         }
         else if(strcmp(command, "V") == 0){
 

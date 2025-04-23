@@ -18,16 +18,14 @@ struct file_header {
 
 struct file_buffer {
   FILE *fp;
+  file_header *h;
   char address[MAX_ADDRESS_SIZE];
-  char mode[2];
+  u64 PC;
 };
 
-// create a synthetic file struct and another one for normal files (e.g we must
-// load code from disk)?
-
-file_buffer *open_file(const char *address, const char *mode);
+file_buffer *open_file(const char *address);
 void exec_file(file_buffer *file);
-void close_file(void);
+void close_file(file_buffer *fb);
 
 #endif
 
