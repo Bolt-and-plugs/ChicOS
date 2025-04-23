@@ -7,6 +7,11 @@
 #include <unistd.h>
 #define TIME_SLICE 10 // time slice duration in ms
 
+
+void init_cpu() {
+  
+}
+
 void exec_program(file_buffer *sint, process *sint_process) {
   char *semaphore, *command, aux[16];
   int time;

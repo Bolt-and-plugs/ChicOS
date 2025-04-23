@@ -22,7 +22,6 @@ bool set_envvar(const char *mode) {
 }
 
 void init_app(int mem_size) {
-  printf("Size of system being set to %d\n", mem_size);
   init_mem(mem_size);
   init_pcb();
   init_cpu();
