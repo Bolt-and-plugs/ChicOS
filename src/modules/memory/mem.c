@@ -5,11 +5,12 @@
 
 extern App app;
 
-void init_mem(i32 mem_size) {
+void init_mem(u32 mem_size) {
   if (mem_size >= 4 * MB) {
-    c_error(MEM_ERROR, "Testing");
+    c_error(MEM_ERROR, "Wrong value for initializing mem");
     mem_size = DEFAULT_MEMORY_SIZE;
   }
+
   memory *mem = malloc(sizeof(memory));
 
   if (!mem) {

@@ -18,9 +18,9 @@ typedef enum {
 } p_status;
 
 typedef enum {
-  CODE = 0x0000,
-  STACK = 0x0001,
-  HEAP = 0x0002,
+  CODE = 0x000,
+  STACK = 0x001,
+  HEAP = 0x002,
 } segment;
 
 typedef struct __page_table {
@@ -30,14 +30,13 @@ typedef struct __page_table {
 } page_table;
 
 typedef struct __process {
-  const char *name;
   u32 pid;
+  const char *name;
   p_status status;
-  i32 time_to_run;
+  u32 time_to_run;
   page_table pt;
   void *address_space;
   u32 bounds;
-
   // quantidade de read e write pro scheduler poder determinar quem vai ser
   // executado primeiro
   u16 qtd_read_write;
