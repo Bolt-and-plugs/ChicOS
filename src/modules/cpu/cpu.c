@@ -7,7 +7,7 @@
 #define TIME_SLICE 10 // time slice duration in ms
 
 void exec_program(file_buffer *sint){
-    char sempahore, *command, aux[16];
+    char *command, aux[16];
     int time
     if(sint->fp == NULL){
         printf("File not open properly!");
