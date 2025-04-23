@@ -1,11 +1,11 @@
 #include "chicos.h"
+#include "modules/cpu/cpu.h"
 #include "modules/log/log.h"
 #include "modules/memory/mem.h"
 #include "modules/process/process.h"
 #include "modules/scheduler/scheduler.h"
 #include "modules/user/user.h"
 #include "modules/utils/utils.h"
-#include "modules/cpu/cpu.h"
 
 log_level min_log_level;
 bool debug;
@@ -24,7 +24,6 @@ bool set_envvar(const char *mode) {
 void init_app(int mem_size) {
   printf("Size of system being set to %d\n", mem_size);
   init_mem(mem_size);
-  app.quantum_time = 0; // ms
   init_pcb();
   init_cpu();
 }

@@ -19,7 +19,7 @@ typedef struct __alloc_header {
   u32 size;
 } alloc_header;
 
-void init_mem(i32 mem_size);
+void init_mem(u32 mem_size);
 
 void clear_mem(memory *mem);
 
