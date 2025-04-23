@@ -43,6 +43,6 @@ process *pop_process() {
     }
   }
 
-  c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "No process found at app.processes");
+  c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "No process found at app.processes!");
   return NULL;
 }
