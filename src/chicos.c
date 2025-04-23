@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
   set_debug_mode();
 
   int *teste = alloc(sizeof(int));
-  init_ui();
+  // init_ui();
   dealloc(teste);
 
   return 0;

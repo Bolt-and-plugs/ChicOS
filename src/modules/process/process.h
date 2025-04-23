@@ -2,6 +2,7 @@
 #define _PROCESS
 
 #include "../../defines.h"
+#include "../io/file.h"
 
 #define MAX_PCB 10
 #define MAX_SIZE_PROC_NAME 32
@@ -33,16 +34,19 @@ typedef struct __process {
   const char *name;
   p_status status;
   u32 time_to_run;
+
+  // memory
   page_table pt;
   void *address_space;
-  u32 bounds;
+
   // quantidade de read e write pro scheduler poder determinar quem vai ser
   // executado primeiro
-  u16 qtd_read_write; // B.O. DO MÁRIO
+  u16 qtd_read_write;
+  file_buffer *fb;
 } process;
 
 typedef struct __PCB {
-  process *processes_stack;
+  process *process_stack;
   u8 curr;
   i8 last;
 } PCB;
