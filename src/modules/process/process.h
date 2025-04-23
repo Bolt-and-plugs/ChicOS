@@ -2,8 +2,6 @@
 #define _PROCESS
 
 #include "../../defines.h"
-#include "../memory/mem.h"
-#include "../utils/list.h"
 
 #define MAX_PCB 10
 #define MAX_SIZE_PROC_NAME 32
@@ -19,11 +17,11 @@ typedef enum {
   BLOCKED = 2,
 } p_status;
 
-typedef enum segment {
+typedef enum {
   CODE = 0x0000,
   STACK = 0x0001,
   HEAP = 0x0002,
-};
+} segment;
 
 typedef struct __page_table {
   u32 base;
@@ -40,14 +38,15 @@ typedef struct __process {
   void *address_space;
   u32 bounds;
 
-  // quantidade de read e write pro scheduler poder determinar quem vai ser executado primeiro
+  // quantidade de read e write pro scheduler poder determinar quem vai ser
+  // executado primeiro
   u16 qtd_read_write;
 } process;
 
 typedef struct __PCB {
   process processes[MAX_PCB];
   u8 curr;
-  u8 last;
+  i8 last;
 } PCB;
 
 void init_pcb(void);

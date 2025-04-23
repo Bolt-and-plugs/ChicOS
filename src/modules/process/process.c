@@ -1,11 +1,13 @@
 #include "process.h"
 #include "../../chicos.h"
 #include "../log/log.h"
+#include "../memory/mem.h"
 
 extern App *app;
 
 void init_pcb(void) {
-  // todo
+  app->pcb.last = -1;
+  app->pcb.curr = 0;
 }
 
 u32 p_create(void) {
@@ -63,16 +65,17 @@ void p_kill(u32 pid) {
   }
 
   dealloc(p->address_space);
+  dealloc(p);
 }
 
 void p_interrupt(u32 pid) {
-  // interrupt occurs every time the quantum time goes to 0
+  // interrupt occurs every time the process quantum time goes to 0
   process *p = p_find(pid);
 
   p->time_to_run = QUANTUM_TIME;
 }
 
-void *p_alloc(process p,u32 bytes) {
+void *p_alloc(process p, u32 bytes) {
   p.bounds += bytes;
-  return (void*)((char*)p.address_space +  p.bounds);
+  return (void *)((char *)p.address_space + p.bounds);
 }

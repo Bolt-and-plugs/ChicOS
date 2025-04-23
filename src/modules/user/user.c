@@ -1,4 +1,6 @@
 #include "user.h"
+#include "../memory/mem.h"
+#include "../semaphore/semaphore.h"
 
 void print_logo() {
   printf("                                                                                     \n");
@@ -47,4 +49,9 @@ void print_logo() {
   printf("                              @@@      @@@@                                           \n");
   printf("                              @@@@    @@                                              \n");
   printf("                               @@@@                                                  \n");
+}
+
+void init_ui() {
+  printf("UI\n");
+  print_logo();
 }

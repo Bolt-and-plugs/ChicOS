@@ -9,5 +9,6 @@ typedef struct __User {
 } User;
 
 void print_logo();
+void init_ui();
 
 #endif

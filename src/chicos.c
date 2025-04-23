@@ -1,11 +1,11 @@
 #include "chicos.h"
-#include "modules/io/file.h"
 #include "modules/log/log.h"
 #include "modules/memory/mem.h"
-#include "modules/scheduler/scheduler.h"
 #include "modules/process/process.h"
+#include "modules/scheduler/scheduler.h"
 #include "modules/user/user.h"
 #include "modules/utils/utils.h"
+#include "modules/cpu/cpu.h"
 
 log_level min_log_level;
 bool debug;
@@ -26,7 +26,7 @@ void init_app(int mem_size) {
   init_mem(mem_size);
   app.quantum_time = 0; // ms
   init_pcb();
-  // init_cpu()
+  init_cpu();
 }
 
 void set_debug_mode() {
@@ -83,7 +83,6 @@ int main(int argc, char **argv) {
   }
 
   init_app(mem_size);
-  // print_logo();
   set_debug_mode();
 
   int *teste = alloc(sizeof(int));
@@ -93,6 +92,8 @@ int main(int argc, char **argv) {
 
   u32 p = p_create();
   push_process(p_find(p));
+
+  init_ui();
 
   return 0;
 }
