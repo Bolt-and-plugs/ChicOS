@@ -9,11 +9,12 @@ typedef struct file_buffer file_buffer;
 typedef struct file_header file_header;
 
 struct file_header {
-  char *name;
+  char name[128];
   i32 priority;
+  i32 rw_count;
   i32 seg_flag;
   i32 seg_size;
-  char *semaphores;
+  char semaphores[256];
 };
 
 struct file_buffer {

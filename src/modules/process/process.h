@@ -41,7 +41,7 @@ typedef struct __process {
 
   // quantidade de read e write pro scheduler poder determinar quem vai ser
   // executado primeiro
-  u16 qtd_read_write;
+  u16 rw_count;
   file_buffer *fb;
 } process;
 

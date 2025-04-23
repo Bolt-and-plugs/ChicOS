@@ -3,6 +3,22 @@
 #include "../memory/mem.h"
 #include "../process/process.h"
 
+file_header *read_header(FILE *fp) {
+  file_header *header = malloc(sizeof(file_header));
+  int i = 0;
+  fscanf(fp, "%s", header->name);
+  fscanf(fp, "%d", header->seg_flag);
+  fscanf(fp, "%d", header->priority);
+  fscanf(fp, "%d", header->seg_size);
+  fscanf(fp, "%c", header->semaphores[0]);
+  i++;
+  while(header->semaphores[i] != '\n'){
+    fscanf(fp, "%c", header->semaphores[i]);
+  }
+
+  return header;
+}
+
 file_buffer *open_file(const char *address) {
   file_buffer *fb = alloc(sizeof(file_buffer));
 
@@ -11,7 +27,10 @@ file_buffer *open_file(const char *address) {
 
   if (!fb->fp) {
     c_error(DISK_OPEN_ERROR, "Could not open file");
+    return;
   }
+
+  read_header(fp);
 
   return fb;
 }
@@ -23,4 +42,6 @@ void close_file(file_buffer *fb) {
 }
 
 // openning the sinthetic file to simulate the execution
-void open_sinthetic_file(file_buffer *file) {}
+void open_sinthetic_file(file_buffer *file) {
+
+}
