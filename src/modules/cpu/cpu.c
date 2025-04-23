@@ -4,9 +4,10 @@
 #include <unistd.h>
 #include "../log/log.h"
 #include "../file/file.h"
+#include "../process/process.h"
 #define TIME_SLICE 10 // time slice duration in ms
 
-void exec_program(file_buffer *sint){
+void exec_program(file_buffer *sint, process *sint_process){
     char *command, aux[16];
     int time
     if(sint->fp == NULL){
