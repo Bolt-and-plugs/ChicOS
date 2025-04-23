@@ -2,13 +2,11 @@
 #define _PROCESS
 
 #include "../../defines.h"
-#include "../memory/mem.h"
-#include "../utils/list.h"
+#include "../io/file.h"
 
 #define MAX_PCB 10
 #define MAX_SIZE_PROC_NAME 32
 #define MAX_SIZE_SEMAPHORES 32
-#define MAX_SIZE_PROCESS 10
 #define QUANTUM_TIME (1000 / MAX_PCB)
 
 typedef enum {
@@ -19,6 +17,12 @@ typedef enum {
   BLOCKED = 2,
 } p_status;
 
+typedef enum {
+  CODE = 0x000,
+  STACK = 0x001,
+  HEAP = 0x002,
+} segment;
+
 typedef struct __page_table {
   u32 base;
   u32 bounds;
@@ -26,26 +30,33 @@ typedef struct __page_table {
 } page_table;
 
 typedef struct __process {
+  u32 pid;
   const char *name;
-  i32 pid;
   p_status status;
-  i32 time_to_run;
-  // yet to be done
-  // understand how to impl segments here
+  u32 time_to_run;
+
+  // memory
   page_table pt;
-  i32 tickets;
+  void *address_space;
+
+  // quantidade de read e write pro scheduler poder determinar quem vai ser
+  // executado primeiro
+  u16 qtd_read_write;
+  file_buffer *fb;
 } process;
 
 typedef struct __PCB {
-  process processes[MAX_PCB];
+  process *process_stack;
   u8 curr;
+  i8 last;
 } PCB;
 
-i32 p_create(void);
+void init_pcb(void);
+u32 p_create(void);
 void p_finish(void);
-void log_process(i32 pid);
-void p_interrut(i32 pid);
-void p_kill(i32 pid);
-void p_interrupt(i32 pid);
+void log_process(u32 pid);
+void p_kill(u32 pid);
+void p_interrupt(u32 pid);
+process *p_find(u32 pid);
 
 #endif
