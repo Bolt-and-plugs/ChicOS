@@ -3,29 +3,31 @@
 #include "../log/log.h"
 #include "../memory/mem.h"
 
-extern App *app;
+extern App app;
 
 void init_pcb(void) {
-  app->pcb.last = -1;
-  app->pcb.curr = 0;
+  app.pcb.processes_stack = malloc(sizeof(process) * MAX_PCB);
+  printf("%ld", sizeof(app.pcb));
+  app.pcb.last = 0;
+  app.pcb.curr = 0;
 }
 
 u32 p_create(void) {
   // handle process creation
-  if (app->pcb.curr == MAX_PCB - 1) {
+  if (app.pcb.curr == MAX_PCB - 1) {
     return -1; // erro, padronizar dps
   }
   process p = {.pid = getpid() + 1, .status = NEW, .address_space = alloc(KB)};
-  app->pcb.processes[app->pcb.curr] = p;
-  app->pcb.curr++;
+  app.pcb.processes_stack[app.pcb.curr] = p;
+  app.pcb.curr++;
   return p.pid;
 }
 
 void log_process(u32 pid) {
   process p;
   for (u32 i = 0; i < MAX_PCB; i++) {
-    if (app->pcb.processes[i].pid == pid) {
-      p = app->pcb.processes[i];
+    if (app.pcb.processes_stack[i].pid == pid) {
+      p = app.pcb.processes_stack[i];
       break;
     }
   }
@@ -42,8 +44,8 @@ process *p_find(u32 pid) {
   process *p = NULL;
 
   for (int i = 0; i < MAX_PCB; i++) {
-    if (app->pcb.processes[i].pid == pid) {
-      p = &app->pcb.processes[i];
+    if (app.pcb.processes_stack[i].pid == pid) {
+      p = &app.pcb.processes_stack[i];
       break;
     }
   }

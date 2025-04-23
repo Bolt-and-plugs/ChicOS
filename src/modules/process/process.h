@@ -6,7 +6,6 @@
 #define MAX_PCB 10
 #define MAX_SIZE_PROC_NAME 32
 #define MAX_SIZE_SEMAPHORES 32
-#define MAX_SIZE_PROCESS 10
 #define QUANTUM_TIME (1000 / MAX_PCB)
 
 typedef enum {
@@ -39,11 +38,11 @@ typedef struct __process {
   u32 bounds;
   // quantidade de read e write pro scheduler poder determinar quem vai ser
   // executado primeiro
-  u16 qtd_read_write;
+  u16 qtd_read_write; // B.O. DO MÁRIO
 } process;
 
 typedef struct __PCB {
-  process processes[MAX_PCB];
+  process *processes_stack;
   u8 curr;
   i8 last;
 } PCB;
