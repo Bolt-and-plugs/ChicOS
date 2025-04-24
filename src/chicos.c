@@ -3,13 +3,17 @@
 #include "modules/log/log.h"
 #include "modules/memory/mem.h"
 #include "modules/process/process.h"
+#include "modules/render/render.h"
 #include "modules/scheduler/scheduler.h"
-#include "modules/user/user.h"
 #include "modules/utils/utils.h"
 
 log_level min_log_level;
 bool debug;
 App app;
+
+void handle_signal(int signal) {
+  app.loop_stop = 1; 
+}
 
 bool set_envvar(const char *mode) {
   if (strcmp(mode, "Debug") == 0 || strcmp(mode, "DEBUG") == 0) {
@@ -24,7 +28,14 @@ bool set_envvar(const char *mode) {
 void init_app(int mem_size) {
   init_mem(mem_size);
   init_pcb();
-  init_cpu();
+  if (pthread_create(&app.cpu.cpu_t, NULL, init_cpu, NULL) != 0) {
+    perror("Failed to create CPU thread");
+    exit(1);
+  }
+  if (pthread_create(&app.mem->render_t, NULL, init_render, "logo") != 0) {
+    perror("Failed to create render thread");
+    exit(1);
+  }
 }
 
 void set_debug_mode() {
@@ -80,12 +91,18 @@ int main(int argc, char **argv) {
       mem_size = args[1];
   }
 
-  init_app(mem_size);
   set_debug_mode();
 
+  signal(SIGINT, handle_signal);
+  init_app(mem_size);
+
+  pthread_join(app.cpu.cpu_t, NULL);
+  pthread_join(app.mem->render_t, NULL);
+
   int *teste = alloc(sizeof(int));
-  // init_ui();
   dealloc(teste);
+
+  puts("ok");
 
   return 0;
 }

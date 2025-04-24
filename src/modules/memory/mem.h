@@ -12,6 +12,8 @@
 typedef struct __memory {
   u32 len;
   u32 free_page_num;
+  pthread_t render_t;
+  sem_t memory_s;
 } memory;
 
 typedef struct __alloc_header {

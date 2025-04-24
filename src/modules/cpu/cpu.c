@@ -1,15 +1,25 @@
 #include "../io/file.h"
 #include "../log/log.h"
 #include "../process/process.h"
+#include "../../chicos.h"
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#define TIME_SLICE 10 // time slice duration in ms
+#define TIME_SLICE 10
 
+extern App app;
 
-void init_cpu() {
-  
+void cpu_loop() {
+  while (!app.loop_stop) {
+    sleep(1);
+  }
+}
+
+void *init_cpu(void *arg) {
+  app.cpu.quantum_time = 0;
+  cpu_loop();
+  return NULL;
 }
 
 void exec_program(file_buffer *sint, process *sint_process) {

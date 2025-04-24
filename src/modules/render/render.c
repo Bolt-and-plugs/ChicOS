@@ -1,6 +1,9 @@
-#include "user.h"
+#include "render.h"
 #include "../memory/mem.h"
 #include "../semaphore/semaphore.h"
+#include "../../chicos.h"
+
+extern App app;
 
 void print_logo() {
   printf("                                                                                     \n");
@@ -15,31 +18,37 @@ void print_logo() {
   printf("       @@@    @@@@@     @@@   @@@  @@@@@@@@@                 @@  @@         @@@@@@@@@\n");
   printf("    @@@@@@@    @@@@     @@@@   @@           @ @@      @@@ @@@@@@@             @@@@@@@\n");
   printf("   @@@          @@@@         @          @@@ @@@@@@@ @  @@@@@@@@ @               @@@@@\n");
+  usleep(400000);
   printf("  @@@        @   @@@        @      @@@ @@@@@@@@@@@@@@@@ @                         @@@\n");
   printf("  @@@       @@@            @     @  @@@@@@@  @@@@@@@@@@@@@@@ @                      @\n");
   printf("  @@@@@   @@@@            @  @@ @@@@@@@ @@@@@ @@@@@@@@  @@@@@@@ @   @@               \n");
   printf("   @@@@@@@@@      @@      @  @@@@@@@@@@  @@@    @@@@@@@  @ @@@@@@@@@@                \n");
+  usleep(400000);
   printf("                         @ @@ @@@@@@@@@@@@@@@   @@@@@@@@    @@@@ @@                  \n");
   printf("           @@  @           @@    @@@      @@@@@@@@@@@ @@                              \n");
   printf("         @    @@ @  @@ @    @@  @ @@  @@@@@@@@@@@@@  @@@@ @@@@                       \n");
   printf("         @ @ @@  @ @@@     @@@@@@@@@@@@@@@@@@@@@@@ @@@@@@@@  @@ @                    \n");
+  usleep(400000);
   printf("         @ @@   @ @@@@  @@ @@@ @@@@ @@@@@@@@@@@@@@@@@@@@@@@@@@ @@@@                  \n");
   printf("         @ @@    @@@@ @ @@  @@@@@@@@@@@@@@@@@@@@@@@@@ @@@@@@@@@ @@@ @                \n");
   printf("         @   @  @@       @   @@@@@@@@@@@@@@@@@@ @@ @ @@@      @@@  @@ @              \n");
   printf("        @      @ @   @ @@ @    @@@ @@@@@@@@@ @@@@@@ @@@         @@@ @@@@             \n");
+  usleep(400000);
   printf("         @@    @ @@@@@     @    @@@@@@@@@@@@@ @ @@ @@@@@         @@@ @@@@            \n");
   printf("      @    @@ @@@@@@@  @ @     @@@@@@@@ @@ @@@ @  @@@ @@@       @@@@@@@@ @           \n");
   printf("            @@@@ @    @@      @    @@@@@@@@@ @@@ @@ @@@@@@@@@     @ @@@@@ @          \n");
   printf("      @ @@  @@@@@@    @@     @   @@ @@ @@  @@@@ @@    @@@@@@        @@@ @@@          \n");
+  usleep(400000);
   printf("       @@@@  @  @@  @ @        @@ @  @ @@@@ @@@@@      @@@@ @       @@ @@@           \n");
-  sleep(1);
   printf("        @ @     @@@@@ @     @  @  @@@@@ @@@ @@@@       @ @@@ @@    @@ @    @         \n");
   printf("          @  @@@@@@ @  @   @   @@@  @@  @@@@@@@        @@@@@@@@@@@ @@@@@@@@@@        \n");
   printf("           @@@@@@@@@@ @@@ @    @@@@ @@@@@@@@@@       @@ @@@@@@@@ @@  @@@@@@@@@       \n");
+  usleep(400000);
   printf("            @@@@@ @@@ @   @@@ @@@    @@ @@@ @@@@@ @@@@  @@ @@@@@@@@@@@@@             \n");
   printf("               @@@ @@     @@@@@@@@@   @ @@@@@@@        @@@@@@@@@     @  @@@@         \n");
   printf("                @@@@      @ @@@@@@@@@@@@@@@@@@@ @ @   @     @@    @@@    @@@@        \n");
   printf("                 @@@@@   @@@@@@@@@@@     @ @@@@      @@@@ @@@@    @@    @@@@@@       \n");
+  usleep(400000);
   printf("                  @@@@@@@ @@@@@@ @@             @@@@@   @   @@@   @@    @@  @@@      \n");
   printf("                   @@@  @@@ @@@       @@@@@@@@   @@@   @    @@@@ @@@    @@@@@@@@     \n");
   printf("                  @@@@@@@@@@     @@  @@@    @@@   @@@@@@@     @@@@@@   @@@    @@@    \n");
@@ -50,20 +59,31 @@ void print_logo() {
   printf("                              @@@      @@@@                                           \n");
   printf("                              @@@@    @@                                              \n");
   printf("                               @@@@                                                  \n");
+  sleep(3);
+  system("clear");
+}
+
+void print_welcome() {
+  printf("\nBEM-VINDO\n");
+  sleep(3);
+  system("clear");
 }
 
 void render_loop() {
-  while (1) {
+  while (!app.loop_stop) {
     printf("free mem: %2.2f%c \n", retrieve_free_mem_percentage(), '%');
     printf("used mem: %2.2f%c \n", retrieve_used_mem_percentage(), '%');
+    usleep(10000);
     system("clear");
   }
 }
 
-void init_ui() {
-  print_logo();
-  sleep(2);
-  system("clear");
+void *init_render(void* arg) {
+  if(arg && strncmp((char*)arg, "logo", 5) == 0) {
+    print_logo();
+  }
+  print_welcome();
   render_loop();
+  return NULL;
 }
 
