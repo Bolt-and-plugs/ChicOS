@@ -2,25 +2,27 @@
 #include "../log/log.h"
 #include "../memory/mem.h"
 
-file_header *read_header(file_buffer *fb) {
-  open_file(fb->address);
-  file_header *header = malloc(sizeof(file_header));
-  int i = 1;
+void read_header(file_buffer *fb) {
+  file_header *header = alloc(sizeof(file_header));
+  char s[256];
+
   fscanf(fb->fp, "%s", header->name);
   fscanf(fb->fp, "%d", &header->seg_flag);
   fscanf(fb->fp, "%d", &header->priority);
   fscanf(fb->fp, "%d", &header->seg_size);
-  fscanf(fb->fp, "%c", &header->semaphores[0]);
-  while (header->semaphores[i] != '\n') {
-    fscanf(fb->fp, "%c", &header->semaphores[i]);
-    i++;
+  fscanf(fb->fp, "%s", s);
+
+  while(strlen(s) <= 1) {
+    strcat(header->semaphores,  s);
+    fscanf(fb->fp, "%s", s);
   }
-  fb->h->rw_count = counting_io_operations(fb);
-  return header;
+  printf("%s\n", header->semaphores);
+
+  //fb->h->rw_count = counting_io_operations(fb);
 }
 
 i32 counting_io_operations(file_buffer *fb) {
-  char aux[16];
+  char aux[128];
   i32 count = 0;
   while (!feof(fb->fp)) {
     fscanf(fb->fp, "%s", aux);
@@ -30,9 +32,10 @@ i32 counting_io_operations(file_buffer *fb) {
   }
 
   char seeker[128];
-  fseek(fb->fp, 0, SEEK_SET);
-  while (strcmp(seeker, "\n") != 0) {
-    fscanf(fb->fp, "%s", seeker);
+  int value;
+  while (!feof(fb->fp)) {
+    fscanf(fb->fp, "%s %d", seeker, &value);
+    printf("%s %d\n", seeker, value);
   }
 
   return count;
@@ -49,8 +52,7 @@ file_buffer *open_file(const char *address) {
     return NULL;
   }
 
-  file_header *header = read_header(fb);
-  header->rw_count = counting_io_operations(fb);
+  read_header(fb);
 
   return fb;
 }
@@ -58,5 +60,6 @@ file_buffer *open_file(const char *address) {
 void close_file(file_buffer *fb) {
   if (fb->fp)
     fclose(fb->fp);
+  dealloc(fb->h);
   dealloc(fb);
 }

@@ -84,7 +84,6 @@ int main(int argc, char **argv) {
 
   file_buffer *fb = open_file("resources/sint2");
   puts("ok");
-
   close_file(fb);
   return 0;
 }
