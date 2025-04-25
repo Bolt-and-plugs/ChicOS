@@ -3,20 +3,41 @@
 #include "../memory/mem.h"
 #include "../process/process.h"
 
-file_header *read_header(FILE *fp) {
+file_header *read_header(file_buffer *fb) {
+  open_file(fb->address);
   file_header *header = malloc(sizeof(file_header));
-  int i = 0;
-  fscanf(fp, "%s", header->name);
-  fscanf(fp, "%d", header->seg_flag);
-  fscanf(fp, "%d", header->priority);
-  fscanf(fp, "%d", header->seg_size);
-  fscanf(fp, "%c", header->semaphores[0]);
-  i++;
+  int i = 1;
+  fscanf(fb->fp, "%s", header->name);
+  fscanf(fb->fp, "%d", header->seg_flag);
+  fscanf(fb->fp, "%d", header->priority);
+  fscanf(fb->fp, "%d", header->seg_size);
+  fscanf(fb->fp, "%c", header->semaphores[0]);
   while(header->semaphores[i] != '\n'){
-    fscanf(fp, "%c", header->semaphores[i]);
+    fscanf(fb->fp, "%c", header->semaphores[i]);
+    i++;
   }
+  fb->h->rw_count = counting_io_operations(fb);
 
   return header;
+}
+
+i32 counting_io_operations(file_buffer *fb) {
+  char aux[16];
+  i32 count=0;
+  while(!feof(fb->fp)){
+    fscanf(fb->fp, "%s", aux);
+    if(strcmp(aux, "write") == 0 || strcmp(aux, "read") == 0) {
+      count++;
+    }
+  }
+
+  char seeker[128];
+  fseek(fb->fp, 0, SEEK_SET);
+  while(seeker != '\n') {
+    fscanf(fb->fp, "%s", seeker);
+  }
+  
+  return count;
 }
 
 file_buffer *open_file(const char *address) {
@@ -30,7 +51,8 @@ file_buffer *open_file(const char *address) {
     return;
   }
 
-  read_header(fp);
+  file_header *header = read_header(fb);
+  header->rw_count = counting_io_operations(fb);
 
   return fb;
 }
@@ -43,5 +65,6 @@ void close_file(file_buffer *fb) {
 
 // openning the sinthetic file to simulate the execution
 void open_sinthetic_file(file_buffer *file) {
-
+  file_buffer *fb = malloc(sizeof(file_buffer));
+  fb->h = read_header(fb); 
 }
