@@ -4,16 +4,21 @@
 #include "../process/process.h"
 
 file_header *read_header(FILE *fp) {
-  file_header *header = malloc(sizeof(file_header));
+  file_header *header = alloc(sizeof(file_header));
   int i = 0;
   fscanf(fp, "%s", header->name);
-  fscanf(fp, "%d", header->seg_flag);
-  fscanf(fp, "%d", header->priority);
-  fscanf(fp, "%d", header->seg_size);
-  fscanf(fp, "%c", header->semaphores[0]);
+  fscanf(fp, "%d", &header->seg_flag);
+  fscanf(fp, "%d", &header->priority);
+  fscanf(fp, "%d", &header->seg_size);
+  fscanf(fp, "%c", header->semaphores);
   i++;
-  while(header->semaphores[i] != '\n'){
-    fscanf(fp, "%c", header->semaphores[i]);
+  while (header->semaphores[i] != '\n') {
+    char c;
+    fscanf(fp, "%c", &c);
+    if (c != ' ') {
+      header->semaphores[i] = c;
+    }
+    printf("%c", header->semaphores[i]);
   }
 
   return header;
@@ -27,10 +32,10 @@ file_buffer *open_file(const char *address) {
 
   if (!fb->fp) {
     c_error(DISK_OPEN_ERROR, "Could not open file");
-    return;
+    return NULL;
   }
 
-  read_header(fp);
+  read_header(fb->fp);
 
   return fb;
 }
@@ -39,9 +44,4 @@ void close_file(file_buffer *fb) {
   if (fb->fp)
     fclose(fb->fp);
   dealloc(fb);
-}
-
-// openning the sinthetic file to simulate the execution
-void open_sinthetic_file(file_buffer *file) {
-
 }

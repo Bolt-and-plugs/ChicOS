@@ -12,7 +12,7 @@ extern App app;
  * com a maior quantidade de read e write está em último
  */
 void push_process(process *proc) {
-  process *processes = app.pcb.processes_stack;
+  process *processes = app.pcb.process_stack;
   proc->status = READY; // pode ser diferente no futuro
 
   if (!(app.pcb.last + 1 < MAX_PCB)) {
@@ -28,7 +28,7 @@ void push_process(process *proc) {
  * Remove o último elemento da pilha de processos e o retorna
  */
 process *pop_process() {
-  process *processes = app.pcb.processes_stack;
+  process *processes = app.pcb.process_stack;
 
   for (int i = 0; i < MAX_PCB && processes[i].address_space != NULL;
        i++) {

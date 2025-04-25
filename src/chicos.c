@@ -3,8 +3,6 @@
 #include "modules/log/log.h"
 #include "modules/memory/mem.h"
 #include "modules/process/process.h"
-#include "modules/scheduler/scheduler.h"
-#include "modules/user/user.h"
 #include "modules/utils/utils.h"
 
 log_level min_log_level;
@@ -84,9 +82,9 @@ int main(int argc, char **argv) {
   init_app(mem_size);
   set_debug_mode();
 
-  int *teste = alloc(sizeof(int));
-  // init_ui();
-  dealloc(teste);
+  file_buffer *fb = open_file("resources/sint2");
+  puts("ok");
 
+  close_file(fb);
   return 0;
 }

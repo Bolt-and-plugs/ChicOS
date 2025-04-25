@@ -6,7 +6,7 @@
 extern App app;
 
 void init_pcb(void) {
-  app.pcb.processes_stack = malloc(sizeof(process) * MAX_PCB);
+  app.pcb.process_stack = malloc(sizeof(process) * MAX_PCB);
   printf("%ld", sizeof(app.pcb));
   app.pcb.last = 0;
   app.pcb.curr = 0;
@@ -18,7 +18,7 @@ u32 p_create(void) {
     return -1; // erro, padronizar dps
   }
   process p = {.pid = getpid() + 1, .status = NEW, .address_space = alloc(KB)};
-  app.pcb.processes_stack[app.pcb.curr] = p;
+  app.pcb.process_stack[app.pcb.curr] = p;
   app.pcb.curr++;
   return p.pid;
 }
@@ -26,8 +26,8 @@ u32 p_create(void) {
 void log_process(u32 pid) {
   process p;
   for (u32 i = 0; i < MAX_PCB; i++) {
-    if (app.pcb.processes_stack[i].pid == pid) {
-      p = app.pcb.processes_stack[i];
+    if (app.pcb.process_stack[i].pid == pid) {
+      p = app.pcb.process_stack[i];
       break;
     }
   }
@@ -44,8 +44,8 @@ process *p_find(u32 pid) {
   process *p = NULL;
 
   for (int i = 0; i < MAX_PCB; i++) {
-    if (app.pcb.processes_stack[i].pid == pid) {
-      p = &app.pcb.processes_stack[i];
+    if (app.pcb.process_stack[i].pid == pid) {
+      p = &app.pcb.process_stack[i];
       break;
     }
   }
@@ -75,9 +75,4 @@ void p_interrupt(u32 pid) {
   process *p = p_find(pid);
 
   p->time_to_run = QUANTUM_TIME;
-}
-
-void *p_alloc(process p, u32 bytes) {
-  p.bounds += bytes;
-  return (void *)((char *)p.address_space + p.bounds);
 }
