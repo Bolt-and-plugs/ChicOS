@@ -12,7 +12,9 @@ extern App app;
 
 void cpu_loop() {
   while (!app.loop_stop) {
+    void *ptr = alloc(150);
     sleep(1);
+    dealloc(ptr);
   }
 }
 
