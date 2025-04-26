@@ -28,6 +28,7 @@ typedef enum {
   SEMAPHORE_INIT_ERROR = 501,
   SEMAPHORE_POST_ERROR = 502,
   SEMAPHORE_WAIT_ERROR = 503,
+  INVALID_INPUT = 600,
 } status_code;
 
 // defining correct macros for logging

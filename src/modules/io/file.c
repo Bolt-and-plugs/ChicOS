@@ -19,7 +19,7 @@ void read_header(file_buffer *fb) {
   fscanf(fb->fp, "%d", &header->priority);
   fscanf(fb->fp, "%d", &header->seg_size);
 
-  // has to be done twice in order to skip\n
+  // has to be done twice in order to skip \n
   c = fgetc(fb->fp);
   c = fgetc(fb->fp);
 
@@ -49,7 +49,6 @@ i32 counting_io_operations(file_buffer *fb) {
   int value;
   while (!feof(fb->fp)) {
     fscanf(fb->fp, "%s %d", seeker, &value);
-    printf("%s %d\n", seeker, value);
   }
 
   return count;
@@ -57,6 +56,11 @@ i32 counting_io_operations(file_buffer *fb) {
 
 file_buffer *open_file(const char *address) {
   file_buffer *fb = alloc(sizeof(file_buffer));
+
+  if (!address || strlen(address) >= MAX_ADDRESS_SIZE) {
+    c_error(INVALID_INPUT, "address is bigger than max address or is missing");
+    return NULL;
+  }
 
   strcpy(fb->address, address);
   fb->fp = fopen(address, "r");
