@@ -46,12 +46,13 @@ typedef struct __process {
 } process;
 
 typedef struct __PCB {
-  process *process_stack;
+  process process_stack[MAX_PCB];
   u8 curr;
   i8 last;
 } PCB;
 
 void init_pcb(void);
+void clear_pcb(void);
 u32 p_create(void);
 void p_finish(void);
 void log_process(u32 pid);

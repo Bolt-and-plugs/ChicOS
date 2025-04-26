@@ -24,14 +24,18 @@ void init_mem(u32 mem_size) {
   c_info(strcat(parse_int_to_string(mem_size, res), "B allocated"));
 
   app.mem = mem;
+
+  if (sem_init(&app.mem->memory_s, 0, 0) != 0) {
+    c_crit_error(SEMAPHORE_INIT_ERROR,"Memory semaphore failed to initialize")   
+  }
 }
 
-void clear_mem(memory *mem) {
-  if (!mem) {
-    c_crit_error(MEM_ERROR, "There is no memory to free");
+void clear_mem() {
+  if (!app.mem) {
+    c_crit_error(MEM_ERROR, "There is no memory to be freed");
   }
 
-  free(mem);
+  free(app.mem);
 
   char res[128];
   c_info(strcat(parse_int_to_string(MB, res), "B deallocated"));
@@ -41,6 +45,7 @@ void *alloc(u32 bytes) {
   if (bytes == 0)
     return NULL;
 
+  sem_wait(&app.mem->memory_s);
   u32 num_pages = (bytes + PAGE_SIZE - 1) / PAGE_SIZE;
 
   if (num_pages > app.mem->free_page_num || num_pages > app.mem->len) {
@@ -60,6 +65,7 @@ void *alloc(u32 bytes) {
   h_ptr->size = bytes;
 
   app.mem->free_page_num -= num_pages;
+  sem_post(&app.mem->memory_s);
   return (void *)((char *)ptr + sizeof(alloc_header));
 }
 
@@ -85,7 +91,7 @@ void dealloc(void *mem) {
 }
 
 float retrieve_free_mem_percentage(void) {
-  return (float)app.mem->free_page_num / (float)app.mem->len * 100.0f;
+  return (float) app.mem->free_page_num / (float)app.mem->len * 100.0f;
 }
 
 float retrieve_used_mem_percentage(void) {

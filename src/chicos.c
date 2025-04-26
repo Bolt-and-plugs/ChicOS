@@ -3,11 +3,18 @@
 #include "modules/log/log.h"
 #include "modules/memory/mem.h"
 #include "modules/process/process.h"
+#include "modules/render/render.h"
+#include "modules/scheduler/scheduler.h"
 #include "modules/utils/utils.h"
 
 log_level min_log_level;
 bool debug;
 App app;
+
+void handle_signal(int signal) {
+  app.loop_stop = 1; 
+  printf("Stopping loops\n");
+}
 
 bool set_envvar(const char *mode) {
   if (strcmp(mode, "Debug") == 0 || strcmp(mode, "DEBUG") == 0) {
@@ -20,10 +27,28 @@ bool set_envvar(const char *mode) {
 }
 
 void init_app(int mem_size) {
-  printf("Size of system being set to %d\n", mem_size);
   init_mem(mem_size);
   init_pcb();
-  init_cpu();
+
+  signal(SIGINT, handle_signal);
+
+  if (pthread_create(&app.cpu.cpu_t, NULL, init_cpu, NULL) != 0) {
+    perror("Failed to create CPU thread");
+    exit(1);
+  }
+
+  if (pthread_create(&app.mem->render_t, NULL, init_render,
+                     debug ? "no_logo" : "logo") != 0) {
+    perror("Failed to create render thread");
+    exit(1);
+  }
+}
+
+void clear_app() {
+  pthread_join(app.cpu.cpu_t, NULL);
+  pthread_join(app.mem->render_t, NULL);
+  clear_pcb();
+  clear_mem();
 }
 
 void set_debug_mode() {
@@ -74,16 +99,13 @@ int main(int argc, char **argv) {
 
   if (argc > 1) {
     handle_args(args, argc, argv);
-
     if (args[1] && valid_int(args[1]))
       mem_size = args[1];
   }
 
-  init_app(mem_size);
   set_debug_mode();
-
-  file_buffer *fb = open_file("resources/sint2");
-  puts("ok");
-  close_file(fb);
+  // main loop
+  init_app(mem_size);
+  clear_app();
   return 0;
 }

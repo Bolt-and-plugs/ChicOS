@@ -6,10 +6,17 @@
 extern App app;
 
 void init_pcb(void) {
-  app.pcb.process_stack = malloc(sizeof(process) * MAX_PCB);
-  printf("%ld", sizeof(app.pcb));
   app.pcb.last = 0;
   app.pcb.curr = 0;
+}
+
+void clear_pcb(void) {
+  for (int i = 0; i < MAX_PCB; i++) {
+    process *p = &app.pcb.process_stack[i];
+    if (p->pid != -1) {
+      //dealloc(p);
+    }
+  }
 }
 
 u32 p_create(void) {
