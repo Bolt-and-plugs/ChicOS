@@ -13,7 +13,7 @@ typedef struct __App {
   volatile sig_atomic_t loop_stop;
 } App;
 
-void handle_signal(int signal);
+void handle_signal();
 
 typedef enum { HELP = 1 } arguments;
 

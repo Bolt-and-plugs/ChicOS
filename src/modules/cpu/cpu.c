@@ -1,3 +1,4 @@
+#include "cpu.h"
 #include "../../chicos.h"
 #include "../io/file.h"
 #include "../log/log.h"
@@ -6,7 +7,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#define TIME_SLICE 10
 
 extern App app;
 

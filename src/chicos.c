@@ -11,7 +11,7 @@ log_level min_log_level;
 bool debug;
 App app;
 
-void handle_signal(int signal) {
+void handle_signal() {
   app.loop_stop = 1; 
   printf("Stopping loops\n");
 }
