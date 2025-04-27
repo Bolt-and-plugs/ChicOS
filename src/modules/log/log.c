@@ -1,17 +1,17 @@
 #include "log.h"
 #include "stdio.h"
+#include "../../chicos.h"
 
-extern log_level min_log_level;
-extern bool debug;
+extern App app;
 
 log_level get_min_log_level(void) {
-  if (debug)
+  if (app.debug)
     return INFO;
   return WARN;
 }
 
 void c_log(log_level level, status_code status, const char *str, ...) {
-  if (level < min_log_level)
+  if (level < app.min_log_level)
     return;
 
   switch (level) {

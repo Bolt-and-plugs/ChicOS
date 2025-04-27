@@ -7,22 +7,20 @@
 #include "modules/scheduler/scheduler.h"
 #include "modules/utils/utils.h"
 
-log_level min_log_level;
-bool debug;
 App app;
 
-void handle_signal() {
-  app.loop_stop = 1; 
+void handle_signal(sig_atomic_t signal) {
+  app.loop_stop = 1;
   printf("Stopping loops\n");
 }
 
 bool set_envvar(const char *mode) {
   if (strcmp(mode, "Debug") == 0 || strcmp(mode, "DEBUG") == 0) {
-    debug = true;
+    app.debug = true;
     return true;
   }
 
-  debug = false;
+  app.debug = false;
   return false;
 }
 
@@ -38,7 +36,7 @@ void init_app(int mem_size) {
   }
 
   if (pthread_create(&app.mem->render_t, NULL, init_render,
-                     debug ? "no_logo" : "logo") != 0) {
+                     app.debug ? "no_logo" : "logo") != 0) {
     perror("Failed to create render thread");
     exit(1);
   }
@@ -58,7 +56,7 @@ void set_debug_mode() {
   if (debug)
     c_info("Debug mode set");
 #endif
-  min_log_level = get_min_log_level();
+  app.min_log_level = get_min_log_level();
 }
 
 void handle_args(int *args, int argc, char **argv) {
