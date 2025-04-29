@@ -49,7 +49,6 @@ void sys_call(events e, const char *str, ...) {
     p_create(args[0]);
     break;
   case process_finish:
-    p_finish();
     break;
   case mem_load_req:
     break;

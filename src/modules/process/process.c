@@ -13,7 +13,7 @@ void init_pcb(void) {
 void clear_pcb(void) {
   for (int i = 0; i < MAX_PCB; i++) {
     process *p = &app.pcb.process_stack[i];
-    if (p->pid != -1) {
+    if (p->address_space) {
       dealloc(p->address_space);
     }
   }

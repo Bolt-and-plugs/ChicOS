@@ -35,8 +35,7 @@ void init_app(int mem_size) {
     exit(1);
   }
 
-  if (pthread_create(&app.mem->render_t, NULL, init_render,
-                     app.debug ? "no_logo" : "logo") != 0) {
+  if (pthread_create(&app.mem->render_t, NULL, init_render, NULL) != 0) {
     perror("Failed to create render thread");
     exit(1);
   }
