@@ -6,6 +6,7 @@
 #include "modules/memory/mem.h"
 #include "modules/process/process.h"
 #include "modules/log/log.h"
+#include "modules/render/render.h"
 
 typedef struct __App {
   PCB pcb;
@@ -14,6 +15,7 @@ typedef struct __App {
   volatile sig_atomic_t loop_stop;
   log_level min_log_level;
   bool debug;
+  renderer rdr;
 } App;
 
 void handle_signal(sig_atomic_t signal);
