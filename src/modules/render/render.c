@@ -130,9 +130,8 @@ void render_loop() {
     mvprintw(0, 0, "free mem: %2.2f%%", retrieve_free_mem_percentage());
     mvprintw(1, 0, "used mem: %2.2f%%", retrieve_used_mem_percentage());
     mvprintw(2, 0, "quantum time: %ld", app.cpu.quantum_time);
-    if (app.debug) {
+    if (app.debug)
       mvprintw(3, 0, "Debug Mode Set");
-    }
     refresh();
     napms(10);
   }
