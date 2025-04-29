@@ -14,17 +14,31 @@ void clear_pcb(void) {
   for (int i = 0; i < MAX_PCB; i++) {
     process *p = &app.pcb.process_stack[i];
     if (p->pid != -1) {
-      //dealloc(p);
+      dealloc(p->address_space);
     }
   }
 }
 
-u32 p_create(void) {
-  // handle process creation
-  if (app.pcb.curr == MAX_PCB - 1) {
-    return -1; // erro, padronizar dps
+u32 p_create(char *address) {
+  char ret[16];
+  char *name = strtok(address, "/");
+  while (name != NULL) {
+    strcpy(ret, name);
+    name = strtok(NULL, "/");
   }
-  process p = {.pid = getpid() + 1, .status = NEW, .address_space = alloc(KB)};
+  name = strtok(ret, ".");
+
+  if (app.pcb.curr == MAX_PCB - 1) { // isso daqui é loucura
+    c_error(PROCESS_CREATION_ERROR, "");
+    return -1;
+  }
+  process p = {.pid = getpid() + 1,
+               .status = NEW,
+               .address_space = alloc(KB),
+               .time_to_run = TIME_SLICE};
+
+  strcpy(p.name, name);
+  p.fb = open_file(address); // boa mario
   app.pcb.process_stack[app.pcb.curr] = p;
   app.pcb.curr++;
   return p.pid;
