@@ -7,6 +7,7 @@
 #include "modules/process/process.h"
 #include "modules/log/log.h"
 #include "modules/render/render.h"
+#include "modules/user/user.h"
 
 typedef struct __App {
   PCB pcb;
@@ -16,6 +17,7 @@ typedef struct __App {
   log_level min_log_level;
   bool debug;
   renderer rdr;
+  user *user;
 } App;
 
 void handle_signal(sig_atomic_t signal);

@@ -4,7 +4,6 @@
 #include "modules/memory/mem.h"
 #include "modules/process/process.h"
 #include "modules/render/render.h"
-#include "modules/scheduler/scheduler.h"
 #include "modules/utils/utils.h"
 
 App app;
@@ -43,9 +42,10 @@ void init_app(int mem_size) {
 
 void clear_app() {
   pthread_join(app.cpu.cpu_t, NULL);
-  pthread_join(app.mem->render_t, NULL);
+  //pthread_join(app.mem->render_t, NULL);
   clear_pcb();
   clear_mem();
+  dealloc(app.user);
 }
 
 void set_debug_mode() {

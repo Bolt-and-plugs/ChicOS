@@ -1,6 +1,8 @@
 #include "render.h"
 #include "../../chicos.h"
 #include "../memory/mem.h"
+#include "../user/user.h"
+#include <ctype.h>
 #include <locale.h>
 #include <unistd.h>
 
@@ -9,16 +11,76 @@ volatile sig_atomic_t resized = 0;
 
 void handle_resize(int sig) { resized = 1; }
 
-void print_welcome(WINDOW *win) {
+user get_credentials(WINDOW *win) {
+  user login = {0};
   int y, x;
   getmaxyx(win, y, x);
-  wclear(win);
+  int form_width = 40;
+  int start_x = (x - form_width) / 2;
+
+  // Enable special characters and input
+  keypad(win, TRUE);
+  curs_set(1);
+  noecho();
+
+  // Draw form frame
+  werase(win);
   box(win, 0, 0);
-  mvwprintw(win, y / 2 - 1, ((x - 10) / 2) - 1, "[ CHIC✪S ]");
-  mvwprintw(win, y / 2, (x - 10) / 2, "BEM-VINDO");
-  wprintw(win, "");
+  mvwprintw(win, 2, (x - 10) / 2, "[ CHIC✪S ]");
   wrefresh(win);
-  napms(3000);
+
+  // Username Field
+  mvwprintw(win, y / 2 - 2, start_x, "Username:");
+  WINDOW *uname_win = derwin(win, 3, form_width - 10, y / 2 - 1, start_x);
+  box(uname_win, 0, 0);
+  wrefresh(uname_win);
+  wrefresh(win);
+
+  // Password Field (positioned below username)
+  mvwprintw(win, y / 2 + 2, start_x, "Password:");
+  WINDOW *pass_win = derwin(win, 3, form_width - 10, y / 2 + 3, start_x);
+  box(pass_win, 0, 0);
+  wrefresh(pass_win);
+  wtimeout(pass_win, 100);
+  wrefresh(win);
+
+  // Get username
+  echo();
+  mvwgetnstr(uname_win, 1, 1, login.username, sizeof(login.username) - 1);
+  noecho();
+
+  // Get password with masking
+  int pos = 0;
+  int ch;
+  wmove(pass_win, 1, 1);
+  wrefresh(pass_win);
+
+  while (1) {
+    ch = wgetch(pass_win);
+
+    if (ch == '\n') { // Enter key
+      break;
+    } else if (ch == 127 || ch == KEY_BACKSPACE) {
+      if (pos > 0) {
+        pos--;
+        mvwaddch(pass_win, 1, pos + 1, ' ');
+        wmove(pass_win, 1, pos + 1);
+      }
+    } else if (isprint(ch) && pos < (int)sizeof(login.password) - 1) {
+      login.password[pos++] = ch;
+      mvwaddch(pass_win, 1, pos, '*');
+    }
+
+    wrefresh(pass_win);
+  }
+  login.password[pos] = '\0';
+
+  // Cleanup
+  delwin(uname_win);
+  delwin(pass_win);
+  curs_set(0);
+
+  return login;
 }
 
 void print_goodbye(WINDOW *win) {
@@ -60,6 +122,24 @@ void clear_renderer() {
 }
 
 void init_renderer() {
+  if (has_colors()) {
+    start_color();
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+  }
+  WINDOW *logo_window = create_newwin(LINES, COLS, 0, 0);
+  user login = get_credentials(logo_window);
+  app.user = read_login_data(login);
+  if (!app.user) {
+    write_login_data(login);
+    app.user = read_login_data(login);
+    if (!app.user) {
+      c_crit_error(INVALID_INPUT, "Could not login");
+    }
+  }
+  wclear(logo_window);
+  wrefresh(logo_window);
+  delwin(logo_window);
   app.rdr.status_win = create_newwin(1, COLS, 0, 0);
   app.rdr.left_panel = create_newwin(LINES - 1, COLS / 2, 1, 0);
   app.rdr.right_top = create_newwin((LINES - 1) / 2, COLS / 2, 1, COLS / 2);
@@ -69,8 +149,8 @@ void init_renderer() {
 
 void render_left_panel() {
   wclear(app.rdr.left_panel);
-  int max_cols, max_rows;
-  getmaxyx(app.rdr.left_panel, max_cols, max_rows);
+  // int max_cols, max_rows;
+  // getmaxyx(app.rdr.left_panel, max_cols, max_rows);
   box(app.rdr.left_panel, 0, 0);
   wprintw(app.rdr.left_panel, " CPU - quantum time: %ld ",
           app.cpu.quantum_time);
@@ -124,8 +204,8 @@ void render_right_top() {
 void render_right_bottom() {
   // right bottom
   wclear(app.rdr.right_bottom);
-  int max_cols, max_rows;
-  getmaxyx(app.rdr.right_bottom, max_cols, max_rows);
+  // int max_cols, max_rows;
+  // getmaxyx(app.rdr.right_bottom, max_cols, max_rows);
   box(app.rdr.right_bottom, 0, 0);
   wprintw(app.rdr.right_bottom, "User Input ");
   wrefresh(app.rdr.right_bottom);
@@ -160,17 +240,13 @@ void *init_render(void *arg) {
   noecho();
   curs_set(0);
 
-  if (!app.debug) {
-    WINDOW *logo_window = create_newwin(LINES, COLS, 0, 0);
-    print_welcome(logo_window);
-  }
-
   init_renderer();
   render_loop();
   clear_renderer();
 
   if (!app.debug) {
     WINDOW *goodbye = create_newwin(LINES, COLS, 0, 0);
+    print_goodbye(goodbye);
   }
 
   endwin();
