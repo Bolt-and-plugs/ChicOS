@@ -5,7 +5,8 @@
 #include "../memory/mem.h"
 
 void retrieve_addr(const user *u, char *addr, size_t addr_sz) {
-  if (snprintf(addr, addr_sz, "data/%s.us", u->username) >= (int)addr_sz) {
+  system("mkdir -p resources/data");
+  if (snprintf(addr, addr_sz, "resources/data/%s.us", u->username) >= (int)addr_sz) {
     addr[addr_sz - 1] = '\0';
   }
 }
@@ -60,10 +61,11 @@ user *read_login_data(user u) {
   }
   if (strcmp(local_user->username, u.username) == 0 &&
       strcmp(decrypt(local_user->password), u.password) != 0) {
+    user *temp_user = alloc(sizeof(user));
+    strcpy(temp_user->password, "_");
+    strcpy(temp_user->username, local_user->username);
     dealloc(local_user);
-    user *u = alloc(sizeof(user));
-    strcpy(u->password, "_");
-    return u;
+    return temp_user;
   }
 
   dealloc(local_user);

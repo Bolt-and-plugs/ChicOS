@@ -2,7 +2,7 @@
 #define _RENDER
 
 #include "../../defines.h"
-#include "curses.h"
+#include "ncurses.h"
 
 
 typedef struct __renderer {

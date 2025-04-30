@@ -13,7 +13,7 @@ extern App app;
  */
 void push_process(process *proc) {
   process *processes = app.pcb.process_stack;
-  proc->status = READY; // pode ser diferente no futuro
+  proc->status = READY;
 
   if (!(app.pcb.last + 1 < MAX_PCB)) {
     c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "PCB is full");

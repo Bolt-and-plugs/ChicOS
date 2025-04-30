@@ -4,6 +4,7 @@
 typedef struct __user {
   char username[32];
   char password[32];
+  bool logged;
 } user;
 
 void write_login_data(user u);

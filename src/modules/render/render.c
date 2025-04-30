@@ -18,67 +18,44 @@ user get_credentials(WINDOW *win) {
   int form_width = 40;
   int start_x = (x - form_width) / 2;
 
-  // Enable special characters and input
-  keypad(win, TRUE);
-  curs_set(1);
-  noecho();
-
-  // Draw form frame
+  // Clear and draw form frame
   werase(win);
   box(win, 0, 0);
-  mvwprintw(win, 3, (x - 75) / 2, " ____       ____     __  __  ______   ____     _____   ____         ____     ");
-  mvwprintw(win, 4, (x - 75) / 2, "/\\  _\\     /\\  _`\\  /\\ \\/\\ \\/\\__  _\\ /\\  _`\\  /\\  __`\\/\\  _`\\      /\\__ \\    ");
-  mvwprintw(win, 5, (x - 75) / 2, "\\ \\ \\/     \\ \\ \\/\\_\\\\ \\ \\_\\ \\_/_/\\ \\/ \\ \\ \\/\\_\\\\ \\ \\/\\ \\ \\,\\L\\_\\    \\/_/\\ \\   ");
-  mvwprintw(win, 6, (x - 75) / 2, " \\ \\ \\      \\ \\ \\/_/_\\ \\  _  \\ \\ \\ \\  \\ \\ \\/_/_\\ \\ \\ \\ \\/_\\__ \\       \\ \\ \\  ");
-  mvwprintw(win, 7, (x - 75) / 2, "  \\ \\ \\_     \\ \\ \\L\\ \\\\ \\ \\ \\ \\ \\_\\ \\__\\ \\ \\L\\ \\\\ \\ \\_\\ \\/\\ \\L\\ \\      \\_\\ \\ ");
-  mvwprintw(win, 8, (x - 75) / 2, "   \\ \\___\\    \\ \\____/ \\ \\_\\ \\_\\/\\_____\\\\ \\____/ \\ \\_____\\ `\\____\\     /\\___\\");
-  mvwprintw(win, 9, (x - 75) / 2, "    \\/___/     \\/___/   \\/_/\\/_/\\/_____/ \\/___/   \\/_____/\\/_____/     \\/___/");
-  wrefresh(win);
-
-  // Username Field
+  // TODO adds logo here
+  // Prompt fields
   mvwprintw(win, y / 2 - 2, start_x, "Username:");
   WINDOW *uname_win = derwin(win, 3, form_width - 10, y / 2 - 1, start_x);
-  keypad(uname_win, TRUE);
   box(uname_win, 0, 0);
   wrefresh(uname_win);
-  wrefresh(win);
 
-  // Password Field (positioned below username)
   mvwprintw(win, y / 2 + 2, start_x, "Password:");
   WINDOW *pass_win = derwin(win, 3, form_width - 10, y / 2 + 3, start_x);
-  keypad(pass_win, TRUE);
   box(pass_win, 0, 0);
   wrefresh(pass_win);
-  wtimeout(pass_win, 100);
-  wrefresh(win);
 
-  // Get username
+  // Input
+  keypad(uname_win, TRUE);
+  keypad(pass_win, TRUE);
+  curs_set(1);
   echo();
   mvwgetnstr(uname_win, 1, 1, login.username, sizeof(login.username) - 1);
   noecho();
 
-  // Get password with masking
-  int pos = 0;
-  int ch;
+  int pos = 0, ch;
   wmove(pass_win, 1, 1);
   wrefresh(pass_win);
-
-  while (1) {
-    ch = wgetch(pass_win);
+  while ((ch = wgetch(pass_win)) != '\n') {
     if (ch == ERR)
       continue;
-    if (ch == '\n')
-      break;
     if ((ch == KEY_BACKSPACE || ch == 127 || ch == 8) && pos > 0) {
       pos--;
       mvwaddch(pass_win, 1, pos + 1, ' ');
       wmove(pass_win, 1, pos + 1);
     } else if (isprint(ch) && pos < (int)sizeof(login.password) - 1) {
-      login.password[pos] = ch;
-      mvwaddch(pass_win, 1, ++pos, '*');
+      login.password[pos++] = ch;
+      mvwaddch(pass_win, 1, pos, '*');
     }
     wrefresh(pass_win);
-    wrefresh(win);
   }
   login.password[pos] = '\0';
 
@@ -95,7 +72,6 @@ void print_goodbye(WINDOW *win) {
   wclear(win);
   box(win, 0, 0);
   mvwprintw(win, y / 2, (x - 10) / 2, "ATÉ MAIS!");
-  wprintw(win, "");
   wrefresh(win);
   napms(3000);
 }
@@ -117,10 +93,6 @@ void status_bar(WINDOW *status_win) {
 }
 
 void clear_renderer() {
-  wclear(app.rdr.status_win);
-  wclear(app.rdr.left_panel);
-  wclear(app.rdr.right_top);
-  wclear(app.rdr.right_bottom);
   delwin(app.rdr.status_win);
   delwin(app.rdr.left_panel);
   delwin(app.rdr.right_top);
@@ -129,6 +101,7 @@ void clear_renderer() {
     WINDOW *goodbye = create_newwin(LINES, COLS, 0, 0);
     print_goodbye(goodbye);
   }
+  endwin();
 }
 
 void init_renderer() {
@@ -141,19 +114,20 @@ void init_renderer() {
 
 void render_left_panel() {
   wclear(app.rdr.left_panel);
-  // int max_cols, max_rows;
-  // getmaxyx(app.rdr.left_panel, max_cols, max_rows);
+  // int y, x;
+  // getmaxyx(app.rdr.left_panel, y, x);
   box(app.rdr.left_panel, 0, 0);
-  mvwprintw(app.rdr.left_panel, 1, 1, " CPU - quantum time: %ld ", app.cpu.quantum_time);
+  mvwprintw(app.rdr.left_panel, 1, 1, " CPU - quantum time: %ld ",
+            app.cpu.quantum_time);
   wrefresh(app.rdr.left_panel);
 }
 
 void render_right_top() {
   wclear(app.rdr.right_top);
-  int max_cols, max_rows;
-  getmaxyx(app.rdr.right_top, max_rows, max_cols);
+  int x, y;
+  getmaxyx(app.rdr.right_top, y, x);
   box(app.rdr.right_top, 0, 0);
-  int bar_width = max_cols - 4;
+  int bar_width = x - 4;
   float used_percent = retrieve_used_mem_percentage();
 
   char bar[bar_width + 1];
@@ -167,7 +141,6 @@ void render_right_top() {
   init_pair(1, COLOR_RED, COLOR_BLACK);
   init_pair(2, COLOR_GREEN, COLOR_BLACK);
 
-  wprintw(app.rdr.right_top, "Memory");
   mvwprintw(app.rdr.right_top, 1, 1, "Memory Usage:");
   mvwprintw(app.rdr.right_top, 2, 1, "[%.*s]", bar_width, bar);
 
@@ -186,72 +159,18 @@ void render_right_top() {
 
   wrefresh(app.rdr.right_top);
   napms(100);
-
-  wrefresh(app.rdr.right_top);
-  napms(100);
 }
 
 void render_right_bottom() {
   wclear(app.rdr.right_bottom);
-  // int max_cols, max_rows;
-  // getmaxyx(app.rdr.right_bottom, max_cols, max_rows);
+  int x, y;
+  getmaxyx(app.rdr.right_bottom, y, x);
   box(app.rdr.right_bottom, 0, 0);
-  wprintw(app.rdr.right_bottom, "User Input ");
+  char str[MAX_ADDRESS_SIZE];
+  wscanw(app.rdr.right_bottom, "%s", str);
+  mvwprintw(app.rdr.right_bottom, 0, y, "Enter your text");
+  mvwprintw(app.rdr.right_bottom,  y, 12, str);
   wrefresh(app.rdr.right_bottom);
-  wprintw(app.rdr.right_bottom,
-          "                                                  \n");
-  wprintw(app.rdr.right_bottom,
-          "                      █████   ███                 \n");
-  wprintw(app.rdr.right_bottom,
-          "              █ ██   ██   █ ██   ██ █     █       \n");
-  wprintw(app.rdr.right_bottom,
-          "         █  ██   ██ ██      ██   ██        ██▓    \n");
-  wprintw(app.rdr.right_bottom,
-          "      ▓███  ███  ▓█   █████  █████     █    ███▓  \n");
-  wprintw(app.rdr.right_bottom,
-          "    ██  ████  ██  ██ █████       ████▓██      ███▓\n");
-  wprintw(app.rdr.right_bottom,
-          "  ██     ██   █   ░░▒▒▒▒▓▓███  ████████         ██\n");
-  wprintw(app.rdr.right_bottom,
-          " ██    ██ █     █▒▒▒▓█░████████████               \n");
-  wprintw(app.rdr.right_bottom,
-          " ███  ██       █▓█░█▒█████░█████ ▓███▓  █         \n");
-  wprintw(app.rdr.right_bottom,
-          "   ███         ░███████░░████▒▒▒█ █▓████          \n");
-  wprintw(app.rdr.right_bottom,
-          "      █▒▒██░█  ██░▓█▒▓████████▒▒██       █        \n");
-  wprintw(app.rdr.right_bottom,
-          "     ██▓█▓█▒▒▒░ ▒███░████████▒████▓░█▒            \n");
-  wprintw(app.rdr.right_bottom,
-          "     █▓█▓▒▒▒░▓█ █████░█████████▓█████░██          \n");
-  wprintw(app.rdr.right_bottom,
-          "     ░▒▒█▒█▓█▓██ █▓████████▓█▓▓█▓▒░░░█▒░██        \n");
-  wprintw(app.rdr.right_bottom,
-          "    ██▓▒▒▓██▓▒▒░   ▒██████░██▓██▓▒▒▒▒▒██▓█▓       \n");
-  wprintw(app.rdr.right_bottom,
-          "   █▒▒▒▓███▒▒▒   █░█▓█████▒▓░█▓▒▓█▓▓▒▒▒░█▒██      \n");
-  wprintw(app.rdr.right_bottom,
-          "    ▒█▓▓██▓▒██   ░▒░█░░█▒▒█▒█▒▒▒███▓▒▒▒▒████      \n");
-  wprintw(app.rdr.right_bottom,
-          "     ██▒▒▓██▒█  █░▓▓▓▒▓▒█▓██▒▒▒▒▓░███▓▒█▒▓▓▓█     \n");
-  wprintw(app.rdr.right_bottom,
-          "       ███▓█░▒██▒▒▓▒▒▓█▓▓▓▓▒▒▒▒█▒███████▓▓████    \n");
-  wprintw(app.rdr.right_bottom,
-          "       ▓███▒█▒░▓▓███▒▒▓█▓▓███░▒▒▒▓▓████   ███     \n");
-  wprintw(app.rdr.right_bottom,
-          "         ▓█▓▒▒▒██████▒░▒▒█▒█▒▓▒  ███   █   ███    \n");
-  wprintw(app.rdr.right_bottom,
-          "          ▒████▓█████▒▒▒    ███  █ ██ ███ ██ ██   \n");
-  wprintw(app.rdr.right_bottom,
-          "           ██████    ███ ███ ████   ████  ██  ██  \n");
-  wprintw(app.rdr.right_bottom,
-          "              █████ █ ██▓██   █   █  ███ ███      \n");
-  wprintw(app.rdr.right_bottom,
-          "              █  ███   ██ ██  ████                \n");
-  wprintw(app.rdr.right_bottom,
-          "                  ██   ███                        \n");
-  wprintw(app.rdr.right_bottom,
-          "                  ███                             \n");
   napms(100);
 }
 
@@ -281,41 +200,55 @@ void *init_render(void *arg) {
   initscr();
   cbreak();
   noecho();
-
-  // Initialize colors
   start_color();
   init_pair(1, COLOR_RED, COLOR_BLACK);
   init_pair(2, COLOR_GREEN, COLOR_BLACK);
 
-  // Create and display login window
-  //WINDOW *logo_window = create_newwin(LINES, COLS, 0, 0);
-  //user login = get_credentials(logo_window);
-  //app.user = read_login_data(login);
+  WINDOW *logo_window = create_newwin(LINES, COLS, 0, 0);
+  user *usr = NULL;
 
-  //// Display username (debug/test line)
-  //mvwprintw(logo_window, 4, 4, app.user->username);
-  //wrefresh(logo_window);
+  // if (!app.user || !app.user->logged) {
+  //   WINDOW *logo_window = create_newwin(LINES, COLS, 0, 0);
+  //   user login = get_credentials(logo_window);
 
-  //// Handle new user creation if no existing user
-  //if (!app.user) {
-  //  write_login_data(login);
-  //  app.user = read_login_data(login);
-  //  if (!app.user) {
-  //    c_crit_error(INVALID_INPUT, "Could not login");
-  //    endwin();  // Ensure ncurses exits before error
-  //    return NULL;
-  //  }
+  //  do {
+  //    app.user = read_login_data(login);
+
+  //    if (!app.user) {
+  //      write_login_data(login);
+  //      app.user = read_login_data(login);
+  //      if (!app.user) {
+  //        c_crit_error(INVALID_INPUT, "Could not login");
+  //        endwin();
+  //        return NULL;
+  //      }
+  //    }
+
+  //    if (strcmp(app.user->password, login.password) != 0) {
+  //      c_crit_error(INVALID_INPUT, "Wrong password");
+  //      endwin();
+  //      return NULL;
+  //    }
+
+  //    app.user->logged = true;
+  //  } while (!app.user->logged);
+
+  //  delwin(logo_window);
+  //  clear();
+  //  refresh();
   //}
+  // ---- TEAR DOWN LOGIN UI & GO DASHBOARD ----
+  // delwin(logo_window);
+  // clear();
+  // refresh();
 
-  //// --- FIX: Destroy login window before dashboard ---
-  //delwin(logo_window);  // Delete login window
-  //refresh();            // Clear the screen
-
-  // Initialize dashboard panels and start render loop
   init_renderer();
   render_loop();
 
-  // Cleanup
+  app.user = usr;
+  init_renderer();
+  render_loop();
+
   clear_renderer();
   endwin();
   return NULL;
