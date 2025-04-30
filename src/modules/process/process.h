@@ -3,6 +3,7 @@
 
 #include "../../defines.h"
 #include "../io/file.h"
+#include "../memory/mem.h"
 
 #define MAX_PCB 10
 #define MAX_SIZE_PROC_NAME 32
@@ -16,18 +17,6 @@ typedef enum {
   READY = 1,
   BLOCKED = 2,
 } p_status;
-
-typedef enum {
-  CODE = 0x000,
-  STACK = 0x001,
-  HEAP = 0x002,
-} segment;
-
-typedef struct __page_table {
-  u32 base;
-  u32 bounds;
-  u8 magic_number;
-} page_table;
 
 typedef struct __process {
   u32 pid;

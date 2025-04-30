@@ -71,14 +71,14 @@ user get_credentials(WINDOW *win) {
       break;
     if ((ch == KEY_BACKSPACE || ch == 127 || ch == 8) && pos > 0) {
       pos--;
-      mvwaddch(pass_win, 1, pos+1, ' ');
-      wmove(pass_win, 1, pos+1);
-    }
-    else if (isprint(ch) && pos < (int)sizeof(login.password)-1) {
+      mvwaddch(pass_win, 1, pos + 1, ' ');
+      wmove(pass_win, 1, pos + 1);
+    } else if (isprint(ch) && pos < (int)sizeof(login.password) - 1) {
       login.password[pos] = ch;
       mvwaddch(pass_win, 1, ++pos, '*');
     }
     wrefresh(pass_win);
+    wrefresh(win);
   }
   login.password[pos] = '\0';
 
@@ -129,7 +129,6 @@ void clear_renderer() {
     WINDOW *goodbye = create_newwin(LINES, COLS, 0, 0);
     print_goodbye(goodbye);
   }
-
 }
 
 void init_renderer() {
@@ -145,17 +144,16 @@ void render_left_panel() {
   // int max_cols, max_rows;
   // getmaxyx(app.rdr.left_panel, max_cols, max_rows);
   box(app.rdr.left_panel, 0, 0);
-  wprintw(app.rdr.left_panel, " CPU - quantum time: %ld ",
-          app.cpu.quantum_time);
+  mvwprintw(app.rdr.left_panel, 1, 1, " CPU - quantum time: %ld ", app.cpu.quantum_time);
   wrefresh(app.rdr.left_panel);
 }
 
 void render_right_top() {
   wclear(app.rdr.right_top);
   int max_cols, max_rows;
-  getmaxyx(app.rdr.right_top, max_cols, max_rows);
+  getmaxyx(app.rdr.right_top, max_rows, max_cols);
   box(app.rdr.right_top, 0, 0);
-  int bar_width = max_cols - 1;
+  int bar_width = max_cols - 4;
   float used_percent = retrieve_used_mem_percentage();
 
   char bar[bar_width + 1];
@@ -171,8 +169,7 @@ void render_right_top() {
 
   wprintw(app.rdr.right_top, "Memory");
   mvwprintw(app.rdr.right_top, 1, 1, "Memory Usage:");
-  mvwprintw(app.rdr.right_top, 2, 1, "[%.*s] %2.1f%%", bar_width, bar,
-            used_percent);
+  mvwprintw(app.rdr.right_top, 2, 1, "[%.*s]", bar_width, bar);
 
   if (used_percent > 80) {
     wattron(app.rdr.right_top, COLOR_PAIR(1));
@@ -201,33 +198,60 @@ void render_right_bottom() {
   box(app.rdr.right_bottom, 0, 0);
   wprintw(app.rdr.right_bottom, "User Input ");
   wrefresh(app.rdr.right_bottom);
-  wprintw(app.rdr.right_bottom,"                                                  \n");
-  wprintw(app.rdr.right_bottom,"                      █████   ███                 \n");
-  wprintw(app.rdr.right_bottom,"              █ ██   ██   █ ██   ██ █     █       \n");
-  wprintw(app.rdr.right_bottom,"         █  ██   ██ ██      ██   ██        ██▓    \n");
-  wprintw(app.rdr.right_bottom,"      ▓███  ███  ▓█   █████  █████     █    ███▓  \n");
-  wprintw(app.rdr.right_bottom,"    ██  ████  ██  ██ █████       ████▓██      ███▓\n");
-  wprintw(app.rdr.right_bottom,"  ██     ██   █   ░░▒▒▒▒▓▓███  ████████         ██\n");
-  wprintw(app.rdr.right_bottom," ██    ██ █     █▒▒▒▓█░████████████               \n");
-  wprintw(app.rdr.right_bottom," ███  ██       █▓█░█▒█████░█████ ▓███▓  █         \n");
-  wprintw(app.rdr.right_bottom,"   ███         ░███████░░████▒▒▒█ █▓████          \n");
-  wprintw(app.rdr.right_bottom,"      █▒▒██░█  ██░▓█▒▓████████▒▒██       █        \n");
-  wprintw(app.rdr.right_bottom,"     ██▓█▓█▒▒▒░ ▒███░████████▒████▓░█▒            \n");
-  wprintw(app.rdr.right_bottom,"     █▓█▓▒▒▒░▓█ █████░█████████▓█████░██          \n");
-  wprintw(app.rdr.right_bottom,"     ░▒▒█▒█▓█▓██ █▓████████▓█▓▓█▓▒░░░█▒░██        \n");
-  wprintw(app.rdr.right_bottom,"    ██▓▒▒▓██▓▒▒░   ▒██████░██▓██▓▒▒▒▒▒██▓█▓       \n");
-  wprintw(app.rdr.right_bottom,"   █▒▒▒▓███▒▒▒   █░█▓█████▒▓░█▓▒▓█▓▓▒▒▒░█▒██      \n");
-  wprintw(app.rdr.right_bottom,"    ▒█▓▓██▓▒██   ░▒░█░░█▒▒█▒█▒▒▒███▓▒▒▒▒████      \n");
-  wprintw(app.rdr.right_bottom,"     ██▒▒▓██▒█  █░▓▓▓▒▓▒█▓██▒▒▒▒▓░███▓▒█▒▓▓▓█     \n");
-  wprintw(app.rdr.right_bottom,"       ███▓█░▒██▒▒▓▒▒▓█▓▓▓▓▒▒▒▒█▒███████▓▓████    \n");
-  wprintw(app.rdr.right_bottom,"       ▓███▒█▒░▓▓███▒▒▓█▓▓███░▒▒▒▓▓████   ███     \n");
-  wprintw(app.rdr.right_bottom,"         ▓█▓▒▒▒██████▒░▒▒█▒█▒▓▒  ███   █   ███    \n");
-  wprintw(app.rdr.right_bottom,"          ▒████▓█████▒▒▒    ███  █ ██ ███ ██ ██   \n");
-  wprintw(app.rdr.right_bottom,"           ██████    ███ ███ ████   ████  ██  ██  \n");
-  wprintw(app.rdr.right_bottom,"              █████ █ ██▓██   █   █  ███ ███      \n");
-  wprintw(app.rdr.right_bottom,"              █  ███   ██ ██  ████                \n");
-  wprintw(app.rdr.right_bottom,"                  ██   ███                        \n");
-  wprintw(app.rdr.right_bottom,"                  ███                             \n");
+  wprintw(app.rdr.right_bottom,
+          "                                                  \n");
+  wprintw(app.rdr.right_bottom,
+          "                      █████   ███                 \n");
+  wprintw(app.rdr.right_bottom,
+          "              █ ██   ██   █ ██   ██ █     █       \n");
+  wprintw(app.rdr.right_bottom,
+          "         █  ██   ██ ██      ██   ██        ██▓    \n");
+  wprintw(app.rdr.right_bottom,
+          "      ▓███  ███  ▓█   █████  █████     █    ███▓  \n");
+  wprintw(app.rdr.right_bottom,
+          "    ██  ████  ██  ██ █████       ████▓██      ███▓\n");
+  wprintw(app.rdr.right_bottom,
+          "  ██     ██   █   ░░▒▒▒▒▓▓███  ████████         ██\n");
+  wprintw(app.rdr.right_bottom,
+          " ██    ██ █     █▒▒▒▓█░████████████               \n");
+  wprintw(app.rdr.right_bottom,
+          " ███  ██       █▓█░█▒█████░█████ ▓███▓  █         \n");
+  wprintw(app.rdr.right_bottom,
+          "   ███         ░███████░░████▒▒▒█ █▓████          \n");
+  wprintw(app.rdr.right_bottom,
+          "      █▒▒██░█  ██░▓█▒▓████████▒▒██       █        \n");
+  wprintw(app.rdr.right_bottom,
+          "     ██▓█▓█▒▒▒░ ▒███░████████▒████▓░█▒            \n");
+  wprintw(app.rdr.right_bottom,
+          "     █▓█▓▒▒▒░▓█ █████░█████████▓█████░██          \n");
+  wprintw(app.rdr.right_bottom,
+          "     ░▒▒█▒█▓█▓██ █▓████████▓█▓▓█▓▒░░░█▒░██        \n");
+  wprintw(app.rdr.right_bottom,
+          "    ██▓▒▒▓██▓▒▒░   ▒██████░██▓██▓▒▒▒▒▒██▓█▓       \n");
+  wprintw(app.rdr.right_bottom,
+          "   █▒▒▒▓███▒▒▒   █░█▓█████▒▓░█▓▒▓█▓▓▒▒▒░█▒██      \n");
+  wprintw(app.rdr.right_bottom,
+          "    ▒█▓▓██▓▒██   ░▒░█░░█▒▒█▒█▒▒▒███▓▒▒▒▒████      \n");
+  wprintw(app.rdr.right_bottom,
+          "     ██▒▒▓██▒█  █░▓▓▓▒▓▒█▓██▒▒▒▒▓░███▓▒█▒▓▓▓█     \n");
+  wprintw(app.rdr.right_bottom,
+          "       ███▓█░▒██▒▒▓▒▒▓█▓▓▓▓▒▒▒▒█▒███████▓▓████    \n");
+  wprintw(app.rdr.right_bottom,
+          "       ▓███▒█▒░▓▓███▒▒▓█▓▓███░▒▒▒▓▓████   ███     \n");
+  wprintw(app.rdr.right_bottom,
+          "         ▓█▓▒▒▒██████▒░▒▒█▒█▒▓▒  ███   █   ███    \n");
+  wprintw(app.rdr.right_bottom,
+          "          ▒████▓█████▒▒▒    ███  █ ██ ███ ██ ██   \n");
+  wprintw(app.rdr.right_bottom,
+          "           ██████    ███ ███ ████   ████  ██  ██  \n");
+  wprintw(app.rdr.right_bottom,
+          "              █████ █ ██▓██   █   █  ███ ███      \n");
+  wprintw(app.rdr.right_bottom,
+          "              █  ███   ██ ██  ████                \n");
+  wprintw(app.rdr.right_bottom,
+          "                  ██   ███                        \n");
+  wprintw(app.rdr.right_bottom,
+          "                  ███                             \n");
   napms(100);
 }
 
@@ -238,11 +262,11 @@ void render_loop() {
   nodelay(app.rdr.right_bottom, TRUE);
 
   while (!app.loop_stop) {
+    napms(100);
     if (resized) {
       resized = 0;
       endwin();
       refresh();
-
       clear_renderer();
       init_renderer();
     }
@@ -258,28 +282,41 @@ void *init_render(void *arg) {
   cbreak();
   noecho();
 
-  if (has_colors()) {
-    start_color();
-    init_pair(1, COLOR_RED, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-  }
-  WINDOW *logo_window = create_newwin(LINES, COLS, 0, 0);
-  user login = get_credentials(logo_window);
-  app.user = read_login_data(login);
-  if (!app.user) {
-    write_login_data(login);
-    app.user = read_login_data(login);
-    if (!app.user) {
-      c_crit_error(INVALID_INPUT, "Could not login");
-    }
-  }
-  wclear(logo_window);
-  wrefresh(logo_window);
-  delwin(logo_window);
+  // Initialize colors
+  start_color();
+  init_pair(1, COLOR_RED, COLOR_BLACK);
+  init_pair(2, COLOR_GREEN, COLOR_BLACK);
+
+  // Create and display login window
+  //WINDOW *logo_window = create_newwin(LINES, COLS, 0, 0);
+  //user login = get_credentials(logo_window);
+  //app.user = read_login_data(login);
+
+  //// Display username (debug/test line)
+  //mvwprintw(logo_window, 4, 4, app.user->username);
+  //wrefresh(logo_window);
+
+  //// Handle new user creation if no existing user
+  //if (!app.user) {
+  //  write_login_data(login);
+  //  app.user = read_login_data(login);
+  //  if (!app.user) {
+  //    c_crit_error(INVALID_INPUT, "Could not login");
+  //    endwin();  // Ensure ncurses exits before error
+  //    return NULL;
+  //  }
+  //}
+
+  //// --- FIX: Destroy login window before dashboard ---
+  //delwin(logo_window);  // Delete login window
+  //refresh();            // Clear the screen
+
+  // Initialize dashboard panels and start render loop
   init_renderer();
   render_loop();
-  clear_renderer();
 
+  // Cleanup
+  clear_renderer();
   endwin();
   return NULL;
 }

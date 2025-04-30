@@ -58,6 +58,13 @@ user *read_login_data(user u) {
       strcmp(decrypt(local_user->password), u.password) == 0) {
     return local_user;
   }
+  if (strcmp(local_user->username, u.username) == 0 &&
+      strcmp(decrypt(local_user->password), u.password) != 0) {
+    dealloc(local_user);
+    user *u = alloc(sizeof(user));
+    strcpy(u->password, "_");
+    return u;
+  }
 
   dealloc(local_user);
   return NULL;

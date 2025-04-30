@@ -21,6 +21,18 @@ typedef struct __alloc_header {
   u32 size;
 } alloc_header;
 
+typedef enum {
+  CODE = 0x000,
+  STACK = 0x001,
+  HEAP = 0x002,
+} segment;
+
+typedef struct __page_table {
+  u32 base;
+  u32 bounds;
+  u8 magic_number;
+} page_table;
+
 void init_mem(u32 mem_size);
 
 void clear_mem();
