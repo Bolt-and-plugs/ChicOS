@@ -1,6 +1,7 @@
 #include "log.h"
-#include "stdio.h"
 #include "../../chicos.h"
+#include "../render/render.h"
+#include "stdio.h"
 
 extern App app;
 
@@ -59,14 +60,17 @@ void c_log(log_level level, status_code status, const char *str, ...) {
     printf("%d - Unknown Status\n", status);
   }
 
-  va_list arg;
-  va_start(arg, str);
+  char buffer[4096];
 
-  while (str) {
-    printf("-> %s\n", str);
-    str = va_arg(arg, const char *);
-  }
+  va_list arg_list;
+  va_start(arg_list, str);
+  vsnprintf (buffer, 255, str, arg_list);
+  va_end(arg_list);
+  time_t clk = time(NULL);
+  printf("[%s] - %s", ctime(&clk) ,buffer);
 
-  va_end(arg);
+  if (app.rdr.output_buff)
+    render_log(buffer);
+
   puts("");
 }

@@ -19,7 +19,9 @@ void cpu_loop() {
     local_quantum_time++;
     if (local_quantum_time % 500 == 0) {
       app.cpu.quantum_time++;
-      // loop de verdade
+    }
+    if (app.cpu.quantum_time == 5) {
+      sys_call(process_finish, "ok");
     }
     usleep(1000);
   }
@@ -28,35 +30,39 @@ void cpu_loop() {
 void *init_cpu(void *arg) {
   app.cpu.quantum_time = 0;
   cpu_loop();
+  sem_init(&app.cpu.cpu_s, 0, 1);
   return NULL;
 }
 
 void sys_call(events e, const char *str, ...) {
-  va_list arg;
-  va_start(arg, str);
-  char args[4][16];
-  int i = 0;
-  while (str) {
-    str = va_arg(arg, const char *);
-    strcpy(args[i], str);
-    printf("-> %s\n", str);
-  }
+  c_info(str);
+  char buffer[4096];
+  va_list arg_list;
+  va_start(arg_list, str);
+  vsprintf(buffer, str, arg_list);
+  va_end(arg_list);
+
+  c_info(buffer);
 
   switch ((u8)e) {
   case process_interrupt:
+    p_interrupt(*(int *)buffer);
     break;
   case process_create:
-    p_create(args[0]);
+    p_create(buffer);
     break;
   case process_finish:
+    p_kill(*(int *)(buffer));
     break;
   case mem_load_req:
     break;
   case mem_load_finish:
     break;
   case semaphore_p:
+    semaphoreP((sem_t *)buffer);
     break;
   case semaphore_v:
+    semaphoreV((sem_t *)buffer);
     break;
   }
 }

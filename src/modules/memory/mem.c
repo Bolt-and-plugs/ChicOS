@@ -20,14 +20,16 @@ void init_mem(u32 mem_size) {
   mem->len = mem_size / PAGE_SIZE;
   mem->free_page_num = mem->len;
 
-  char res[128];
-  c_info(strcat(parse_int_to_string(mem_size, res), "B allocated"));
 
   app.mem = mem;
 
-  if (sem_init(&app.mem->memory_s, 0, 0) != 0) {
-    c_crit_error(SEMAPHORE_INIT_ERROR,"Memory semaphore failed to initialize")   
+  if (sem_init(&app.mem->memory_s, 0, 1) != 0) {
+    c_crit_error(SEMAPHORE_INIT_ERROR, "Memory semaphore failed to initialize")
   }
+
+  char res[128];
+  sprintf(res, "%dB allocated", (int)mem_size);
+  c_info(res);
 }
 
 void clear_mem() {
@@ -57,6 +59,7 @@ void *alloc(u32 bytes) {
 
   if (!ptr) {
     c_error(MEM_ALLOC_FAIL, "Failed to allocate memory");
+    sem_post(&app.mem->memory_s);
     return NULL;
   }
 
@@ -91,7 +94,7 @@ void dealloc(void *mem) {
 }
 
 float retrieve_free_mem_percentage(void) {
-  return (float) app.mem->free_page_num / (float)app.mem->len * 100.0f;
+  return (float)app.mem->free_page_num / (float)app.mem->len * 100.0f;
 }
 
 float retrieve_used_mem_percentage(void) {

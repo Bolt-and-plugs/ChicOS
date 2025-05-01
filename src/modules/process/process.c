@@ -38,7 +38,7 @@ u32 p_create(char *address) {
                .time_to_run = TIME_SLICE};
 
   strcpy(p.name, name);
-  p.fb = open_file(address); // boa mario
+  p.fb = open_file(address);
   app.pcb.process_stack[app.pcb.curr] = p;
   app.pcb.curr++;
   return p.pid;

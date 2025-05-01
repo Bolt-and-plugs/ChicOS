@@ -29,14 +29,10 @@ void init_app(int mem_size) {
 
   signal(SIGINT, handle_signal);
 
-  if (pthread_create(&app.cpu.cpu_t, NULL, init_cpu, NULL) != 0) {
-    perror("Failed to create CPU thread");
-    exit(1);
-  }
+  //if (pthread_create(&app.mem->render_t, NULL, init_render, NULL) != 0) { c_crit_error(THREAD_INIT_ERROR ,"Failed to create render thread"); }
 
-  if (pthread_create(&app.mem->render_t, NULL, init_render, NULL) != 0) {
-    perror("Failed to create render thread");
-    exit(1);
+  if (pthread_create(&app.cpu.cpu_t, NULL, init_cpu, NULL) != 0) {
+    c_crit_error(THREAD_INIT_ERROR ,"Failed to create CPU thread");
   }
 }
 
@@ -73,8 +69,7 @@ void handle_args(int *args, int argc, char **argv) {
     if (strcmp(str_arg, "--mem-size") == 0 || strcmp(str_arg, "-ms") == 0) {
       int val = parse_string_to_int(argv[i + 1]);
       if (val <= 0 || val >= 4 * MB || !valid_int(val)) {
-        c_error(MEM_ERROR, "Bad system length");
-        exit(0);
+        c_crit_error(MEM_ERROR, "Bad system length");
       }
       args[1] = val;
     }
