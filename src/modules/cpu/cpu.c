@@ -3,6 +3,7 @@
 #include "../io/file.h"
 #include "../log/log.h"
 #include "../process/process.h"
+#include "../semaphore/semaphore.h"
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -11,22 +12,56 @@
 extern App app;
 
 void cpu_loop() {
-  u64 local_quantum_time = 0;
   while (!app.loop_stop) {
-    local_quantum_time++;
-    if (local_quantum_time % 100 == 0)
-      app.cpu.quantum_time++;
-    usleep(1000);
-    if (local_quantum_time == UINT64_MAX - 1) {
-      local_quantum_time = 0;
-    }
+    if(app.debug)
+      usleep(100000);
+    else
+      sleep(1);
+
+    app.cpu.quantum_time++;
   }
 }
 
 void *init_cpu(void *arg) {
   app.cpu.quantum_time = 0;
+  sem_init(&app.cpu.cpu_s, 0, 1);
   cpu_loop();
   return NULL;
+}
+
+void sys_call(events e, const char *str, ...) {
+  sem_wait(&app.cpu.cpu_s);
+  char buffer[4096];
+  va_list arg_list;
+  va_start(arg_list, str);
+  vsprintf(buffer, str, arg_list);
+  va_end(arg_list);
+
+  int pid;
+  process *p;
+  switch ((u8)e) {
+  case process_interrupt:
+    p_interrupt(*(int *)buffer);
+    break;
+  case process_create:
+    pid = p_create((char *)buffer);
+    log_process(pid);
+    break;
+  case process_kill:
+    p_kill(*(int *)(buffer));
+    break;
+  case mem_load_req:
+    break;
+  case mem_load_finish:
+    break;
+  case semaphore_p:
+    semaphoreP((sem_t *)buffer);
+    break;
+  case semaphore_v:
+    semaphoreV((sem_t *)buffer);
+    break;
+  }
+  sem_post(&app.cpu.cpu_s);
 }
 
 void exec_program(file_buffer *sint, process *sint_process) {

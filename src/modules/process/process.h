@@ -3,6 +3,7 @@
 
 #include "../../defines.h"
 #include "../io/file.h"
+#include "../memory/mem.h"
 
 #define MAX_PCB 10
 #define MAX_SIZE_PROC_NAME 32
@@ -17,21 +18,9 @@ typedef enum {
   BLOCKED = 2,
 } p_status;
 
-typedef enum {
-  CODE = 0x000,
-  STACK = 0x001,
-  HEAP = 0x002,
-} segment;
-
-typedef struct __page_table {
-  u32 base;
-  u32 bounds;
-  u8 magic_number;
-} page_table;
-
 typedef struct __process {
+  char name[MAX_ADDRESS_SIZE];
   u32 pid;
-  const char *name;
   p_status status;
   u32 time_to_run;
 
@@ -39,21 +28,19 @@ typedef struct __process {
   page_table pt;
   void *address_space;
 
-  // quantidade de read e write pro scheduler poder determinar quem vai ser
-  // executado primeiro
-  u16 rw_count;
+  // disk
   file_buffer *fb;
 } process;
 
 typedef struct __PCB {
   process process_stack[MAX_PCB];
   u8 curr;
-  i8 last;
+  u8 last;
 } PCB;
 
 void init_pcb(void);
 void clear_pcb(void);
-u32 p_create(void);
+u32 p_create(char *address);
 void p_finish(void);
 void log_process(u32 pid);
 void p_kill(u32 pid);

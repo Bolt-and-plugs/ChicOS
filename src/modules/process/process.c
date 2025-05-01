@@ -13,18 +13,39 @@ void init_pcb(void) {
 void clear_pcb(void) {
   for (int i = 0; i < MAX_PCB; i++) {
     process *p = &app.pcb.process_stack[i];
-    if (p->pid != -1) {
-      //dealloc(p);
+    if (p->address_space) {
+      dealloc(p->address_space);
     }
   }
 }
 
-u32 p_create(void) {
-  // handle process creation
-  if (app.pcb.curr == MAX_PCB - 1) {
-    return -1; // erro, padronizar dps
+u32 p_create(char *address) {
+  char ret[16];
+  char *name;
+  char addr[MAX_ADDRESS_SIZE];
+
+  strcpy(addr, address);
+
+  name = strtok(address, "/");
+  while (name != NULL) {
+    strcpy(ret, name);
+    name = strtok(NULL, "/");
   }
-  process p = {.pid = getpid() + 1, .status = NEW, .address_space = alloc(KB)};
+  name = strtok(ret, ".");
+
+  if (app.pcb.curr == MAX_PCB - 1) {
+    c_error(PROCESS_CREATION_ERROR, "teste maroto fera");
+    return -1;
+  }
+
+  process p = {.pid = app.cpu.quantum_time,
+               .status = NEW,
+               .address_space = alloc(KB),
+               .time_to_run = TIME_SLICE};
+
+  strcpy(p.name, name);
+  p.fb = open_file(addr);
+
   app.pcb.process_stack[app.pcb.curr] = p;
   app.pcb.curr++;
   return p.pid;
@@ -44,7 +65,10 @@ void log_process(u32 pid) {
     return;
   }
 
-  printf("process: %s\npid: %d\n", p.name, p.pid);
+  char res[256];
+  snprintf(res, 255, "process: %s\npid: %d\nrw_count: %d\n", p.name, p.pid,
+           p.fb->h->rw_count);
+  c_info(res);
 }
 
 process *p_find(u32 pid) {
@@ -73,8 +97,8 @@ void p_kill(u32 pid) {
     return;
   }
 
-  dealloc(p->address_space);
-  dealloc(p);
+  if (p->address_space)
+    dealloc(p->address_space);
 }
 
 void p_interrupt(u32 pid) {
