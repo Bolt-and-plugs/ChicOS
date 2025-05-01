@@ -8,29 +8,43 @@ extern App app;
 void init_mem(u32 mem_size) {
   if (mem_size >= 4 * MB) {
     c_error(MEM_ERROR,
-            "Given memory size is broken! Setting to default mem size");
+            "Given memory size %d is broken! Setting to default mem size: %",
+            mem_size, DEFAULT_MEMORY_SIZE);
     mem_size = DEFAULT_MEMORY_SIZE;
   }
 
   memory *mem = malloc(sizeof(memory));
+  void *memory_pool = malloc(mem_size);
 
-  if (!mem) {
-    c_crit_error(MEM_ERROR, "could not bootstrap memory!");
+  if (!mem || !memory_pool) {
+    c_crit_error(MEM_ERROR, "Could not bootstrap memory! given mem_size: %d",
+                 mem_size);
   }
 
-  mem->len = mem_size / PAGE_SIZE;
-  mem->free_page_num = mem->len;
-
-
+  mem->pt.len = mem_size / PAGE_SIZE;
+  mem->pt.pages = malloc(sizeof(page) * mem->pt.len);
+  mem->pt.free_stack = malloc(sizeof(u32) * mem->pt.len);
+  mem->pt.free_stack_top = 0;
+  mem->pt.free_page_num = mem->pt.len;
+  mem->pool = memory_pool;
   app.mem = mem;
+
+  for (int i = 0; i < mem->pt.len; i++) {
+    mem->pt.pages[i].id = i;
+    mem->pt.pages[i].p = memory_pool + (i * PAGE_SIZE);
+    mem->pt.pages[i].free = true;
+    push_free_stack(i);
+  }
+
+  if (!mem->pt.pages) {
+    c_crit_error(MEM_ERROR, "Could not allocate pages!");
+  }
 
   if (sem_init(&app.mem->memory_s, 0, 1) != 0) {
     c_crit_error(SEMAPHORE_INIT_ERROR, "Memory semaphore failed to initialize")
   }
 
-  char res[128];
-  sprintf(res, "%dB allocated", (int)mem_size);
-  c_info(res);
+  c_info("%dB allocated", (int)mem_size);
 }
 
 void clear_mem() {
@@ -38,10 +52,13 @@ void clear_mem() {
     c_crit_error(MEM_ERROR, "There is no memory to be freed");
   }
 
+  int mem = sizeof(app.mem->pool);
+
+  free(app.mem->pt.pages);
+  free(app.mem->pool);
   free(app.mem);
 
-  char res[128];
-  c_info(strcat(parse_int_to_string(MB, res), "B deallocated"));
+  c_info("%d sB deallocated", mem);
 }
 
 void *alloc(u32 bytes) {
@@ -49,14 +66,32 @@ void *alloc(u32 bytes) {
     return NULL;
 
   sem_wait(&app.mem->memory_s);
-  u32 num_pages = (bytes + PAGE_SIZE - 1) / PAGE_SIZE;
+  u32 num_pages = (bytes + sizeof(alloc_header) + PAGE_SIZE - 1) / PAGE_SIZE;
 
-  if (num_pages > app.mem->free_page_num || num_pages > app.mem->len) {
-    c_error(MEM_FULL, "Memory would overload when allocating");
+  if (num_pages > app.mem->pt.free_page_num || num_pages > app.mem->pt.len) {
+    c_error(MEM_FULL, "Memory would overload when allocating %d pages",
+            num_pages);
+    sem_post(&app.mem->memory_s);
     return NULL;
   }
 
-  void *ptr = malloc(sizeof(alloc_header) + bytes);
+  void *ptr = NULL;
+  for (int i = 0; i < app.mem->pt.len; i++) {
+    if (i + num_pages >= app.mem->pt.len)
+      break;
+    if (app.mem->pt.pages[i].free && app.mem->pt.pages[i + num_pages].free) {
+      ptr = &app.mem->pool[i];
+      app.mem->pt.free_page_num -= num_pages;
+      ;
+      for (int j = i; j < i + num_pages; j++) {
+        app.mem->pt.pages[j].free = false;
+      }
+      alloc_header *h_ptr = ptr;
+      h_ptr->id = i;
+      h_ptr->page_num = num_pages;
+      break;
+    }
+  }
 
   if (!ptr) {
     c_error(MEM_ALLOC_FAIL, "Failed to allocate memory");
@@ -64,40 +99,49 @@ void *alloc(u32 bytes) {
     return NULL;
   }
 
-  alloc_header *h_ptr = (alloc_header *)ptr;
-  h_ptr->page_num = num_pages;
-  h_ptr->size = bytes;
+  return (void *)(char *)ptr + sizeof(alloc_header);
+}
 
-  app.mem->free_page_num -= num_pages;
+void push_free_stack(u32 i) {
+  if (app.mem->pt.free_stack_top < app.mem->pt.len) {
+    app.mem->pt.free_stack[app.mem->pt.free_stack_top++] = i;
+  }
+}
+
+void dealloc(void *mem) {
+  sem_wait(&app.mem->memory_s);
+  if (!mem) {
+    c_error(MEM_DEALLOC_FAIL,
+            "Trying to deallocate a non allocated memory region");
+    sem_post(&app.mem->memory_s);
+    return;
+  }
+
+  alloc_header *h_ptr = get_header(mem);
+
+  for (u32 i = h_ptr->id; i < h_ptr->id + h_ptr->page_num; i++) {
+    app.mem->pt.pages[i].free = true;
+    push_free_stack(i);
+  }
+  app.mem->pt.free_page_num += h_ptr->page_num;
+
   sem_post(&app.mem->memory_s);
-  return (void *)((char *)ptr + sizeof(alloc_header));
 }
 
 alloc_header *get_header(void *ptr) {
   return (alloc_header *)((char *)ptr - sizeof(alloc_header));
 }
 
-void dealloc(void *mem) {
-  if (!mem) {
-    c_error(MEM_DEALLOC_FAIL,
-            "Trying to deallocate a non allocated memory region");
-    return;
-  }
-  alloc_header *h_ptr = get_header(mem);
-
-  if (!(h_ptr->size > 0 && h_ptr->page_num > 0 &&
-        h_ptr->page_num < app.mem->len))
-    c_crit_error(MEM_DEALLOC_FAIL, "error");
-
-  app.mem->free_page_num += h_ptr->page_num;
-
-  free(h_ptr);
-}
-
 float retrieve_free_mem_percentage(void) {
-  return (float)app.mem->free_page_num / (float)app.mem->len * 100.0f;
+  return (float)app.mem->pt.free_page_num / (float)app.mem->pt.len * 100.0f;
 }
 
 float retrieve_used_mem_percentage(void) {
   return 100.0f - retrieve_free_mem_percentage();
+}
+void print_page_table_status() {
+  for (int i = 0; i < app.mem->pt.len; i++) {
+    if (app.mem->pt.pages[i].p)
+      c_info("%d %d", i, app.mem->pt.pages[i].id);
+  }
 }

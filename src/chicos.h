@@ -28,7 +28,7 @@ bool set_envvar(const char *mode);
 
 void handle_args(int *args, int argc, char **argv);
 
-void init_app(int system_size);
+void init_app(int mem_size, bool should_render);
 
 int main(int argc, char **argv);
 

@@ -14,12 +14,15 @@ extern App app;
 void cpu_loop() {
   while (!app.loop_stop) {
     if(app.debug)
-      usleep(100000);
+      usleep(1000000);
     else
       sleep(1);
 
     app.cpu.quantum_time++;
 
+    void *ptr = alloc(16);
+    print_page_table_status();
+    dealloc(ptr);
     // process *p = schedduler_thing
     // save process here
     // exec_file()

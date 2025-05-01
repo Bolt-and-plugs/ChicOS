@@ -23,27 +23,36 @@ bool set_envvar(const char *mode) {
   return false;
 }
 
-void init_app(int mem_size) {
+void init_app(int mem_size, bool should_render) {
   init_mem(mem_size);
   init_pcb();
 
   signal(SIGINT, handle_signal);
 
-  if (pthread_create(&app.mem->render_t, NULL, init_render, NULL) != 0) {
-    c_crit_error(THREAD_INIT_ERROR, "Failed to create render thread");
-  }
+  void *ptr = alloc(256);
+  print_page_table_status();
 
   if (pthread_create(&app.cpu.cpu_t, NULL, init_cpu, NULL) != 0) {
     c_crit_error(THREAD_INIT_ERROR, "Failed to create CPU thread");
   }
+
+  if (!should_render) {
+    c_info("Disabled UI");
+    return;
+  }
+  if (pthread_create(&app.mem->render_t, NULL, init_render, NULL) != 0) {
+    c_crit_error(THREAD_INIT_ERROR, "Failed to create render thread");
+  }
 }
 
-void clear_app() {
+void clear_app(bool should_render) {
   pthread_join(app.cpu.cpu_t, NULL);
+
+  if (!should_render)
+    return;
   pthread_join(app.mem->render_t, NULL);
   clear_pcb();
   clear_mem();
-  dealloc(app.user);
 }
 
 void set_debug_mode() {
@@ -75,12 +84,17 @@ void handle_args(int *args, int argc, char **argv) {
       }
       args[1] = val;
     }
+
+    if (strcmp(str_arg, "--no_render") == 0) {
+      args[2] = true;
+    }
   }
 
   // print help
   if (args[0] == HELP) {
     puts("Valid Arguments:");
     puts("--mem-size -> (integer) Memory size in bytes");
+    puts("--no_render -> Disables UI rendering");
     exit(-1);
   }
 
@@ -88,18 +102,21 @@ void handle_args(int *args, int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-  i32 args[argc];
+  i32 args[10];
   i32 mem_size = 1 * MB;
+  bool should_render = true;
 
   if (argc > 1) {
     handle_args(args, argc, argv);
     if (args[1] && valid_int(args[1]))
       mem_size = args[1];
+    if (args[2] && valid_int(args[2]))
+      should_render = false;
   }
 
   set_debug_mode();
   // main loop
-  init_app(mem_size);
-  clear_app();
+  init_app(mem_size, should_render);
+  clear_app(should_render);
   return 0;
 }

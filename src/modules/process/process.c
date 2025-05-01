@@ -40,7 +40,8 @@ u32 p_create(char *address) {
 
   process p = {.pid = app.cpu.quantum_time,
                .status = NEW,
-               .address_space = alloc(KB),
+               .address_space =
+                   alloc(KB - (u32)sizeof(process) - (u32)sizeof(file_buffer)),
                .time_to_run = TIME_SLICE};
 
   strcpy(p.name, name);
