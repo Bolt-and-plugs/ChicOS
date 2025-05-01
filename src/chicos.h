@@ -2,14 +2,23 @@
 #define _CHICOS
 
 #include "defines.h"
+#include "modules/cpu/cpu.h"
 #include "modules/memory/mem.h"
 #include "modules/process/process.h"
-
+#include "modules/log/log.h"
 
 typedef struct __App {
   PCB pcb;
   memory *mem;
+  cpu cpu;
+  volatile sig_atomic_t loop_stop;
+  log_level min_log_level;
+  bool debug;
 } App;
+
+void handle_signal(sig_atomic_t signal);
+
+typedef enum { HELP = 1 } arguments;
 
 bool set_envvar(const char *mode);
 

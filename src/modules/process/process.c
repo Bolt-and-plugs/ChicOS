@@ -1,25 +1,40 @@
 #include "process.h"
 #include "../../chicos.h"
 #include "../log/log.h"
+#include "../memory/mem.h"
 
-extern App *app;
+extern App app;
 
-i32 p_create(void) {
+void init_pcb(void) {
+  app.pcb.last = 0;
+  app.pcb.curr = 0;
+}
+
+void clear_pcb(void) {
+  for (int i = 0; i < MAX_PCB; i++) {
+    process *p = &app.pcb.process_stack[i];
+    if (p->pid != -1) {
+      //dealloc(p);
+    }
+  }
+}
+
+u32 p_create(void) {
   // handle process creation
-  if (app->pcb.curr == MAX_PCB - 1) {
+  if (app.pcb.curr == MAX_PCB - 1) {
     return -1; // erro, padronizar dps
   }
-  process p = {.pid = getpid() + 1, .status = NEW};
-  app->pcb.processes[app->pcb.curr] = p;
-  app->pcb.curr++;
+  process p = {.pid = getpid() + 1, .status = NEW, .address_space = alloc(KB)};
+  app.pcb.process_stack[app.pcb.curr] = p;
+  app.pcb.curr++;
   return p.pid;
 }
 
-void log_process(i32 pid) {
+void log_process(u32 pid) {
   process p;
-  for (i32 i = 0; i < MAX_PCB; i++) {
-    if (app->pcb.processes[i].pid == pid) {
-      p = app->pcb.processes[i];
+  for (u32 i = 0; i < MAX_PCB; i++) {
+    if (app.pcb.process_stack[i].pid == pid) {
+      p = app.pcb.process_stack[i];
       break;
     }
   }
@@ -32,12 +47,12 @@ void log_process(i32 pid) {
   printf("process: %s\npid: %d\n", p.name, p.pid);
 }
 
-process *find_p(i32 pid) {
+process *p_find(u32 pid) {
   process *p = NULL;
 
   for (int i = 0; i < MAX_PCB; i++) {
-    if (app->pcb.processes[i].pid == pid) {
-      p = &app->pcb.processes[i];
+    if (app.pcb.process_stack[i].pid == pid) {
+      p = &app.pcb.process_stack[i];
       break;
     }
   }
@@ -50,16 +65,21 @@ process *find_p(i32 pid) {
   return p;
 }
 
-void p_kill(i32 pid) {
+void p_kill(u32 pid) {
   // to kill the process: free the memory allocated to it
-  process *p = find_p(pid);
+  process *p = p_find(pid);
+  if (!p) {
+    c_error(PROCESS_OUT_OF_LIST, "Could not find process");
+    return;
+  }
 
-  // deallocate_mem(p->address_space);
+  dealloc(p->address_space);
+  dealloc(p);
 }
 
-void p_interrupt(i32 pid) {
-  // interrupt occurs every time the quantum time goes to 0
-  process *p = find_p(pid);
+void p_interrupt(u32 pid) {
+  // interrupt occurs every time the process quantum time goes to 0
+  process *p = p_find(pid);
 
   p->time_to_run = QUANTUM_TIME;
 }
