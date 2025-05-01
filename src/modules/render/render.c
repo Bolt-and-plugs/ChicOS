@@ -16,7 +16,7 @@ void handle_resize(int sig) { resized = 1; }
 void bootstrap_ui() {
   sem_init(&app.rdr.renderer_s, 0, 1);
   app.rdr.active = true;
-  app.rdr.output_buff = alloc(4096);
+  app.rdr.output_buff = c_alloc(4096);
   strcpy(app.rdr.output_buff, "init");
   setlocale(LC_ALL, "");
   initscr();
@@ -50,7 +50,7 @@ void clear_renderer() {
     delwin(goodbye);
   }
   endwin();
-  dealloc(app.rdr.output_buff);
+  c_dealloc(app.rdr.output_buff);
   app.rdr.active = false;
 }
 

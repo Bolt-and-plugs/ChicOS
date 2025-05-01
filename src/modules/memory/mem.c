@@ -61,7 +61,7 @@ void clear_mem() {
   c_info("%d sB deallocated", mem);
 }
 
-void *alloc(u32 bytes) {
+void *c_alloc(u32 bytes) {
   if (bytes == 0)
     return NULL;
 
@@ -106,6 +106,7 @@ void *alloc(u32 bytes) {
     return NULL;
   }
 
+  c_debug(MEM_STATUS, "Allocated %d pages for %d bytes", num_pages, bytes);
   return (void *)(char *)ptr + sizeof(alloc_header);
 }
 
@@ -115,7 +116,7 @@ void push_free_stack(u32 i) {
   }
 }
 
-void dealloc(void *mem) {
+void c_dealloc(void *mem) {
   sem_wait(&app.mem->memory_s);
   if (!mem) {
     c_error(MEM_DEALLOC_FAIL,
@@ -152,3 +153,8 @@ void print_page_table_status() {
       c_info("%d %d", i, app.mem->pt.pages[i].id);
   }
 }
+
+void memory_load_finish(void *dest) {}
+
+void memory_load_req(void *dest, u32 bytes) {}
+

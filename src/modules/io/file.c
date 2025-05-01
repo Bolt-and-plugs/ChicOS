@@ -3,7 +3,7 @@
 #include "../memory/mem.h"
 
 void read_header(file_buffer *fb) {
-  file_header *header = alloc(sizeof(file_header));
+  file_header *header = c_alloc(sizeof(file_header));
   char c;
   int i = 0;
   char aux[256];
@@ -55,7 +55,7 @@ i32 counting_io_operations(file_buffer *fb) {
 }
 
 file_buffer *open_file(const char *address) {
-  file_buffer *fb = alloc(sizeof(file_buffer));
+  file_buffer *fb = c_alloc(sizeof(file_buffer));
 
   if (!address || strlen(address) >= MAX_ADDRESS_SIZE) {
     c_error(INVALID_INPUT, "address is bigger than max address or is missing");
@@ -78,6 +78,6 @@ file_buffer *open_file(const char *address) {
 void close_file(file_buffer *fb) {
   if (fb->fp)
     fclose(fb->fp);
-  dealloc(fb->h);
-  dealloc(fb);
+  c_dealloc(fb->h);
+  c_dealloc(fb);
 }

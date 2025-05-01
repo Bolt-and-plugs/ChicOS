@@ -93,7 +93,7 @@ user *read_login_data(const user *u) {
     return NULL;
   }
 
-  user *local = alloc(sizeof(user));
+  user *local = c_alloc(sizeof(user));
   char line[MAX_LINE_LENGTH];
   int fields_found = 0;
 
@@ -113,7 +113,7 @@ user *read_login_data(const user *u) {
   // Validation
   if (fields_found != 2) {
     log_event("INVALID_FILE_FORMAT", u->username);
-    dealloc(local);
+    c_dealloc(local);
     return NULL;
   }
 
@@ -136,6 +136,6 @@ user *read_login_data(const user *u) {
   }
 
   log_event("LOGIN_FAIL", u->username);
-  dealloc(local);
+  c_dealloc(local);
   return NULL;
 }

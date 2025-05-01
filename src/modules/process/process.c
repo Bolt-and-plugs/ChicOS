@@ -14,7 +14,7 @@ void clear_pcb(void) {
   for (int i = 0; i < MAX_PCB; i++) {
     process *p = &app.pcb.process_stack[i];
     if (p->address_space) {
-      dealloc(p->address_space);
+      c_dealloc(p->address_space);
     }
   }
 }
@@ -41,7 +41,7 @@ u32 p_create(char *address) {
   process p = {.pid = app.cpu.quantum_time,
                .status = NEW,
                .address_space =
-                   alloc(KB - (u32)sizeof(process) - (u32)sizeof(file_buffer)),
+                   c_alloc(KB - (u32)sizeof(process) - (u32)sizeof(file_buffer)),
                .time_to_run = TIME_SLICE};
 
   strcpy(p.name, name);
@@ -99,7 +99,7 @@ void p_kill(u32 pid) {
   }
 
   if (p->address_space)
-    dealloc(p->address_space);
+    c_dealloc(p->address_space);
 }
 
 void p_interrupt(u32 pid) {

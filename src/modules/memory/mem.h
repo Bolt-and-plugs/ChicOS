@@ -45,11 +45,11 @@ void init_mem(u32 mem_size);
 
 void clear_mem();
 
-void *alloc(u32 bytes);
+void *c_alloc(u32 bytes);
 
 alloc_header *get_header(void *ptr);
 
-void dealloc(void *mem);
+void c_dealloc(void *mem);
 
 void push_free_stack(u32 i);
 
@@ -58,5 +58,9 @@ void print_page_table_status();
 float retrieve_free_mem_percentage(void);
 
 float retrieve_used_mem_percentage(void);
+
+void memory_load_finish(void *dest);
+
+void memory_load_req(void *dest, u32 bytes);
 
 #endif

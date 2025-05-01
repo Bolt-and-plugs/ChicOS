@@ -20,7 +20,6 @@ void cpu_loop() {
 
     app.cpu.quantum_time++;
 
-    void *ptr = alloc(16);
     // process *p = schedduler_thing
     // save process here
     // exec_file()
