@@ -2,6 +2,7 @@
 #define _LOG
 
 #include "../../defines.h"
+#include "ncurses.h"
 #include <stdarg.h>
 
 typedef enum { DEBUG, INFO, WARN, ERROR, CRIT_ERROR } log_level;
@@ -12,6 +13,7 @@ typedef enum { DEBUG, INFO, WARN, ERROR, CRIT_ERROR } log_level;
 typedef enum {
   SCHEDULER_PROCESS_OUT_OF_BOUNDS = 000,
   DEFAULT_STATUS = -100,
+  PROCESS_STATUS = 100,
   PROCESS_OUT_OF_LIST = 101,
   PROCESS_CREATION_ERROR = 102,
   PROCESS_DELETION_ERROR = 103,
@@ -38,6 +40,9 @@ typedef enum {
 // defining correct macros for logging
 #define c_crit_error(s, ...)                                                   \
   c_log(CRIT_ERROR, s, ##__VA_ARGS__, NULL);                                   \
+  clear();                                                                     \
+  refresh();                                                                   \
+  endwin();                                                                    \
   exit(1);
 #define c_error(s, ...) c_log(ERROR, s, ##__VA_ARGS__, NULL)
 #define c_warn(s, ...) c_log(WARN, s, ##__VA_ARGS__, NULL)

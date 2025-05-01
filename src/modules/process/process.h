@@ -19,8 +19,8 @@ typedef enum {
 } p_status;
 
 typedef struct __process {
+  char name[MAX_ADDRESS_SIZE];
   u32 pid;
-  char *name;
   p_status status;
   u32 time_to_run;
 
@@ -35,7 +35,7 @@ typedef struct __process {
 typedef struct __PCB {
   process process_stack[MAX_PCB];
   u8 curr;
-  i8 last;
+  u8 last;
 } PCB;
 
 void init_pcb(void);

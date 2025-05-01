@@ -12,46 +12,42 @@
 extern App app;
 
 void cpu_loop() {
-  u64 local_quantum_time = 0;
   while (!app.loop_stop) {
-    if (local_quantum_time == UINT64_MAX - 1)
-      local_quantum_time = 0;
-    local_quantum_time++;
-    if (local_quantum_time % 500 == 0) {
-      app.cpu.quantum_time++;
+    sleep(1);
+    app.cpu.quantum_time++;
+    c_info("%d", app.cpu.quantum_time);
+    if (app.cpu.quantum_time == 2) {
+      sys_call(process_create, "resources/sint2", NULL);
     }
-    if (app.cpu.quantum_time == 5) {
-      sys_call(process_finish, "ok");
-    }
-    usleep(1000);
   }
 }
 
 void *init_cpu(void *arg) {
   app.cpu.quantum_time = 0;
-  cpu_loop();
   sem_init(&app.cpu.cpu_s, 0, 1);
+  cpu_loop();
   return NULL;
 }
 
 void sys_call(events e, const char *str, ...) {
-  c_info(str);
+  sem_wait(&app.cpu.cpu_s);
   char buffer[4096];
   va_list arg_list;
   va_start(arg_list, str);
-  vsnprintf(buffer, sizeof(str), str, arg_list);
+  vsprintf(buffer, str, arg_list);
   va_end(arg_list);
 
-  c_info(buffer);
-
+  int pid;
+  char tralalero_tralala[MAX_ADDRESS_SIZE];
   switch ((u8)e) {
   case process_interrupt:
     p_interrupt(*(int *)buffer);
     break;
   case process_create:
-    p_create(buffer);
+    strcpy(tralalero_tralala, buffer);
+    pid = p_create((char *)tralalero_tralala);
     break;
-  case process_finish:
+  case process_kill:
     p_kill(*(int *)(buffer));
     break;
   case mem_load_req:
@@ -65,6 +61,7 @@ void sys_call(events e, const char *str, ...) {
     semaphoreV((sem_t *)buffer);
     break;
   }
+  sem_post(&app.cpu.cpu_s);
 }
 
 void exec_program(file_buffer *sint, process *sint_process) {

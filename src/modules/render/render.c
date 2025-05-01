@@ -15,6 +15,7 @@ void handle_resize(int sig) { resized = 1; }
 // Initialize curses modes
 void bootstrap_ui() {
   sem_init(&app.rdr.renderer_s, 0, 1);
+  app.rdr.active = true;
   app.rdr.output_buff = alloc(4096);
   strcpy(app.rdr.output_buff, "init");
   setlocale(LC_ALL, "");
@@ -36,7 +37,6 @@ WINDOW *create_newwin(int h, int w, int y, int x) {
   return win;
 }
 
-// Show goodbye and cleanup
 void clear_renderer() {
   delwin(app.rdr.status_win);
   delwin(app.rdr.left_panel);
@@ -51,9 +51,9 @@ void clear_renderer() {
   }
   endwin();
   dealloc(app.rdr.output_buff);
+  app.rdr.active = false;
 }
 
-// Draw status bar
 void status_bar() {
   WINDOW *s = app.rdr.status_win;
   werase(s);
@@ -62,17 +62,17 @@ void status_bar() {
   wrefresh(s);
 }
 
-// Rendering panels
 void render_left_panel() {
-  WINDOW *p = app.rdr.left_panel;
-  werase(p);
-  box(p, 0, 0);
-  mvwprintw(p, 1, 1, "CPU - quantum time: %ld", app.cpu.quantum_time);
+  werase(app.rdr.left_panel);
+  box(app.rdr.left_panel, 0, 0);
+  mvwprintw(app.rdr.left_panel, 1, 1, "CPU - quantum time: %ld",
+            app.cpu.quantum_time);
 
   if (strcmp(app.rdr.output_buff, "init") != 0) {
-    mvwprintw(p, 2, 1, app.rdr.output_buff);
+    mvwprintw(app.rdr.left_panel, 2, 1, app.rdr.output_buff);
+    strcpy(app.rdr.output_buff, "init");
   }
-  wrefresh(p);
+  wrefresh(app.rdr.left_panel);
 }
 
 void render_right_top_panel() {
@@ -126,9 +126,8 @@ void render_loop() {
       resized = 0;
       endwin();
       refresh();
-      // reinitialize UI
       bootstrap_ui();
-      clear_renderer(); // cleans windows only
+      clear_renderer();
       init_renderer();
     }
     status_bar();
@@ -183,7 +182,6 @@ user get_credentials(WINDOW *win) {
   return login;
 }
 
-// Login loop: retry bad password
 user *login_flow() {
   WINDOW *w = create_newwin(LINES - 1, COLS - 1, 0, 0);
   user login = {0};
@@ -202,10 +200,9 @@ user *login_flow() {
     retrieve_addr(&login, addr, sizeof(addr));
 
     bool file_exists = (access(addr, F_OK) == 0);
-    usr = read_login_data(&login); // Try to read user data
+    usr = read_login_data(&login);
 
     if (!file_exists) {
-      // New user: create file and read back
       mvwprintw(w, 2, 2, "User does not exist. Creating one...");
       wrefresh(w);
       write_login_data(&login);
@@ -214,10 +211,10 @@ user *login_flow() {
       wrefresh(w);
 
       if (usr) {
-        logged_in = true; // Successfully created and logged in
+        logged_in = true;
         mvwprintw(w, 3, 2, "Welcome, %s!", usr->username);
         wrefresh(w);
-        napms(2000); // Short pause to show message
+        napms(2000);
       } else {
         mvwprintw(w, 3, 2, "Error creating user!");
         wrefresh(w);
@@ -248,11 +245,10 @@ void render_log(const char *statement) {
   sem_post(&app.rdr.renderer_s);
 }
 
-// Entry: init curses, login, dashboard
 void *init_render(void *arg) {
   bootstrap_ui();
   // app.user = login_flow();
-  //  if (!app.user) return NULL;
+  // if (!app.user) return NULL;
   init_renderer();
   render_loop();
   clear_renderer();
