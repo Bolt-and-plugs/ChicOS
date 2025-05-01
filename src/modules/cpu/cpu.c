@@ -19,6 +19,10 @@ void cpu_loop() {
       sleep(1);
 
     app.cpu.quantum_time++;
+
+    // process *p = schedduler_thing
+    // save process here
+    // exec_file()
   }
 }
 
@@ -75,7 +79,7 @@ void exec_program(file_buffer *sint, process *sint_process) {
   for (int i = 0; i < 6; i++)
     fgets(aux, sizeof(aux), sint->fp);
 
-  while (!feof(sint->fp)) {
+  while (!feof(sint->fp)) { // run until current time slice ends
     fgets(aux, sizeof(aux), sint->fp);
     command = strtok(aux, " ");
     if (strcmp(command, "exec") == 0) {
