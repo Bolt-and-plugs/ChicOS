@@ -76,8 +76,8 @@ void *alloc(u32 bytes) {
   }
 
   void *ptr = NULL;
-  bool contiguos_region = true;
   for (int i = 0; i < app.mem->pt.len; i++) {
+    bool contiguos_region = true;
     if (i + num_pages >= app.mem->pt.len)
       break;
     for (int j = i; j < i + num_pages; j++) {
@@ -88,7 +88,7 @@ void *alloc(u32 bytes) {
     if (!contiguos_region)
       continue;
     if (contiguos_region) {
-      ptr = &app.mem->pool[i];
+      ptr = (void*)((char *)app.mem->pool + (i * PAGE_SIZE));
       app.mem->pt.free_page_num -= num_pages;
       for (int j = i; j < i + num_pages; j++) {
         app.mem->pt.pages[j].free = false;
