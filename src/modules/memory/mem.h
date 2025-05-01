@@ -28,6 +28,7 @@ typedef struct __memory {
   sem_t memory_s;
   page_table pt;
   void *pool;
+  u32 size;
 } memory;
 
 typedef struct __alloc_header {

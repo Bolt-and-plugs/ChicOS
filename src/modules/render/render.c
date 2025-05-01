@@ -239,10 +239,10 @@ user *login_flow() {
 }
 
 void render_log(const char *statement) {
-  sem_wait(&app.rdr.renderer_s);
+  semaphoreP(&app.rdr.renderer_s);
   napms(100);
   strcpy(app.rdr.output_buff, statement);
-  sem_post(&app.rdr.renderer_s);
+  semaphoreV(&app.rdr.renderer_s);
 }
 
 void *init_render(void *arg) {

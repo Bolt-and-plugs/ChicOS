@@ -34,7 +34,7 @@ void *init_cpu(void *arg) {
 }
 
 void sys_call(events e, const char *str, ...) {
-  sem_wait(&app.cpu.cpu_s);
+  semaphoreP(&app.cpu.cpu_s);
   char buffer[4096];
   va_list arg_list;
   va_start(arg_list, str);
@@ -65,7 +65,7 @@ void sys_call(events e, const char *str, ...) {
     semaphoreV((sem_t *)buffer);
     break;
   }
-  sem_post(&app.cpu.cpu_s);
+  semaphoreV(&app.cpu.cpu_s);
 }
 
 void exec_program(file_buffer *sint, process *sint_process) {
