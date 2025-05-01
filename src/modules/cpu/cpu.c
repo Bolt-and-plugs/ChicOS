@@ -21,8 +21,6 @@ void cpu_loop() {
     app.cpu.quantum_time++;
 
     void *ptr = alloc(16);
-    print_page_table_status();
-    dealloc(ptr);
     // process *p = schedduler_thing
     // save process here
     // exec_file()

@@ -3,9 +3,9 @@
 
 #include "defines.h"
 #include "modules/cpu/cpu.h"
+#include "modules/log/log.h"
 #include "modules/memory/mem.h"
 #include "modules/process/process.h"
-#include "modules/log/log.h"
 #include "modules/render/render.h"
 #include "modules/user/user.h"
 

@@ -30,7 +30,6 @@ void init_app(int mem_size, bool should_render) {
   signal(SIGINT, handle_signal);
 
   void *ptr = alloc(256);
-  print_page_table_status();
 
   if (pthread_create(&app.cpu.cpu_t, NULL, init_cpu, NULL) != 0) {
     c_crit_error(THREAD_INIT_ERROR, "Failed to create CPU thread");
