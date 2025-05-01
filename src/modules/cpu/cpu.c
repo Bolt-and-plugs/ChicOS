@@ -39,7 +39,7 @@ void sys_call(events e, const char *str, ...) {
   char buffer[4096];
   va_list arg_list;
   va_start(arg_list, str);
-  vsprintf(buffer, str, arg_list);
+  vsnprintf(buffer, sizeof(str), str, arg_list);
   va_end(arg_list);
 
   c_info(buffer);

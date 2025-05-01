@@ -29,16 +29,18 @@ void init_app(int mem_size) {
 
   signal(SIGINT, handle_signal);
 
-  //if (pthread_create(&app.mem->render_t, NULL, init_render, NULL) != 0) { c_crit_error(THREAD_INIT_ERROR ,"Failed to create render thread"); }
+  if (pthread_create(&app.mem->render_t, NULL, init_render, NULL) != 0) {
+    c_crit_error(THREAD_INIT_ERROR, "Failed to create render thread");
+  }
 
   if (pthread_create(&app.cpu.cpu_t, NULL, init_cpu, NULL) != 0) {
-    c_crit_error(THREAD_INIT_ERROR ,"Failed to create CPU thread");
+    c_crit_error(THREAD_INIT_ERROR, "Failed to create CPU thread");
   }
 }
 
 void clear_app() {
   pthread_join(app.cpu.cpu_t, NULL);
-  //pthread_join(app.mem->render_t, NULL);
+  pthread_join(app.mem->render_t, NULL);
   clear_pcb();
   clear_mem();
   dealloc(app.user);
