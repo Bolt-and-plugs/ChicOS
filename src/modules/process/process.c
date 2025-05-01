@@ -66,7 +66,8 @@ void log_process(u32 pid) {
   }
 
   char res[256];
-  snprintf(res, 255, "process: %s\npid: %d\n", p.name, p.pid);
+  snprintf(res, 255, "process: %s\npid: %d\nrw_count: %d\n", p.name, p.pid,
+           p.fb->h->rw_count);
   c_info(res);
 }
 

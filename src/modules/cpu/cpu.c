@@ -13,12 +13,12 @@ extern App app;
 
 void cpu_loop() {
   while (!app.loop_stop) {
-    sleep(1);
+    if(app.debug)
+      usleep(100000);
+    else
+      sleep(1);
+
     app.cpu.quantum_time++;
-    c_info("%d", app.cpu.quantum_time);
-    if (app.cpu.quantum_time == 2) {
-      sys_call(process_create, "resources/sint2", NULL);
-    }
   }
 }
 
@@ -38,14 +38,14 @@ void sys_call(events e, const char *str, ...) {
   va_end(arg_list);
 
   int pid;
-  char tralalero_tralala[MAX_ADDRESS_SIZE];
+  process *p;
   switch ((u8)e) {
   case process_interrupt:
     p_interrupt(*(int *)buffer);
     break;
   case process_create:
-    strcpy(tralalero_tralala, buffer);
-    pid = p_create((char *)tralalero_tralala);
+    pid = p_create((char *)buffer);
+    log_process(pid);
     break;
   case process_kill:
     p_kill(*(int *)(buffer));
