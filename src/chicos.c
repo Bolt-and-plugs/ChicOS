@@ -33,10 +33,16 @@ void init_app(int mem_size, bool should_render) {
     c_crit_error(THREAD_INIT_ERROR, "Failed to create CPU thread");
   }
 
+
+  if (pthread_create(&app.disk.disk_t, NULL, init_disk, NULL) != 0) {
+    c_crit_error(THREAD_INIT_ERROR, "Failed to create DISK thread");
+  }
+
   if (!should_render) {
     c_info("Disabled UI");
     return;
   }
+
   if (pthread_create(&app.mem->render_t, NULL, init_render, NULL) != 0) {
     c_crit_error(THREAD_INIT_ERROR, "Failed to create render thread");
   }
@@ -44,10 +50,9 @@ void init_app(int mem_size, bool should_render) {
 
 void clear_app(bool should_render) {
   pthread_join(app.cpu.cpu_t, NULL);
-
-  if (!should_render)
-    return;
-  pthread_join(app.mem->render_t, NULL);
+  pthread_join(app.disk.disk_t, NULL);
+  if (should_render)
+    pthread_join(app.mem->render_t, NULL);
   clear_pcb();
   clear_mem();
 }

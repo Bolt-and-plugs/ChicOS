@@ -38,6 +38,8 @@ void cpu_loop();
 
 void sys_call(events e, const char *str, ...);
 
+void interrupt_control(events e, const char *str, ...);
+
 void exec_program(process *sint_process);
 
 #endif

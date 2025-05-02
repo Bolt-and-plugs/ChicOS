@@ -33,22 +33,20 @@ u32 p_create(char *address) {
   }
   name = strtok(ret, ".");
 
-  if (app.pcb.curr == MAX_PCB - 1) {
-    c_error(PROCESS_CREATION_ERROR, "teste maroto fera");
+  if (app.pcb.curr >= MAX_PCB - 1) {
+    c_error(PROCESS_CREATION_ERROR, "PCB is full");
     return -1;
   }
 
   process p = {.pid = app.cpu.quantum_time,
                .status = NEW,
-               .address_space =
-                   c_alloc(KB - (u32)sizeof(process) - (u32)sizeof(file_buffer)),
+               .address_space = c_alloc(KB),
                .time_to_run = TIME_SLICE};
 
   strcpy(p.name, name);
   p.fb = open_file(addr);
 
-  app.pcb.process_stack[app.pcb.curr] = p;
-  app.pcb.curr++;
+  app.pcb.process_stack[app.pcb.curr++] = p;
   return p.pid;
 }
 
@@ -107,4 +105,14 @@ void p_interrupt(u32 pid) {
   process *p = p_find(pid);
 
   p->time_to_run = QUANTUM_TIME;
+}
+
+void p_block(u32 pid) {
+  process *p = p_find(pid);
+  p->status = BLOCKED;
+}
+
+void p_unblock(u32 pid) {
+  process *p = p_find(pid);
+  p->status = READY;
 }
