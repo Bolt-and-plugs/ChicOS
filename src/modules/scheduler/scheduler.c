@@ -49,9 +49,13 @@ process *pop_process() {
 
 void scheduler_no_running() {
   for (int i = 1; i < MAX_PCB; i++) {
+    if (!app.pcb.process_stack[i]) {
+      app.pcb.last = i - 1;
+      break;
+    }
+    
     if (app.pcb.process_stack[i].status == RUNNING) {
       c_info("proccess %s (%d) was running and is now ready\n", app.pcb.process_stack->name, i);
-      app.pcb.last = i;// ?????
       app.pcb.process_stack[i] = READY;
     }
   }
@@ -66,6 +70,11 @@ process *scheduler_get_process() {
   }
 
   for (int i = 1; i < MAX_PCB; i++) {
+    if (!app.pcb.process_stack[i]) {
+      app.pcb.last = i - 1;
+      break;
+    }
+    
     if (p->fb->h->rw_count < app.pcb.process_stack[i]) {
       app.pcb.curr = i; // ????????
       p = &app.pcb.process_stack[i];
