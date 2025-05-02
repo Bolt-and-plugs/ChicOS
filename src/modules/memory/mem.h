@@ -67,6 +67,6 @@ void memory_load_finish(void *dest);
 
 void memory_load_req(void *dest, u32 bytes);
 
-int second_chance_page_replacement();
+int second_chance();
 
 #endif
