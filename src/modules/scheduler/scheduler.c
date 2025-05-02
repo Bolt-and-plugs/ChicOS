@@ -79,15 +79,18 @@ process *scheduler_get_process() {
     c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "acabou pro beta");
     return NULL;
   }
-
   for (int i = 1; i < MAX_PCB; i++) {
+
     if (!is_mem_free(app.pcb.process_stack[i].address_space)) {
       app.pcb.last = i - 1;
       break;
     }
 
+    if (app.pcb.process_stack[i].status == BLOCKED)
+      continue;
+
     if (p->fb->h->rw_count < app.pcb.process_stack[i].fb->h->rw_count) {
-      app.pcb.curr = i; // ????????
+      app.pcb.curr = (u8) i;
       p = &app.pcb.process_stack[i];
     }
   }

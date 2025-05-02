@@ -10,7 +10,7 @@ typedef struct __semaphore {
 } semaphore;
 
 typedef struct __semaphore_list {
-  semaphore l[];
+  semaphore *l;
 } semaphore_list;
 
 void semaphoreP(sem_t *s);
