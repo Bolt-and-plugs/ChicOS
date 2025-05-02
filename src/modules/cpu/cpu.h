@@ -2,6 +2,9 @@
 #define _CPU
 
 #include "../../defines.h"
+#include "../io/file.h"
+#include "../process/process.h"
+#include "../scheduler/scheduler.h"
 #include "../semaphore/semaphore.h"
 
 #define TIME_SLICE 10
@@ -34,5 +37,7 @@ void *init_cpu(void *arg);
 void cpu_loop();
 
 void sys_call(events e, const char *str, ...);
+
+void exec_program(process *sint_process);
 
 #endif

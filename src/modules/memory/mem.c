@@ -156,7 +156,24 @@ void print_page_table_status() {
       c_info("%d %d", i, app.mem->pt.pages[i].id);
   }
 }
+ 
+void memory_load_req(void *dest, u32 bytes) { dest = c_alloc(bytes); } // TODO save ptr into process 
 
-void memory_load_finish(void *dest) {}
+void memory_load_finish(void *dest) { c_dealloc(dest); } 
 
-void memory_load_req(void *dest, u32 bytes) {}
+bool is_mem_free(void *ptr) {
+  if (!ptr)
+    return true;
+
+  alloc_header *h_ptr = get_header(ptr);
+  bool is_free = true;
+  for (int i = 0; i < h_ptr->page_num; i++) {
+    page *p = (page *)(char *)app.mem->pool + (i * PAGE_SIZE);
+    if (!p->free) {
+      is_free = false;
+      break;
+    }
+  }
+
+  return is_free;
+}

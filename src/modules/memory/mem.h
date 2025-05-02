@@ -56,6 +56,8 @@ void push_free_stack(u32 i);
 
 void print_page_table_status();
 
+bool is_mem_free(void *ptr);
+
 float retrieve_free_mem_percentage(void);
 
 float retrieve_used_mem_percentage(void);

@@ -2,8 +2,7 @@
 #include "../../chicos.h"
 #include "../io/file.h"
 #include "../log/log.h"
-#include "../process/process.h"
-#include "../semaphore/semaphore.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -15,18 +14,16 @@ void cpu_loop() {
   process *running_process;
 
   while (!app.loop_stop) {
-    if(app.debug)
-    usleep(1000000);
+    if (app.debug)
+      usleep(1000000);
     else
-    sleep(1);
-    
+      sleep(1);
+
     app.cpu.quantum_time++;
-    
     scheduler_no_running();
     running_process = scheduler_get_process();
-    
-    // save process here
-    // exec_file()
+    if (running_process)
+      exec_program(running_process);
   }
 }
 
@@ -72,19 +69,19 @@ void sys_call(events e, const char *str, ...) {
   semaphoreV(&app.cpu.cpu_s);
 }
 
-void exec_program(file_buffer *sint, process *sint_process) {
+void exec_program(process *sint_process) {
   char *semaphore, *command, aux[16];
   int time;
-  if (sint->fp == NULL) {
+  if (sint_process->fb->fp == NULL) {
     c_error(DISK_OPEN_ERROR, "File not open properly!");
     return;
   }
 
   for (int i = 0; i < 6; i++)
-    fgets(aux, sizeof(aux), sint->fp);
+    fgets(aux, sizeof(aux), sint_process->fb->fp);
 
-  while (!feof(sint->fp)) { // run until current time slice ends
-    fgets(aux, sizeof(aux), sint->fp);
+  while (!feof((sint_process->fb->fp)) || sint_process->time_to_run <= 0) {
+    fgets(aux, sizeof(aux), sint_process->fb->fp);
     command = strtok(aux, " ");
     if (strcmp(command, "exec") == 0) {
       time = atoi(strtok(NULL, " "));
@@ -108,5 +105,13 @@ void exec_program(file_buffer *sint, process *sint_process) {
     } else {
       c_error(DISK_FILE_READ_ERROR, "Found invalid command!");
     }
+    sint_process->time_to_run--;
   }
+
+  // kill or interrupt process
+  if (feof((sint_process->fb->fp)))
+    sys_call(process_kill, "%d", sint_process->pid);
+
+  if (sint_process->time_to_run <= 0)
+    sys_call(process_interrupt, "%d", sint_process->pid);
 }
