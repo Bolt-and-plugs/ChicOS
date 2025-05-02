@@ -13,6 +13,7 @@ typedef struct __page {
   int id;
   void *p;
   bool free;
+  bool used;
 } page;
 
 typedef struct __page_table {
@@ -65,5 +66,7 @@ float retrieve_used_mem_percentage(void);
 void memory_load_finish(void *dest);
 
 void memory_load_req(void *dest, u32 bytes);
+
+int second_chance_page_replacement();
 
 #endif

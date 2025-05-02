@@ -34,6 +34,7 @@ void init_mem(u32 mem_size) {
     mem->pt.pages[i].id = i;
     mem->pt.pages[i].p = memory_pool + (i * PAGE_SIZE);
     mem->pt.pages[i].free = true;
+    mem->pt.pages[i].used = false;
     push_free_stack(i);
   }
 
@@ -71,10 +72,20 @@ void *c_alloc(u32 bytes) {
   u32 num_pages = (bytes + sizeof(alloc_header) + PAGE_SIZE - 1) / PAGE_SIZE;
 
   if (num_pages > app.mem->pt.free_page_num || num_pages > app.mem->pt.len) {
-    c_error(MEM_FULL, "Memory would overload when allocating %d pages",
-            num_pages);
+    // **NOVO**: Tentar liberar páginas usando o algoritmo de substituição
+    int not_used_page = second_chance();
+    if (not_used_page == -1) {
+      c_error(MEM_FULL, "Memory full even after page replacement!");
+      semaphoreV(&app.mem->memory_s);
+      return NULL;
+    }
+
+    // **NOVO**: Marcar a página substituída como livre
+    app.mem->pt.pages[not_used_page].free = true;
+    app.mem->pt.free_page_num++;
+    push_free_stack(not_used_page);
+    
     semaphoreV(&app.mem->memory_s);
-    return NULL;
   }
 
   void *ptr = NULL;
@@ -94,6 +105,7 @@ void *c_alloc(u32 bytes) {
       app.mem->pt.free_page_num -= num_pages;
       for (int j = i; j < i + num_pages; j++) {
         app.mem->pt.pages[j].free = false;
+        app.mem->pt.pages[j].used = true;
       }
       alloc_header *h_ptr = ptr;
       h_ptr->id = i;
@@ -176,4 +188,21 @@ bool is_mem_free(void *ptr) {
   }
 
   return is_free;
+}
+
+int second_place(){
+  static int i = 0; // Variável estática marcando o ínicio da lista circular
+  int curr =  i;  
+
+  do { 
+    page *p = &app.mem->pt.pages[curr]; 
+    if (!(p->used)){
+      p->used = false; // Usa a  segunda chance da página
+      return (i = (curr + 1) % app.mem->pt.len); // Retorna o índice da página a ser substituída e atualiza o ínicio da lista    }
+    } 
+    p->used = false; 
+    curr = (curr + 1) % app.mem->pt.len; // Atualiza o valor da curr para a próxima página
+  } while (curr != i-1 ); // Continua até voltar ao início da lista
+    i = (curr + 1) % app.mem->pt.len;
+    return -1;
 }
