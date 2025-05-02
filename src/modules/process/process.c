@@ -65,8 +65,24 @@ void log_process(u32 pid) {
   }
 
   char res[256];
-  snprintf(res, 255, "process: %s\npid: %d\nrw_count: %d\n", p.name, p.pid,
-           p.fb->h->rw_count);
+  char status[10];
+
+  switch ((int)p.status) {
+  case RUNNING:
+    strcpy(status, "RUNNING");
+    break;
+  case BLOCKED:
+    strcpy(status, "BLOCKED");
+    break;
+  case NEW:
+    strcpy(status, "NEW");
+    break;
+  case READY:
+    strcpy(status, "READY");
+    break;
+  }
+  snprintf(res, 255, "process: %s\npid: %d\nstatus %s\nrw_count: %d\n", p.name,
+           p.pid, status, p.fb->h->rw_count);
   c_info(res);
 }
 
@@ -81,7 +97,7 @@ process *p_find(u32 pid) {
   }
 
   if (p == NULL) {
-    c_error(PROCESS_OUT_OF_LIST, "Proccess out of reach");
+    c_error(PROCESS_OUT_OF_LIST, "Process out of reach");
     return NULL;
   }
 
@@ -91,8 +107,9 @@ process *p_find(u32 pid) {
 void p_kill(u32 pid) {
   // to kill the process: free the memory allocated to it
   process *p = p_find(pid);
+
   if (!p) {
-    c_error(PROCESS_OUT_OF_LIST, "Could not find process");
+    c_error(PROCESS_OUT_OF_LIST, "Could not find process to kill");
     return;
   }
 

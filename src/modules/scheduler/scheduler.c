@@ -73,29 +73,28 @@ process *scheduler_get_process() {
     return NULL;
   }
 
-  process *p = &app.pcb.process_stack[0];
+  process *selected = NULL;
 
-  if (!p) {
-    c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "acabou pro beta");
-    return NULL;
-  }
-  for (int i = 1; i < MAX_PCB; i++) {
+  for (int i = 0; i < MAX_PCB; i++) {
+    process *candidate = &app.pcb.process_stack[i];
 
-    if (!is_mem_free(app.pcb.process_stack[i].address_space)) {
-      app.pcb.last = i - 1;
-      break;
-    }
-
-    if (app.pcb.process_stack[i].status == BLOCKED)
+    if (!candidate->address_space || is_mem_free(candidate->address_space))
       continue;
 
-    if (p->fb->h->rw_count < app.pcb.process_stack[i].fb->h->rw_count) {
-      app.pcb.curr = (u8) i;
-      p = &app.pcb.process_stack[i];
+    if (candidate->status == BLOCKED)
+      continue;
+
+    if (!selected || candidate->fb->h->rw_count > selected->fb->h->rw_count) {
+      selected = candidate;
+      app.pcb.curr = (u8)i;
     }
   }
 
-  p->status = RUNNING;
+  if (!selected) {
+    c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "No runnable process found");
+    return NULL;
+  }
 
-  return p;
+  selected->status = RUNNING;
+  return selected;
 }

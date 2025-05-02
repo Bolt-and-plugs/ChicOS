@@ -82,7 +82,7 @@ void *c_alloc(u32 bytes) {
     app.mem->pt.pages[not_used_page].free = true;
     app.mem->pt.free_page_num++;
     push_free_stack(not_used_page);
-    
+
     semaphoreV(&app.mem->memory_s);
   }
 
@@ -166,14 +166,18 @@ void print_page_table_status() {
       c_info("%d %d", i, app.mem->pt.pages[i].id);
   }
 }
- 
-void memory_load_req(void *dest, u32 bytes) { dest = c_alloc(bytes); } // TODO save ptr into process 
 
-void memory_load_finish(void *dest) { c_dealloc(dest); } 
+void memory_load_req(void *dest, u32 bytes) {
+  dest = c_alloc(bytes);
+} // TODO save ptr into process
+
+void memory_load_finish(void *dest) { c_dealloc(dest); }
 
 bool is_mem_free(void *ptr) {
   if (!ptr)
     return true;
+
+  sem_wait(&app.mem->memory_s);
 
   alloc_header *h_ptr = get_header(ptr);
   bool is_free = true;
@@ -184,23 +188,31 @@ bool is_mem_free(void *ptr) {
       break;
     }
   }
-
+  sem_post(&app.mem->memory_s);
   return is_free;
 }
 
-int second_chance(){
+int second_chance() {
   static int i = 0; // Variável estática marcando o ínicio da lista circular
-  int curr =  i;  
+  int curr = i;
 
-  do { 
-    page *p = &app.mem->pt.pages[curr]; 
-    if (!(p->used)){
+  sem_wait(&app.mem->memory_s);
+  do {
+    page *p = &app.mem->pt.pages[curr];
+    if (!(p->used)) {
       p->used = false; // Usa a  segunda chance da página
-      return (i = (curr + 1) % app.mem->pt.len); // Retorna o índice da página a ser substituída e atualiza o ínicio da lista    }
-    } 
-    p->used = false; 
-    curr = (curr + 1) % app.mem->pt.len; // Atualiza o valor da curr para a próxima página
-  } while (curr != i-1 ); // Continua até voltar ao início da lista
-    i = (curr + 1) % app.mem->pt.len;
-    return -1;
+      sem_post(&app.mem->memory_s);
+      return (
+          i = (curr + 1) %
+              app.mem->pt.len); // Retorna o índice da página a ser substituída
+                                // e atualiza o ínicio da lista    }
+    }
+    p->used = false;
+    curr = (curr + 1) %
+           app.mem->pt.len; // Atualiza o valor da curr para a próxima página
+  } while (curr != i - 1); // Continua até voltar ao início da lista
+  i = (curr + 1) % app.mem->pt.len;
+
+  sem_post(&app.mem->memory_s);
+  return -1;
 }

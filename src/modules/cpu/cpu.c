@@ -23,8 +23,10 @@ void cpu_loop() {
     app.cpu.quantum_time++;
     scheduler_no_running();
     running_process = scheduler_get_process();
-    if (running_process)
+    if (running_process) {
       exec_program(running_process);
+      log_process(running_process->pid);
+    }
 
     if (app.cpu.quantum_time == 2) {
       sys_call(process_create, "resources/sint2", NULL);
@@ -155,12 +157,17 @@ void exec_program(process *sint_process) {
       c_error(DISK_FILE_READ_ERROR, "Found invalid command!");
     }
     sint_process->time_to_run--;
+    return;
   }
 
   // kill or interrupt process
-  if (feof((sint_process->fb->fp)))
+  if (feof((sint_process->fb->fp))) {
     sys_call(process_kill, "%d", sint_process->pid);
+    return;
+  }
 
-  if (sint_process->time_to_run <= 0)
+  if (sint_process->time_to_run <= 0) {
     sys_call(process_interrupt, "%d", sint_process->pid);
+    return;
+  }
 }
