@@ -27,10 +27,6 @@ void cpu_loop() {
       exec_program(running_process);
       log_process(running_process->pid);
     }
-
-    if (app.cpu.quantum_time == 2) {
-      sys_call(process_create, "resources/sint2", NULL);
-    }
   }
 }
 
@@ -59,14 +55,14 @@ void sys_call(events e, const char *str, ...) {
     simulate_io(pid, time);
     break;
   case process_interrupt:
-    p_interrupt(*(u32 *)buffer);
+    p_interrupt(*(u32 *)(buffer) - '0');
     break;
   case process_create:
     pid = p_create((char *)buffer);
     log_process(pid);
     break;
   case process_kill:
-    p_kill(*(u32 *)(buffer));
+    p_kill(*(u32 *)(buffer) - '0');
     break;
   case mem_load_req:
     break;
