@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "../../chicos.h"
+#include "../io/disk.h"
 #include "../io/file.h"
 #include "../log/log.h"
 
@@ -24,6 +25,10 @@ void cpu_loop() {
     running_process = scheduler_get_process();
     if (running_process)
       exec_program(running_process);
+
+    if (app.cpu.quantum_time == 2) {
+      sys_call(process_create, "resources/sint2", NULL);
+    }
   }
 }
 
@@ -42,11 +47,55 @@ void sys_call(events e, const char *str, ...) {
   vsprintf(buffer, str, arg_list);
   va_end(arg_list);
 
+  u32 pid;
+  process *p;
+  switch ((u8)e) {
+  case disk_request:
+    p_block(*(u32 *)buffer);
+    u32 pid, time;
+    sscanf(buffer, "%d %d", &pid, &time);
+    simulate_io(pid, time);
+    break;
+  case process_interrupt:
+    p_interrupt(*(u32 *)buffer);
+    break;
+  case process_create:
+    pid = p_create((char *)buffer);
+    log_process(pid);
+    break;
+  case process_kill:
+    p_kill(*(u32 *)(buffer));
+    break;
+  case mem_load_req:
+    break;
+  case mem_load_finish:
+    break;
+  case semaphore_p:
+    semaphoreP((sem_t *)buffer);
+    break;
+  case semaphore_v:
+    semaphoreV((sem_t *)buffer);
+    break;
+  }
+  semaphoreV(&app.cpu.cpu_s);
+}
+
+void interrupt_control(events e, const char *str, ...) {
+  semaphoreP(&app.cpu.cpu_s);
+  char buffer[4096];
+  va_list arg_list;
+  va_start(arg_list, str);
+  vsprintf(buffer, str, arg_list);
+  va_end(arg_list);
+
   int pid;
   process *p;
   switch ((u8)e) {
+  case disk_finish:
+    p_unblock(*(u32 *)buffer);
+    break;
   case process_interrupt:
-    p_interrupt(*(int *)buffer);
+    p_interrupt(*(u32 *)buffer);
     break;
   case process_create:
     pid = p_create((char *)buffer);
@@ -71,7 +120,7 @@ void sys_call(events e, const char *str, ...) {
 
 void exec_program(process *sint_process) {
   char *semaphore, *command, aux[16];
-  int time;
+  u32 time;
   if (sint_process->fb->fp == NULL) {
     c_error(DISK_OPEN_ERROR, "File not open properly!");
     return;
@@ -90,11 +139,11 @@ void exec_program(process *sint_process) {
     } else if (strcmp(command, "write") == 0) {
       time = atoi(strtok(NULL, " "));
       printf("Writing on dik for %dms...", time);
-      sleep(time / 1000);
+      sys_call(disk_request, "%d", sint_process->pid);
     } else if (strcmp(command, "read") == 0) {
       time = atoi(strtok(NULL, " "));
-      printf("Reading on dik for %dms...", time);
-      sleep(time / 1000);
+      printf("Reading on disk for %dms...", time);
+      sys_call(disk_request, "%d", sint_process->pid);
     } else if (strcmp(command, "P") == 0) {
       semaphore = strtok(NULL, " ");
       printf("Acessing critical storage session stored by %s", semaphore);

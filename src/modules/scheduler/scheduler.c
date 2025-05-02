@@ -91,6 +91,7 @@ process *scheduler_get_process() {
       p = &app.pcb.process_stack[i];
     }
   }
+
   p->status = RUNNING;
 
   return p;
