@@ -35,6 +35,8 @@ void cpu_loop() {
 }
 
 void *init_cpu(void *arg) {
+  if(arg)
+    c_info(arg);
   app.cpu.quantum_time = 0;
   sem_init(&app.cpu.cpu_s, 0, 1);
   cpu_loop();
@@ -49,13 +51,11 @@ void sys_call(events e, const char *str, ...) {
   vsprintf(buffer, str, arg_list);
   va_end(arg_list);
 
-  u32 pid;
-  process *p;
+  u32 pid, time;
   switch ((u8)e) {
   case disk_request:
     p_block(*(u32 *)buffer);
-    u32 pid, time;
-    sscanf(buffer, "%d %d", &pid, &time);
+    sscanf(buffer, "%u %u", &pid, &time);
     simulate_io(pid, time);
     break;
   case process_interrupt:
@@ -91,7 +91,6 @@ void interrupt_control(events e, const char *str, ...) {
   va_end(arg_list);
 
   int pid;
-  process *p;
   switch ((u8)e) {
   case disk_finish:
     p_unblock(*(u32 *)buffer);
@@ -127,9 +126,6 @@ void exec_program(process *sint_process) {
     c_error(DISK_OPEN_ERROR, "File not open properly!");
     return;
   }
-
-  for (int i = 0; i < 6; i++)
-    fgets(aux, sizeof(aux), sint_process->fb->fp);
 
   while (!feof((sint_process->fb->fp)) || sint_process->time_to_run <= 0) {
     fgets(aux, sizeof(aux), sint_process->fb->fp);
