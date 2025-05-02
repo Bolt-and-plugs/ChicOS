@@ -12,15 +12,19 @@
 extern App app;
 
 void cpu_loop() {
+  process *running_process;
+
   while (!app.loop_stop) {
     if(app.debug)
-      usleep(1000000);
+    usleep(1000000);
     else
-      sleep(1);
-
+    sleep(1);
+    
     app.cpu.quantum_time++;
-
-    // process *p = schedduler_thing
+    
+    scheduler_no_running();
+    running_process = scheduler_get_process();
+    
     // save process here
     // exec_file()
   }

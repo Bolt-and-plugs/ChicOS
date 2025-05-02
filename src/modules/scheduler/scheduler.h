@@ -4,7 +4,7 @@
 #include "../process/process.h"
 #include "../../defines.h"
 
-void push_process(process *proc);
-process *pop_process();
+process *scheduler_get_process();
+void scheduler_no_running();
 
 #endif
