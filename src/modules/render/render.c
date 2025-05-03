@@ -4,9 +4,9 @@
 #include "../user/user.h"
 #include <ctype.h>
 #include <locale.h>
+#include <pthread.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <pthread.h>
 
 extern App app;
 volatile sig_atomic_t resized = 0;
@@ -71,19 +71,15 @@ void render_left_panel() {
 
   if (strcmp(app.rdr.output_buff, "init") != 0) {
     mvwprintw(app.rdr.left_panel, 2, 1, app.rdr.output_buff);
-    napms(100);
     strcpy(app.rdr.output_buff, "init");
-  }
-  else{
-    int i=0;
-    //app.pcb.last=10;
-    while(i < app.pcb.last)
-    {
-      mvwprintw(app.rdr.left_panel, i+2, 1, "%s\tid: %d\tSTATUS= %d", 
-        app.pcb.process_stack[i].name, 
-        app.pcb.process_stack[i].pid,
-        app.pcb.process_stack[i].status);
-        i++;
+  } else {
+    int i = 0;
+    // app.pcb.last=10;
+    while (i < app.pcb.last) {
+      mvwprintw(app.rdr.left_panel, i + 2, 1, "%s\tid: %d\tSTATUS= %d",
+                app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid,
+                app.pcb.process_stack[i].status);
+      i++;
     }
   }
   wrefresh(app.rdr.left_panel);
@@ -114,34 +110,11 @@ void render_right_top_panel() {
   wrefresh(p);
 }
 
-char* read_path(WINDOW *p){
+char *read_path(WINDOW *p) {
   nodelay(p, FALSE);
   char path_buffer[MAX_ADDRESS_SIZE];
-
-  //PARTE PARA MOSTRAR OQ ESTA ESCREVENDO (AINDA NAO FUNCIONA)
-  // keypad(p, TRUE);
-  // int idx = 0, maker;
-  // while(maker = wgetch(p) != '\n') {
-  //   maker = wgetch(p);
-
-  //   if(maker == KEY_BACKSPACE || maker == 127 || maker == 8 && idx > 0) {
-  //       idx--;
-  //       path_buffer[idx] = '\0';
-  //   }
-  //   else if(idx < sizeof(path_buffer)-1){
-  //       path_buffer[idx++] = maker;
-  //       path_buffer[idx] = '\0';
-  //     }
-
-  //   //refresh the window with the text until now
-  //   mvwprintw(p, 3, 1, "Path: %-*s", COLS-4, "");
-  //   mvwprintw(p, 3, 1, "Path: %s", path_buffer);
-  //   wrefresh(p);
-  // }
-  
-  wrefresh(p);
+  mvwprintw(p, 4, 1, "Enter path path: %s", path_buffer);
   mvwgetstr(p, 3, 1, path_buffer);
-  mvwprintw(p, 3, 1, "Last path recivied: %s", path_buffer);
   nodelay(p, TRUE);
 }
 
@@ -150,7 +123,7 @@ void render_right_bottom_panel() {
   box(p, 0, 0);
   mvwprintw(p, 1, 1, "Press 'p' to enter a path of a file");
   char char_to_stop = wgetch(p);
-  if(char_to_stop == 'p' || char_to_stop == 'P')
+  if (char_to_stop == 'p' || char_to_stop == 'P')
     read_path(p);
   wrefresh(p);
 }

@@ -22,9 +22,9 @@ typedef struct __disk {
 
 void *init_disk(void *args);
 void disk_loop();
-void simulate_io(i32 pid, i32 time_to_run);
+void simulate_io(u32 pid, u32 time_to_run);
 
-void exec_io(blocked_process p);
+void exec_io(blocked_process *p);
 
 void q_put(blocked_process p);
 void q_remove(blocked_process p);

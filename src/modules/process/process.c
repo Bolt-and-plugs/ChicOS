@@ -8,6 +8,7 @@ extern App app;
 void init_pcb(void) {
   app.pcb.last = 0;
   app.pcb.curr = 0;
+  sem_init(&app.pcb.pcb_s, 0, 1);
 }
 
 void clear_pcb(void) {
@@ -46,7 +47,9 @@ u32 p_create(char *address) {
   strcpy(p.name, name);
   p.fb = open_file(addr);
 
+  sem_wait(&app.pcb.pcb_s);
   app.pcb.process_stack[app.pcb.curr++] = p;
+  sem_post(&app.pcb.pcb_s);
   return p.pid;
 }
 
@@ -88,20 +91,19 @@ void log_process(u32 pid) {
 
 process *p_find(u32 pid) {
   process *p = NULL;
+  u8 retry = 5;
 
-  for (int i = 0; i < MAX_PCB; i++) {
-    if (app.pcb.process_stack[i].pid == pid) {
-      p = &app.pcb.process_stack[i];
-      break;
+  while (retry-- > 0) {
+    for (u32 i = 0; i < MAX_PCB; i++) {
+      if (app.pcb.process_stack[i].pid == pid) {
+        return &app.pcb.process_stack[i];
+      }
     }
+    usleep(100);
   }
 
-  if (p == NULL) {
-    c_error(PROCESS_OUT_OF_LIST, "Process out of reach");
-    return NULL;
-  }
-
-  return p;
+  c_error(PROCESS_OUT_OF_LIST, "Process with PID %d not found", pid);
+  return NULL;
 }
 
 void p_kill(u32 pid) {
@@ -113,23 +115,32 @@ void p_kill(u32 pid) {
     return;
   }
 
+  sem_wait(&app.pcb.pcb_s);
   if (p->address_space)
     c_dealloc(p->address_space);
+  sem_post(&app.pcb.pcb_s);
 }
 
 void p_interrupt(u32 pid) {
   // interrupt occurs every time the process quantum time goes to 0
   process *p = p_find(pid);
 
+  sem_wait(&app.pcb.pcb_s);
   p->time_to_run = QUANTUM_TIME;
+  sem_post(&app.pcb.pcb_s);
 }
 
 void p_block(u32 pid) {
   process *p = p_find(pid);
+
+  sem_wait(&app.pcb.pcb_s);
   p->status = BLOCKED;
+  sem_post(&app.pcb.pcb_s);
 }
 
 void p_unblock(u32 pid) {
   process *p = p_find(pid);
+  sem_wait(&app.pcb.pcb_s);
   p->status = READY;
+  sem_post(&app.pcb.pcb_s);
 }
