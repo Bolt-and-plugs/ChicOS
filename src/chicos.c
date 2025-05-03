@@ -10,7 +10,7 @@ App app;
 
 void handle_signal(sig_atomic_t signal) {
   app.loop_stop = 1;
-  printf("Stopping loops\n");
+  c_info("Stopping loops");
 }
 
 bool set_envvar(const char *mode) {
@@ -32,7 +32,6 @@ void init_app(int mem_size, bool should_render) {
   if (pthread_create(&app.cpu.cpu_t, NULL, init_cpu, NULL) != 0) {
     c_crit_error(THREAD_INIT_ERROR, "Failed to create CPU thread");
   }
-
 
   if (pthread_create(&app.disk.disk_t, NULL, init_disk, NULL) != 0) {
     c_crit_error(THREAD_INIT_ERROR, "Failed to create DISK thread");
@@ -87,7 +86,7 @@ void handle_args(int *args, int argc, char **argv) {
       args[1] = val;
     }
 
-    if (strcmp(str_arg, "--no_render") == 0) {
+    if (strcmp(str_arg, "--no_render") == 0 || strcmp(str_arg, "-nr") == 0) {
       args[2] = true;
     }
   }
@@ -95,8 +94,8 @@ void handle_args(int *args, int argc, char **argv) {
   // print help
   if (args[0] == HELP) {
     puts("Valid Arguments:");
-    puts("--mem-size -> (integer) Memory size in bytes");
-    puts("--no_render -> Disables UI rendering");
+    puts("    -ms, --mem-size -> (integer) Memory size in bytes");
+    puts("    -nr, --no_render -> Disables UI rendering");
     exit(-1);
   }
 

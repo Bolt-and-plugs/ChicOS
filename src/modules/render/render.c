@@ -179,6 +179,7 @@ void render_loop() {
       init_renderer();
     }
     nodelay(app.rdr.right_bottom, TRUE);
+    wbkgd(stdscr, COLOR_PAIR(1));
     status_bar();
     render_left_panel();
     render_right_top_panel();
