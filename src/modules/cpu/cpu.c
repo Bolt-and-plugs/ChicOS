@@ -3,6 +3,7 @@
 #include "../io/disk.h"
 #include "../io/file.h"
 #include "../log/log.h"
+#include "../render/render.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -130,26 +131,26 @@ void exec_program(process *sint_process) {
     command = strtok(aux, " ");
     if (strcmp(command, "exec") == 0) {
       time = atoi(strtok(NULL, " "));
-      printf("Executing program for %dms...", time);
+      wprintw(app.rdr.left_panel, "Executing program for %dms...", time);
       sleep(time / 1000);
     } else if (strcmp(command, "write") == 0) {
       sint_process->fb->h->rw_count++; // Contabiliza o rw_count
 
       time = atoi(strtok(NULL, " "));
-      printf("Writing on dik for %dms...", time);
+      wprintw(app.rdr.left_panel,"Writing on dik for %dms...", time);
       sys_call(disk_request, "%d", sint_process->pid);
     } else if (strcmp(command, "read") == 0) {
       sint_process->fb->h->rw_count++; // Contabiliza o rw_count
       
       time = atoi(strtok(NULL, " "));
-      printf("Reading on disk for %dms...", time);
+      wprintw(app.rdr.left_panel,"Reading on disk for %dms...", time);
       sys_call(disk_request, "%d", sint_process->pid);
     } else if (strcmp(command, "P") == 0) {
       semaphore = strtok(NULL, " ");
-      printf("Acessing critical storage session stored by %s", semaphore);
+      wprintw(app.rdr.left_panel,"Acessing critical storage session stored by %s", semaphore);
     } else if (strcmp(command, "V") == 0) {
       semaphore = strtok(NULL, " ");
-      printf("Freeing critical storage session stored by %s", semaphore);
+      wprintw(app.rdr.left_panel,"Freeing critical storage session stored by %s", semaphore);
     } else if (strcmp(command, "print") == 0) {
     } else {
       c_error(DISK_FILE_READ_ERROR, "Found invalid command!");
