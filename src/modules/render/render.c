@@ -116,16 +116,23 @@ char *read_path(WINDOW *p) {
   mvwprintw(p, 4, 1, "Enter path path: %s", path_buffer);
   mvwgetstr(p, 3, 1, path_buffer);
   nodelay(p, TRUE);
+  return path_buffer;
 }
 
 void render_right_bottom_panel() {
   WINDOW *p = app.rdr.right_bottom;
   box(p, 0, 0);
   mvwprintw(p, 1, 1, "Press 'p' to enter a path of a file");
-  char char_to_stop = wgetch(p);
-  if (char_to_stop == 'p' || char_to_stop == 'P')
-    read_path(p);
+  char char_to_stop = wgetch(p), path[MAX_ADDRESS_SIZE];
+  if(char_to_stop == 'p' || char_to_stop == 'P')
+    strcpy(path, read_path(p));
   wrefresh(p);
+  if(open_file(path)) {
+    mvwprintw(p, 4, 1, "File openned");
+  }
+  else {
+    mvwprintw(p, 4, 1, "Error on file open");
+  }
 }
 
 // Initialize renderer windows
