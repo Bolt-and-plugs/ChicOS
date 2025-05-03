@@ -70,7 +70,20 @@ void render_left_panel() {
 
   if (strcmp(app.rdr.output_buff, "init") != 0) {
     mvwprintw(app.rdr.left_panel, 2, 1, app.rdr.output_buff);
+    napms(100);
     strcpy(app.rdr.output_buff, "init");
+  }
+  else{
+    int i=0;
+    //app.pcb.last=10;
+    while(i < app.pcb.last)
+    {
+      mvwprintw(app.rdr.left_panel, i+2, 1, "%s\tid: %d\tSTATUS= %d", 
+        app.pcb.process_stack[i].name, 
+        app.pcb.process_stack[i].pid,
+        app.pcb.process_stack[i].status);
+        i++;
+    }
   }
   wrefresh(app.rdr.left_panel);
 }
