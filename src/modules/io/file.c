@@ -32,9 +32,10 @@ void read_header(file_buffer *fb) {
   header->semaphores[i] = '\0';
 
   fb->h = header;
-  fb->h->rw_count = counting_io_operations(fb);
+  fb->h->rw_count = 0;
 }
 
+// Não vamo mais precisar dessa função linda, carlos
 i32 counting_io_operations(file_buffer *fb) {
   char aux[128];
   i32 count = 0;

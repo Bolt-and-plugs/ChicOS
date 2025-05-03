@@ -35,7 +35,7 @@ typedef struct __process {
 typedef struct __PCB {
   process process_stack[MAX_PCB];
   u8 curr;
-  u8 last;
+  u8 last; // não pode ser usado de forma confiavel para indicar o ultimo elemento
 } PCB;
 
 void init_pcb(void);

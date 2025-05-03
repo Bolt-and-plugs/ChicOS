@@ -30,7 +30,7 @@ void cpu_loop() {
       sleep(1);
 
     app.cpu.quantum_time++;
-    scheduler_no_running();
+    scheduler_no_running(); // troca o status "RUNNING" para "READY" em qualquer processo
     running_process = scheduler_get_process();
     if (running_process) {
       exec_program(running_process);
@@ -133,10 +133,14 @@ void exec_program(process *sint_process) {
       printf("Executing program for %dms...", time);
       sleep(time / 1000);
     } else if (strcmp(command, "write") == 0) {
+      sint_process->fb->h->rw_count++; // Contabiliza o rw_count
+
       time = atoi(strtok(NULL, " "));
       printf("Writing on dik for %dms...", time);
       sys_call(disk_request, "%d", sint_process->pid);
     } else if (strcmp(command, "read") == 0) {
+      sint_process->fb->h->rw_count++; // Contabiliza o rw_count
+      
       time = atoi(strtok(NULL, " "));
       printf("Reading on disk for %dms...", time);
       sys_call(disk_request, "%d", sint_process->pid);
