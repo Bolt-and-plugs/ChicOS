@@ -74,8 +74,8 @@ process *scheduler_get_process() {
       app.pcb.last = i - 1;
       break;
     }
-    
-    if (p->fb->h->rw_count < app.pcb.process_stack[i]) {
+
+    if (p->fb->h->rw_count < app.pcb.process_stack[i].fb->h->rw_count) {
       app.pcb.curr = i; // ????????
       p = &app.pcb.process_stack[i];
     }
