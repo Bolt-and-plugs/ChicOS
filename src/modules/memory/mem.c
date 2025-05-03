@@ -144,8 +144,8 @@ void c_dealloc(void *mem) {
     app.mem->pt.pages[i].free = true;
     push_free_stack(i);
   }
-  app.mem->pt.free_page_num += h_ptr->page_num;
 
+  app.mem->pt.free_page_num += h_ptr->page_num;
   semaphoreV(&app.mem->memory_s);
 }
 

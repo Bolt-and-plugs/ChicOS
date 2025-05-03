@@ -4,9 +4,9 @@
 #include "../user/user.h"
 #include <ctype.h>
 #include <locale.h>
+#include <pthread.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <pthread.h>
 
 extern App app;
 volatile sig_atomic_t resized = 0;
@@ -71,19 +71,15 @@ void render_left_panel() {
 
   if (strcmp(app.rdr.output_buff, "init") != 0) {
     mvwprintw(app.rdr.left_panel, 2, 1, app.rdr.output_buff);
-    napms(100);
     strcpy(app.rdr.output_buff, "init");
-  }
-  else{
-    int i=0;
-    //app.pcb.last=10;
-    while(i < app.pcb.last)
-    {
-      mvwprintw(app.rdr.left_panel, i+2, 1, "%s\tid: %d\tSTATUS= %d", 
-        app.pcb.process_stack[i].name, 
-        app.pcb.process_stack[i].pid,
-        app.pcb.process_stack[i].status);
-        i++;
+  } else {
+    int i = 0;
+    // app.pcb.last=10;
+    while (i < app.pcb.last) {
+      mvwprintw(app.rdr.left_panel, i + 2, 1, "%s\tid: %d\tSTATUS= %d",
+                app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid,
+                app.pcb.process_stack[i].status);
+      i++;
     }
   }
   wrefresh(app.rdr.left_panel);
@@ -141,7 +137,6 @@ void read_path(WINDOW *p){
   
   wrefresh(p);
   mvwgetstr(p, 3, 1, path_buffer);
-  mvwprintw(p, 3, 1, "Last path recivied: %s", path_buffer);
   nodelay(p, TRUE);
 
   if(open_file(path_buffer)) {

@@ -38,7 +38,7 @@ void cpu_loop() {
       log_process(running_process->pid);
     }
 
-    if (app.cpu.quantum_time == 5)
+    if (app.cpu.quantum_time == 1)
       interrupt_control(process_create, "resources/sint2");
   }
 }
@@ -98,17 +98,20 @@ void interrupt_control(events e, const char *str, ...) {
   void *ptr;
   switch ((u8)e) {
   case disk_finish:
-    p_unblock(*(u32 *)buffer);
+    sscanf(buffer, "%u", &pid);
+    p_unblock(pid);
     break;
   case process_interrupt:
-    p_interrupt(*(u32 *)buffer);
+    sscanf(buffer, "%u", &pid);
+    p_interrupt(pid);
     break;
   case process_create:
     pid = p_create((char *)buffer);
     log_process(pid);
     break;
   case process_kill:
-    p_kill(*(int *)(buffer));
+    sscanf(buffer, "%u", &pid);
+    p_kill(pid);
     break;
   case mem_load_finish:
     sscanf(buffer, "%p", &ptr);
@@ -126,7 +129,7 @@ void exec_program(process *sint_process) {
     return;
   }
 
-  while (!feof((sint_process->fb->fp)) || sint_process->time_to_run <= 0) {
+  while (!feof((sint_process->fb->fp)) || sint_process->time_to_run >= 0) {
     fgets(aux, sizeof(aux), sint_process->fb->fp);
     command = strtok(aux, " ");
     if (strcmp(command, "exec") == 0) {
@@ -153,7 +156,7 @@ void exec_program(process *sint_process) {
       wprintw(app.rdr.left_panel,"Freeing critical storage session stored by %s", semaphore);
     } else if (strcmp(command, "print") == 0) {
     } else {
-      c_error(DISK_FILE_READ_ERROR, "Found invalid command!");
+      c_error(DISK_FILE_READ_ERROR, "Found invalid command!: %s", command);
     }
     sint_process->time_to_run--;
     return;
