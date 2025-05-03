@@ -27,11 +27,14 @@ void cpu_loop() {
       exec_program(running_process);
       log_process(running_process->pid);
     }
+
+    if (app.cpu.quantum_time == 5)
+      interrupt_control(process_create, "resources/sint2");
   }
 }
 
 void *init_cpu(void *arg) {
-  if(arg)
+  if (arg)
     c_info(arg);
   app.cpu.quantum_time = 0;
   sem_init(&app.cpu.cpu_s, 0, 1);
@@ -41,32 +44,36 @@ void *init_cpu(void *arg) {
 
 void sys_call(events e, const char *str, ...) {
   semaphoreP(&app.cpu.cpu_s);
-  char buffer[4096];
+  char buffer[MAX_ADDRESS_SIZE];
+  u32 pid, time, bytes;
+  void *ptr;
+
   va_list arg_list;
   va_start(arg_list, str);
   vsprintf(buffer, str, arg_list);
   va_end(arg_list);
 
-  u32 pid, time;
   switch ((u8)e) {
   case disk_request:
-    p_block(*(u32 *)buffer);
     sscanf(buffer, "%u %u", &pid, &time);
+    p_block(pid);
     simulate_io(pid, time);
     break;
   case process_interrupt:
-    p_interrupt(*(u32 *)(buffer) - '0');
+    sscanf(buffer, "%u", &pid);
+    p_interrupt(pid);
     break;
   case process_create:
     pid = p_create((char *)buffer);
     log_process(pid);
     break;
   case process_kill:
-    p_kill(*(u32 *)(buffer) - '0');
+    sscanf(buffer, "%u", &pid);
+    p_kill(pid);
     break;
   case mem_load_req:
-    break;
-  case mem_load_finish:
+    sscanf(buffer, "%p %u", &ptr, &bytes);
+    memory_load_req(ptr, bytes);
     break;
   case semaphore_p:
     semaphoreP((sem_t *)buffer);
@@ -80,13 +87,14 @@ void sys_call(events e, const char *str, ...) {
 
 void interrupt_control(events e, const char *str, ...) {
   semaphoreP(&app.cpu.cpu_s);
-  char buffer[4096];
+  char buffer[MAX_ADDRESS_SIZE];
   va_list arg_list;
   va_start(arg_list, str);
   vsprintf(buffer, str, arg_list);
   va_end(arg_list);
 
-  int pid;
+  u32 pid;
+  void *ptr;
   switch ((u8)e) {
   case disk_finish:
     p_unblock(*(u32 *)buffer);
@@ -101,15 +109,9 @@ void interrupt_control(events e, const char *str, ...) {
   case process_kill:
     p_kill(*(int *)(buffer));
     break;
-  case mem_load_req:
-    break;
   case mem_load_finish:
-    break;
-  case semaphore_p:
-    semaphoreP((sem_t *)buffer);
-    break;
-  case semaphore_v:
-    semaphoreV((sem_t *)buffer);
+    sscanf(buffer, "%p", &ptr);
+    memory_load_finish(ptr);
     break;
   }
   semaphoreV(&app.cpu.cpu_s);
@@ -154,12 +156,12 @@ void exec_program(process *sint_process) {
 
   // kill or interrupt process
   if (feof((sint_process->fb->fp))) {
-    sys_call(process_kill, "%d", sint_process->pid);
+    sys_call(process_kill, "%u", sint_process->pid);
     return;
   }
 
   if (sint_process->time_to_run <= 0) {
-    sys_call(process_interrupt, "%d", sint_process->pid);
+    sys_call(process_interrupt, "%u", sint_process->pid);
     return;
   }
 }
