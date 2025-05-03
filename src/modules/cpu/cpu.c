@@ -3,7 +3,6 @@
 #include "../io/disk.h"
 #include "../io/file.h"
 #include "../log/log.h"
-#include "../render/render.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -132,30 +131,16 @@ void exec_program(process *sint_process) {
 
   while (!feof((sint_process->fb->fp)) || sint_process->time_to_run >= 0) {
     fgets(aux, sizeof(aux), sint_process->fb->fp);
-    command = strtok(aux, " ");
-    if (strcmp(command, "exec") == 0) {
-      time = atoi(strtok(NULL, " "));
-      wprintw(app.rdr.left_panel, "Executing program for %dms...", time);
-      sleep(time / 1000);
-    } else if (strcmp(command, "write") == 0) {
-      sint_process->fb->h->rw_count++; // Contabiliza o rw_count
+    strcpy(sem_aux, aux);
+    command = strtok(sem_aux, "(");
 
-      time = atoi(strtok(NULL, " "));
-      wprintw(app.rdr.left_panel,"Writing on dik for %dms...", time);
-      sys_call(disk_request, "%d", sint_process->pid);
-    } else if (strcmp(command, "read") == 0) {
-      sint_process->fb->h->rw_count++; // Contabiliza o rw_count
-      
-      time = atoi(strtok(NULL, " "));
-      wprintw(app.rdr.left_panel,"Reading on disk for %dms...", time);
-      sys_call(disk_request, "%d", sint_process->pid);
+    if (strcmp(command, "V") == 0) {
+      semaphore = strtok(NULL, "(");
+      printf("Acessing critical storage session stored by %s", semaphore);
     } else if (strcmp(command, "P") == 0) {
-      semaphore = strtok(NULL, " ");
-      wprintw(app.rdr.left_panel,"Acessing critical storage session stored by %s", semaphore);
-    } else if (strcmp(command, "V") == 0) {
-      semaphore = strtok(NULL, " ");
-      wprintw(app.rdr.left_panel,"Freeing critical storage session stored by %s", semaphore);
-    } else if (strcmp(command, "print") == 0) {
+      semaphore = strtok(NULL, "(");
+      semaphore = strtok(semaphore, ")");
+      printf("Freeing critical storage session stored by %s", semaphore);
     } else {
       command = strtok(aux, " ");
       if (strcmp(command, "exec") == 0) {
