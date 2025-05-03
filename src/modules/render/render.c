@@ -6,6 +6,7 @@
 #include <locale.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <pthread.h>
 
 extern App app;
 volatile sig_atomic_t resized = 0;
@@ -113,11 +114,44 @@ void render_right_top_panel() {
   wrefresh(p);
 }
 
+char* read_path(WINDOW *p){
+  nodelay(p, FALSE);
+  char path_buffer[MAX_ADDRESS_SIZE];
+
+  //PARTE PARA MOSTRAR OQ ESTA ESCREVENDO (AINDA NAO FUNCIONA)
+  // keypad(p, TRUE);
+  // int idx = 0, maker;
+  // while(maker = wgetch(p) != '\n') {
+  //   maker = wgetch(p);
+
+  //   if(maker == KEY_BACKSPACE || maker == 127 || maker == 8 && idx > 0) {
+  //       idx--;
+  //       path_buffer[idx] = '\0';
+  //   }
+  //   else if(idx < sizeof(path_buffer)-1){
+  //       path_buffer[idx++] = maker;
+  //       path_buffer[idx] = '\0';
+  //     }
+
+  //   //refresh the window with the text until now
+  //   mvwprintw(p, 3, 1, "Path: %-*s", COLS-4, "");
+  //   mvwprintw(p, 3, 1, "Path: %s", path_buffer);
+  //   wrefresh(p);
+  // }
+  
+  wrefresh(p);
+  mvwgetstr(p, 3, 1, path_buffer);
+  mvwprintw(p, 3, 1, "Last path recivied: %s", path_buffer);
+  nodelay(p, TRUE);
+}
+
 void render_right_bottom_panel() {
   WINDOW *p = app.rdr.right_bottom;
-  werase(p);
   box(p, 0, 0);
-  mvwprintw(p, 1, 1, "Enter command: (not implemented)");
+  mvwprintw(p, 1, 1, "Press 'p' to enter a path of a file");
+  char char_to_stop = wgetch(p);
+  if(char_to_stop == 'p' || char_to_stop == 'P')
+    read_path(p);
   wrefresh(p);
 }
 
@@ -132,6 +166,7 @@ void init_renderer() {
 
 // Main dashboard loop
 void render_loop() {
+  char path[MAX_ADDRESS_SIZE];
   signal(SIGWINCH, handle_resize);
   nodelay(stdscr, TRUE);
   while (!app.loop_stop) {
@@ -143,6 +178,7 @@ void render_loop() {
       clear_renderer();
       init_renderer();
     }
+    nodelay(app.rdr.right_bottom, TRUE);
     status_bar();
     render_left_panel();
     render_right_top_panel();
