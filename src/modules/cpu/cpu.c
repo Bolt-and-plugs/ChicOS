@@ -11,6 +11,15 @@
 
 extern App app;
 
+void *init_cpu(void *arg) {
+  if (arg)
+    c_info(arg);
+  app.cpu.quantum_time = 0;
+  sem_init(&app.cpu.cpu_s, 0, 1);
+  cpu_loop();
+  return NULL;
+}
+
 void cpu_loop() {
   process *running_process;
 
@@ -31,15 +40,6 @@ void cpu_loop() {
     if (app.cpu.quantum_time == 5)
       interrupt_control(process_create, "resources/sint2");
   }
-}
-
-void *init_cpu(void *arg) {
-  if (arg)
-    c_info(arg);
-  app.cpu.quantum_time = 0;
-  sem_init(&app.cpu.cpu_s, 0, 1);
-  cpu_loop();
-  return NULL;
 }
 
 void sys_call(events e, const char *str, ...) {
