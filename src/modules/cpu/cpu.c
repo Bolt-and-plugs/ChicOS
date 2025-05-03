@@ -31,7 +31,8 @@ void cpu_loop() {
       sleep(1);
 
     app.cpu.quantum_time++;
-    scheduler_no_running(); // troca o status "RUNNING" para "READY" em qualquer processo
+    scheduler_no_running(); // troca o status "RUNNING" para "READY" em qualquer
+                            // processo
     running_process = scheduler_get_process();
     if (running_process) {
       exec_program(running_process);
@@ -122,7 +123,7 @@ void interrupt_control(events e, const char *str, ...) {
 }
 
 void exec_program(process *sint_process) {
-  char *semaphore, *command, aux[16];
+  char *semaphore, *command, aux[16], sem_aux[16];
   u32 time;
   if (sint_process->fb->fp == NULL) {
     c_error(DISK_OPEN_ERROR, "File not open properly!");
@@ -131,6 +132,7 @@ void exec_program(process *sint_process) {
 
   while (!feof((sint_process->fb->fp)) || sint_process->time_to_run >= 0) {
     fgets(aux, sizeof(aux), sint_process->fb->fp);
+<<<<<<< HEAD
     command = strtok(aux, " ");
     if (strcmp(command, "exec") == 0) {
       time = atoi(strtok(NULL, " "));
@@ -155,8 +157,41 @@ void exec_program(process *sint_process) {
       semaphore = strtok(NULL, " ");
       wprintw(app.rdr.left_panel,"Freeing critical storage session stored by %s", semaphore);
     } else if (strcmp(command, "print") == 0) {
+=======
+    strcpy(sem_aux, aux);
+    command = strtok(sem_aux, "(");
+
+    if (strcmp(command, "V") == 0) {
+      semaphore = strtok(NULL, "(");
+      semaphore = strtok(semaphore, ")");
+      printf("Acessing critical storage session stored by %s", semaphore);
+    } else if (strcmp(command, "P") == 0) {
+      semaphore = strtok(NULL, "(");
+      semaphore = strtok(semaphore, ")");
+      printf("Freeing critical storage session stored by %s", semaphore);
+>>>>>>> refs/remotes/origin/main
     } else {
-      c_error(DISK_FILE_READ_ERROR, "Found invalid command!: %s", command);
+      command = strtok(aux, " ");
+      if (strcmp(command, "exec") == 0) {
+        time = atoi(strtok(NULL, " "));
+        printf("Executing program for %dms...", time);
+        sleep(time / 1000);
+      } else if (strcmp(command, "write") == 0) {
+        sint_process->fb->h->rw_count++; // Contabiliza o rw_count
+
+        time = atoi(strtok(NULL, " "));
+        printf("Writing on disk for %ums...", time);
+        sys_call(disk_request, "%d", sint_process->pid);
+      } else if (strcmp(command, "read") == 0) {
+        sint_process->fb->h->rw_count++; // Contabiliza o rw_count
+
+        time = atoi(strtok(NULL, " "));
+        printf("Reading on disk for %dms...", time);
+        sys_call(disk_request, "%d", sint_process->pid);
+      } else if (strcmp(command, "print") == 0) {
+      } else {
+        c_error(DISK_FILE_READ_ERROR, "Found invalid command!: %s", command);
+      }
     }
     sint_process->time_to_run--;
     return;
