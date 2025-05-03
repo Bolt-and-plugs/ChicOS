@@ -3,6 +3,7 @@
 
 #include "defines.h"
 #include "modules/cpu/cpu.h"
+#include "modules/io/disk.h"
 #include "modules/log/log.h"
 #include "modules/memory/mem.h"
 #include "modules/process/process.h"
@@ -13,6 +14,7 @@ typedef struct __App {
   PCB pcb;
   memory *mem;
   cpu cpu;
+  disk disk;
   volatile sig_atomic_t loop_stop;
   log_level min_log_level;
   bool debug;

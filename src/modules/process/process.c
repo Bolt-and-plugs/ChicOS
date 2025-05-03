@@ -33,22 +33,20 @@ u32 p_create(char *address) {
   }
   name = strtok(ret, ".");
 
-  if (app.pcb.curr == MAX_PCB - 1) {
-    c_error(PROCESS_CREATION_ERROR, "teste maroto fera");
+  if (app.pcb.curr >= MAX_PCB - 1) {
+    c_error(PROCESS_CREATION_ERROR, "PCB is full");
     return -1;
   }
 
   process p = {.pid = app.cpu.quantum_time,
                .status = NEW,
-               .address_space =
-                   c_alloc(KB - (u32)sizeof(process) - (u32)sizeof(file_buffer)),
+               .address_space = c_alloc(KB),
                .time_to_run = TIME_SLICE};
 
   strcpy(p.name, name);
   p.fb = open_file(addr);
 
-  app.pcb.process_stack[app.pcb.curr] = p;
-  app.pcb.curr++;
+  app.pcb.process_stack[app.pcb.curr++] = p;
   return p.pid;
 }
 
@@ -67,8 +65,24 @@ void log_process(u32 pid) {
   }
 
   char res[256];
-  snprintf(res, 255, "process: %s\npid: %d\nrw_count: %d\n", p.name, p.pid,
-           p.fb->h->rw_count);
+  char status[10];
+
+  switch ((int)p.status) {
+  case RUNNING:
+    strcpy(status, "RUNNING");
+    break;
+  case BLOCKED:
+    strcpy(status, "BLOCKED");
+    break;
+  case NEW:
+    strcpy(status, "NEW");
+    break;
+  case READY:
+    strcpy(status, "READY");
+    break;
+  }
+  snprintf(res, 255, "process: %s\npid: %d\nstatus %s\nrw_count: %d\n", p.name,
+           p.pid, status, p.fb->h->rw_count);
   c_info(res);
 }
 
@@ -83,7 +97,7 @@ process *p_find(u32 pid) {
   }
 
   if (p == NULL) {
-    c_error(PROCESS_OUT_OF_LIST, "Proccess out of reach");
+    c_error(PROCESS_OUT_OF_LIST, "Process out of reach");
     return NULL;
   }
 
@@ -93,8 +107,9 @@ process *p_find(u32 pid) {
 void p_kill(u32 pid) {
   // to kill the process: free the memory allocated to it
   process *p = p_find(pid);
+
   if (!p) {
-    c_error(PROCESS_OUT_OF_LIST, "Could not find process");
+    c_error(PROCESS_OUT_OF_LIST, "Could not find process to kill");
     return;
   }
 
@@ -107,4 +122,14 @@ void p_interrupt(u32 pid) {
   process *p = p_find(pid);
 
   p->time_to_run = QUANTUM_TIME;
+}
+
+void p_block(u32 pid) {
+  process *p = p_find(pid);
+  p->status = BLOCKED;
+}
+
+void p_unblock(u32 pid) {
+  process *p = p_find(pid);
+  p->status = READY;
 }

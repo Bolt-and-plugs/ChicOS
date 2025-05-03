@@ -130,6 +130,7 @@ void render_loop() {
       clear_renderer();
       init_renderer();
     }
+    wbkgd(stdscr, COLOR_PAIR(1));
     status_bar();
     render_left_panel();
     render_right_top_panel();
