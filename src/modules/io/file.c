@@ -3,6 +3,14 @@
 #include "../memory/mem.h"
 #include "../semaphore/semaphore.h"
 
+bool valid_path(const char *path) {
+  if (!path || strlen(path) > MAX_ADDRESS_SIZE || access(path, F_OK) != 0) {
+    return false;
+  }
+
+  return true;
+}
+
 void read_header(file_buffer *fb) {
   file_header *header = c_alloc(sizeof(file_header));
   char c;

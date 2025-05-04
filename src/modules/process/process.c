@@ -49,6 +49,7 @@ u32 p_create(char *address) {
 
   sem_wait(&app.pcb.pcb_s);
   app.pcb.process_stack[app.pcb.curr++] = p;
+  app.pcb.last++;
   sem_post(&app.pcb.pcb_s);
   return p.pid;
 }
@@ -83,7 +84,11 @@ void log_process(u32 pid) {
   case READY:
     strcpy(status, "READY");
     break;
+  case KILL:
+    strcpy(status, "KILL");
+    break;
   }
+  // DEBUG INFO
   snprintf(res, 255, "process: %s\npid: %d\nstatus %s\nrw_count: %d\n", p.name,
            p.pid, status, p.fb->h->rw_count);
   c_info(res);
@@ -117,6 +122,8 @@ void p_kill(u32 pid) {
   sem_wait(&app.pcb.pcb_s);
   if (p->address_space)
     c_dealloc(p->address_space);
+  p->status = KILL;
+  // app.pcb.last--;
   sem_post(&app.pcb.pcb_s);
 }
 
@@ -125,7 +132,8 @@ void p_interrupt(u32 pid) {
   process *p = p_find(pid);
 
   sem_wait(&app.pcb.pcb_s);
-  p->time_to_run = QUANTUM_TIME;
+  // todo processo é incializado com time_to_run = TIME_SLICE
+  // p->time_to_run = QUANTUM_TIME;
   sem_post(&app.pcb.pcb_s);
 }
 

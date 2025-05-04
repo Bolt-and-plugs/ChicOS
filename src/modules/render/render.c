@@ -1,5 +1,6 @@
 #include "render.h"
 #include "../../chicos.h"
+#include "../io/disk.h"
 #include "../memory/mem.h"
 #include "../user/user.h"
 #include <ctype.h>
@@ -70,18 +71,41 @@ void render_left_panel() {
             app.cpu.quantum_time);
 
   if (strcmp(app.rdr.output_buff, "init") != 0) {
-    mvwprintw(app.rdr.left_panel, 2, 1, app.rdr.output_buff);
+    mvwprintw(app.rdr.left_panel, 10, 1, app.rdr.output_buff);
     strcpy(app.rdr.output_buff, "init");
-  } else {
-    int i = 0;
-    // app.pcb.last=10;
-    while (i < app.pcb.last) {
-      mvwprintw(app.rdr.left_panel, i + 2, 1, "%s\tid: %d\tSTATUS= %d",
-                app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid,
-                app.pcb.process_stack[i].status);
-      i++;
-    }
   }
+  int i = 0;
+  // app.pcb.last=1;
+  while (i < app.pcb.last) {
+    if (!app.pcb.process_stack[0].address_space) {
+      mvwprintw(app.rdr.left_panel, 4, 1, "%u  last: %u", i, app.pcb.last);
+    } else {
+
+      char status[10];
+      switch ((int)app.pcb.process_stack[i].status) {
+      case RUNNING:
+        strcpy(status, "RUNNING");
+        break;
+      case BLOCKED:
+        strcpy(status, "BLOCKED");
+        break;
+      case NEW:
+        strcpy(status, "NEW");
+        break;
+      case READY:
+        strcpy(status, "READY");
+        break;
+      case KILL:
+        strcpy(status, "KILLING");
+        break;
+      }
+      mvwprintw(
+          app.rdr.left_panel, i + 3, 1, "\tProcess: %s \t|id: %d\t|STATUS= %s ",
+          app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid, status);
+    }
+    i++;
+  }
+
   wrefresh(app.rdr.left_panel);
 }
 
@@ -107,43 +131,49 @@ void render_right_top_panel() {
   wattroff(p, COLOR_PAIR(1) | COLOR_PAIR(2));
   mvwprintw(p, 4, 1, "Used: %2.2f%%", used);
   mvwprintw(p, 5, 1, "Free: %2.2f%%", retrieve_free_mem_percentage());
+
+  mvwprintw(p, 7, 1, "Disk Queue:");
+  mvwprintw(p, 8, 1, "%d to be done", app.disk.q.len);
+
   wrefresh(p);
 }
 
-void read_path(WINDOW *p){
-  nodelay(p, FALSE);
+void read_path(WINDOW *p) {
+  nodelay(p, TRUE); // nodelay TRUE para não travar
+  keypad(p, TRUE);
+
   char path_buffer[MAX_ADDRESS_SIZE];
+  path_buffer[0] = '\0'; // inicializa vazio
 
-  //PARTE PARA MOSTRAR OQ ESTA ESCREVENDO (AINDA NAO FUNCIONA)
-  // keypad(p, TRUE);
-  // int idx = 0, maker;
+  int idx = 0, maker;
 
-  // while(maker = wgetch(p) != '\n') {
+  while (1) {
+    maker = wgetch(p);
 
-  //   if(maker == KEY_BACKSPACE || maker == 127 || maker == 8 && idx > 0) {
-  //       idx--;
-  //       path_buffer[idx] = '\0';
-  //   }
-  //   else if(idx < sizeof(path_buffer)-1){
-  //       path_buffer[idx++] = maker;
-  //       path_buffer[idx] = '\0';
-  //     }
+    if (maker != ERR) { // só processa se houve tecla
+      if ((maker == KEY_BACKSPACE || maker == 127 || maker == 8) && idx > 0) {
+        idx--;
+        path_buffer[idx] = '\0';
+      } else if (idx < sizeof(path_buffer) - 1 && maker >= 32 && maker <= 126) {
+        path_buffer[idx++] = maker;
+        path_buffer[idx] = '\0';
+      } else if (maker == '\n') {
+        break; // ENTER finaliza
+      }
+    }
 
-  //   //refresh the window with the text until now
-  //   mvwprintw(p, 3, 1, "Path: %-*s", COLS-4, "");
-  //   mvwprintw(p, 3, 1, "Path: %s", path_buffer);
-  //   wrefresh(p);
-  // }
-  
+    // Atualiza a janela sempre
+    mvwprintw(p, 3, 1, "Path: %s", path_buffer); // mostra string
+  }
+
   wrefresh(p);
-  mvwgetstr(p, 3, 1, path_buffer);
   nodelay(p, TRUE);
 
-  if(open_file(path_buffer)) {
-    mvwprintw(p, 4, 1, "File openned");
-  }
-  else {
-    mvwprintw(p, 4, 1, "Error on file open");
+  if (valid_path(path_buffer)) {
+    interrupt_control(process_create, "%s", path_buffer);
+    mvwprintw(p, 5, 1, "Last file openned path: %s", path_buffer);
+  } else {
+    mvwprintw(p, 4, 1, "File path is wrong");
   }
 }
 
@@ -152,7 +182,7 @@ void render_right_bottom_panel() {
   box(p, 0, 0);
   mvwprintw(p, 1, 1, "Press 'p' and enter a path of a file");
   char char_to_stop = wgetch(p);
-  if(char_to_stop == 'p' || char_to_stop == 'P')
+  if (char_to_stop == 'p' || char_to_stop == 'P')
     read_path(p);
   wrefresh(p);
 }
@@ -293,7 +323,7 @@ user *login_flow() {
 void render_log(const char *statement) {
   semaphoreP(&app.rdr.renderer_s);
   napms(100);
-  if(app.rdr.output_buff)
+  if (app.rdr.output_buff)
     strcpy(app.rdr.output_buff, statement);
   semaphoreV(&app.rdr.renderer_s);
 }

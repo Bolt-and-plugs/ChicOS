@@ -30,7 +30,7 @@ void init_mem(u32 mem_size) {
   mem->size = mem_size;
   app.mem = mem;
 
-  for (int i = 0; i < mem->pt.len; i++) {
+  for (u32 i = 0; i < mem->pt.len; i++) {
     mem->pt.pages[i].id = i;
     mem->pt.pages[i].p = memory_pool + (i * PAGE_SIZE);
     mem->pt.pages[i].free = true;
@@ -100,12 +100,12 @@ void *c_alloc(u32 bytes) {
 
   semaphoreP(&app.mem->memory_s);
   void *ptr = NULL;
-  for (int i = 0; i < app.mem->pt.len; i++) {
+  for (u32 i = 0; i < app.mem->pt.len; i++) {
     bool contiguos_region = true;
     if (i + num_pages > app.mem->pt.len) {
       break;
     }
-    for (int j = i; j < i + num_pages; j++) {
+    for (u32 j = i; j < i + num_pages; j++) {
       if (!app.mem->pt.pages[j].free) {
         contiguos_region = false;
         break;
@@ -118,7 +118,7 @@ void *c_alloc(u32 bytes) {
       c_info("Found %d pages at %d", num_pages, i);
       ptr = (void *)((char *)app.mem->pool + (i * PAGE_SIZE));
       app.mem->pt.free_page_num -= num_pages;
-      for (int j = i; j < i + num_pages; j++) {
+      for (u32 j = i; j < i + num_pages; j++) {
         app.mem->pt.pages[j].free = false;
         app.mem->pt.pages[j].used = true;
       }
@@ -142,22 +142,34 @@ void *c_alloc(u32 bytes) {
   return (void *)(char *)ptr + sizeof(alloc_header);
 }
 
-void c_realloc(void *curr_region, u32 bytes) {
+void *c_realloc(void *curr_region, u32 bytes) {
   if (!curr_region) {
-    c_error(MEM_REALLOC_FAIL, "memory chunck not allocated for reallocing");
-    return;
+    c_error(MEM_REALLOC_FAIL, "NULL pointer passed to realloc");
+    return NULL;
   }
+
   alloc_header *h_ptr = get_header(curr_region);
-  if (!curr_region) {
-    c_error(MEM_REALLOC_FAIL, "no header on sent memory: %p", curr_region);
-    return;
+  if (!h_ptr) {
+    c_error(MEM_REALLOC_FAIL, "No valid header found for memory: %p",
+            curr_region);
+    return NULL;
   }
 
-  bytes += (h_ptr->page_num * PAGE_SIZE);
-  c_dealloc(curr_region);
-  curr_region = c_alloc(bytes);
-}
+  u32 old_size = h_ptr->page_num * PAGE_SIZE - sizeof(alloc_header);
+  u32 total_size = old_size + bytes;
 
+  void *buffer = c_alloc(total_size);
+  if (!buffer) {
+    c_error(MEM_REALLOC_FAIL, "Failed to realloc %d + %d bytes", old_size,
+            bytes);
+    return NULL;
+  }
+
+  memcpy(buffer, curr_region, old_size);
+  c_dealloc(curr_region);
+
+  return buffer;
+}
 void push_free_stack(u32 i) {
   if (app.mem->pt.free_stack_top < app.mem->pt.len) {
     app.mem->pt.free_stack[app.mem->pt.free_stack_top++] = i;
@@ -196,7 +208,7 @@ float retrieve_used_mem_percentage(void) {
   return 100.0f - retrieve_free_mem_percentage();
 }
 void print_page_table_status() {
-  for (int i = 0; i < app.mem->pt.len; i++) {
+  for (u32 i = 0; i < app.mem->pt.len; i++) {
     if (app.mem->pt.pages[i].p)
       c_info("%d %d", i, app.mem->pt.pages[i].id);
   }
@@ -216,7 +228,7 @@ bool is_mem_free(void *ptr) {
 
   alloc_header *h_ptr = get_header(ptr);
   bool is_free = true;
-  for (int i = 0; i < h_ptr->page_num; i++) {
+  for (u32 i = 0; i < h_ptr->page_num; i++) {
     page *p = (page *)(char *)app.mem->pool + (i * PAGE_SIZE);
     if (!p->free) {
       is_free = false;
