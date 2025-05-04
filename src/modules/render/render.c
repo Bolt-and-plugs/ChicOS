@@ -76,7 +76,7 @@ void render_left_panel() {
   }
   int i = 0;
   // app.pcb.last=1;
-  while (i < app.pcb.last) {
+  while (i < app.pcb.last && i < MAX_PCB) {
     if (!app.pcb.process_stack[0].address_space) {
       mvwprintw(app.rdr.left_panel, 4, 1, "%u  last: %u", i, app.pcb.last);
     } else {
@@ -100,8 +100,8 @@ void render_left_panel() {
         break;
       }
       mvwprintw(
-          app.rdr.left_panel, i + 3, 1, "\tProcess: %s \t|id: %d\t|STATUS= %s ",
-          app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid, status);
+          app.rdr.left_panel, i + 3, 1, "\tProcess: %s \t|\tid: %d\t|\tSTATUS= %s \t|\ttime: %u",
+          app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid, status, app.pcb.process_stack[i].time_to_run);
     }
     i++;
   }
