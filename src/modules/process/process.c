@@ -49,6 +49,7 @@ u32 p_create(char *address) {
 
   sem_wait(&app.pcb.pcb_s);
   app.pcb.process_stack[app.pcb.curr++] = p;
+  app.pcb.last++;
   sem_post(&app.pcb.pcb_s);
   return p.pid;
 }
@@ -119,6 +120,7 @@ void p_kill(u32 pid) {
   if (p->address_space)
     c_dealloc(p->address_space);
   p->status = KILL;
+  app.pcb.last--;
   sem_post(&app.pcb.pcb_s);
 }
 
