@@ -72,18 +72,21 @@ void render_left_panel() {
   if (strcmp(app.rdr.output_buff, "init") != 0) {
     mvwprintw(app.rdr.left_panel, 2, 1, app.rdr.output_buff);
     strcpy(app.rdr.output_buff, "init");
-  } else {
-    int i = 0;
-    //app.pcb.last=1;
-    while (i <= app.pcb.last) {
-      mvwprintw(app.rdr.left_panel, i+2, 1, "\tProcess: %s\tid: %d\tSTATUS= %d", 
-        app.pcb.process_stack[i].name,
-        app.pcb.process_stack[i].pid,
-        app.pcb.process_stack[i].status);
-      wrefresh(app.rdr.left_panel);
-      i++;
-    }
   }
+  int i = 0;
+  // app.pcb.last=1;
+  while (i <= app.pcb.last) {
+    if (!app.pcb.process_stack[0].address_space) {
+      mvwprintw(app.rdr.left_panel, i + 2, 1, "%u  last: %u", i, app.pcb.last);
+    } else {
+      mvwprintw(app.rdr.left_panel, i + 2, 1,
+                "\tProcess: %s\tid: %d\tSTATUS= % d ",
+                app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid,
+                app.pcb.process_stack[i].status);
+    }
+    i++;
+  }
+
   wrefresh(app.rdr.left_panel);
 }
 
@@ -112,46 +115,43 @@ void render_right_top_panel() {
   wrefresh(p);
 }
 
-void read_path(WINDOW *p){
-  nodelay(p, TRUE);  // nodelay TRUE para não travar
+void read_path(WINDOW *p) {
+  nodelay(p, TRUE); // nodelay TRUE para não travar
   keypad(p, TRUE);
 
   char path_buffer[MAX_ADDRESS_SIZE];
-  path_buffer[0] = '\0';   // inicializa vazio
+  path_buffer[0] = '\0'; // inicializa vazio
 
   int idx = 0, maker;
 
-  while(1) {
+  while (1) {
     maker = wgetch(p);
 
-    if (maker != ERR) {   // só processa se houve tecla
-      if((maker == KEY_BACKSPACE || maker == 127 || maker == 8) && idx > 0) {
-          idx--;
-          path_buffer[idx] = '\0';
-      }
-      else if(idx < sizeof(path_buffer)-1 && maker >= 32 && maker <= 126) {
-          path_buffer[idx++] = maker;
-          path_buffer[idx] = '\0';
-      }
-      else if (maker == '\n') {
-          break;  // ENTER finaliza
+    if (maker != ERR) { // só processa se houve tecla
+      if ((maker == KEY_BACKSPACE || maker == 127 || maker == 8) && idx > 0) {
+        idx--;
+        path_buffer[idx] = '\0';
+      } else if (idx < sizeof(path_buffer) - 1 && maker >= 32 && maker <= 126) {
+        path_buffer[idx++] = maker;
+        path_buffer[idx] = '\0';
+      } else if (maker == '\n') {
+        break; // ENTER finaliza
       }
     }
 
     // Atualiza a janela sempre
-    mvwprintw(p, 3, 1, "Path: %s", path_buffer);    // mostra string
+    mvwprintw(p, 3, 1, "Path: %s", path_buffer); // mostra string
     wrefresh(p);
   }
-  
+
   wrefresh(p);
-  //mvwgetstr(p, 3, 1, path_buffer);
+  // mvwgetstr(p, 3, 1, path_buffer);
   nodelay(p, TRUE);
 
-  if(open_file(path_buffer)) {
+  if (open_file(path_buffer)) {
     mvwprintw(p, 4, 1, "File openned");
     mvwprintw(p, 5, 1, "Last file openned path: %s", path_buffer);
-  }
-  else {
+  } else {
     mvwprintw(p, 4, 1, "Error on file open");
   }
 }
@@ -161,7 +161,7 @@ void render_right_bottom_panel() {
   box(p, 0, 0);
   mvwprintw(p, 1, 1, "Press 'p' and enter a path of a file");
   char char_to_stop = wgetch(p);
-  if(char_to_stop == 'p' || char_to_stop == 'P')
+  if (char_to_stop == 'p' || char_to_stop == 'P')
     read_path(p);
   wrefresh(p);
 }
@@ -302,7 +302,7 @@ user *login_flow() {
 void render_log(const char *statement) {
   semaphoreP(&app.rdr.renderer_s);
   napms(100);
-  if(app.rdr.output_buff)
+  if (app.rdr.output_buff)
     strcpy(app.rdr.output_buff, statement);
   semaphoreV(&app.rdr.renderer_s);
 }

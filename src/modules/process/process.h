@@ -33,7 +33,8 @@ typedef struct __process {
 typedef struct __PCB {
   process process_stack[MAX_PCB];
   u8 curr;
-  u8 last; // talvez possa ser usado de forma confiavel para indicar o ultimo elemento
+  u8 last; // talvez possa ser usado de forma confiavel para indicar o ultimo
+           // elemento
   sem_t pcb_s;
 } PCB;
 
