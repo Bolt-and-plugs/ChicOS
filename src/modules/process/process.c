@@ -125,7 +125,8 @@ void p_interrupt(u32 pid) {
   process *p = p_find(pid);
 
   sem_wait(&app.pcb.pcb_s);
-  p->time_to_run = QUANTUM_TIME;
+  // todo processo é incializado com time_to_run = TIME_SLICE
+  // p->time_to_run = QUANTUM_TIME;
   sem_post(&app.pcb.pcb_s);
 }
 

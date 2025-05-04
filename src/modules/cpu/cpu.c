@@ -28,10 +28,10 @@ void cpu_loop() {
   process *running_process;
 
   while (!app.loop_stop) {
-    if (app.debug)
-      sleep_ms(1000);
+    if (app.debug) // esse if else é onde o gutias tava reclamando q ele da um sleep absurdo
+      sleep_ms(100);
     else
-      sleep_ms(1000);
+      sleep_ms(100);
 
     app.cpu.quantum_time++;
     scheduler_no_running(); // troca o status "RUNNING" para "READY" em qualquer
@@ -128,12 +128,13 @@ void interrupt_control(events e, const char *str, ...) {
 void exec_program(process *sint_process) {
   char *semaphore, *command, aux[16], sem_aux[16];
   u32 time;
+
   if (sint_process->fb->fp == NULL) {
     c_error(DISK_OPEN_ERROR, "File not open properly!");
     return;
   }
 
-  while (!feof((sint_process->fb->fp)) || sint_process->time_to_run >= 0) {
+  while (!feof((sint_process->fb->fp)) || sint_process->time_to_run > 0) { // time_to_run é no minimo 0
     if (!fgets(aux, sizeof(aux), sint_process->fb->fp)) {
       sys_call(process_kill, "%u", sint_process->pid);
       return;
@@ -166,12 +167,18 @@ void exec_program(process *sint_process) {
           wprintw(app.rdr.left_panel, "Executing program for %dms...", time);
         else
           printf("Executing program for %dms...", time);
-        sleep(time / 1000);
-        if (time >= 1000) {
+        
+        u32 l_time = time > TIME_SLICE ? TIME_SLICE : time;
+        sleep_ms(l_time); // sleep pelo menor tempo
+        
+        sint_process->time_to_run -= l_time;
+        if (time >= MAX_TIME_MORE_PAGES) {
           sint_process->address_space =
               c_realloc(sint_process->address_space,
-                        KB + sizeof(page) * (u32)time / 1000);
+                        KB + (sizeof(page) * l_time));
         }
+
+        return; // n deixa dar sint_process->time_to_run--
       } else if (strcmp(command, "write") == 0) {
         sint_process->fb->h->rw_count++; // Contabiliza o rw_count
 

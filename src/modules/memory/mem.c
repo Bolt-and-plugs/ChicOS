@@ -30,9 +30,9 @@ void init_mem(u32 mem_size) {
   mem->size = mem_size;
   app.mem = mem;
 
-  for (int i = 0; i < mem->pt.len; i++) {
+  for (u32 i = 0; i < mem->pt.len; i++) {
     mem->pt.pages[i].id = i;
-    mem->pt.pages[i].p = memory_pool + (i * PAGE_SIZE);
+    mem->pt.pages[i].p = (u32)memory_pool + (i * PAGE_SIZE);
     mem->pt.pages[i].free = true;
     mem->pt.pages[i].used = false;
     push_free_stack(i);
@@ -100,12 +100,12 @@ void *c_alloc(u32 bytes) {
 
   semaphoreP(&app.mem->memory_s);
   void *ptr = NULL;
-  for (int i = 0; i < app.mem->pt.len; i++) {
+  for (u32 i = 0; i < app.mem->pt.len; i++) {
     bool contiguos_region = true;
     if (i + num_pages > app.mem->pt.len) {
       break;
     }
-    for (int j = i; j < i + num_pages; j++) {
+    for (u32 j = i; j < i + num_pages; j++) {
       if (!app.mem->pt.pages[j].free) {
         contiguos_region = false;
         break;
@@ -118,7 +118,7 @@ void *c_alloc(u32 bytes) {
       c_info("Found %d pages at %d", num_pages, i);
       ptr = (void *)((char *)app.mem->pool + (i * PAGE_SIZE));
       app.mem->pt.free_page_num -= num_pages;
-      for (int j = i; j < i + num_pages; j++) {
+      for (u32 j = i; j < i + num_pages; j++) {
         app.mem->pt.pages[j].free = false;
         app.mem->pt.pages[j].used = true;
       }
@@ -142,7 +142,7 @@ void *c_alloc(u32 bytes) {
   return (void *)(char *)ptr + sizeof(alloc_header);
 }
 
-void c_realloc(void *curr_region, u32 bytes) {
+void *c_realloc(void *curr_region, u32 bytes) {
   if (!curr_region) {
     c_error(MEM_REALLOC_FAIL, "memory chunck not allocated for reallocing");
     return;
@@ -199,7 +199,7 @@ float retrieve_used_mem_percentage(void) {
   return 100.0f - retrieve_free_mem_percentage();
 }
 void print_page_table_status() {
-  for (int i = 0; i < app.mem->pt.len; i++) {
+  for (u32 i = 0; i < app.mem->pt.len; i++) {
     if (app.mem->pt.pages[i].p)
       c_info("%d %d", i, app.mem->pt.pages[i].id);
   }
@@ -219,7 +219,7 @@ bool is_mem_free(void *ptr) {
 
   alloc_header *h_ptr = get_header(ptr);
   bool is_free = true;
-  for (int i = 0; i < h_ptr->page_num; i++) {
+  for (u32 i = 0; i < h_ptr->page_num; i++) {
     page *p = (page *)(char *)app.mem->pool + (i * PAGE_SIZE);
     if (!p->free) {
       is_free = false;

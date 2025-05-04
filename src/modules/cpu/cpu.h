@@ -8,6 +8,7 @@
 #include "../semaphore/semaphore.h"
 
 #define TIME_SLICE 10
+#define MAX_TIME_MORE_PAGES 1000
 
 typedef enum {
   process_interrupt = 1, // interrupção gerada pela execução da função processCreate e pelo término de operações de E/S
