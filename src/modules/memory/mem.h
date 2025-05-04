@@ -49,6 +49,8 @@ void clear_mem();
 
 void *c_alloc(u32 bytes);
 
+void c_realloc(void *curr_region, u32 bytes);
+
 alloc_header *get_header(void *ptr);
 
 void c_dealloc(void *mem);

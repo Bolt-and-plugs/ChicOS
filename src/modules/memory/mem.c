@@ -142,6 +142,22 @@ void *c_alloc(u32 bytes) {
   return (void *)(char *)ptr + sizeof(alloc_header);
 }
 
+void c_realloc(void *curr_region, u32 bytes) {
+  if (!curr_region) {
+    c_error(MEM_REALLOC_FAIL, "memory chunck not allocated for reallocing");
+    return;
+  }
+  alloc_header *h_ptr = get_header(curr_region);
+  if (!curr_region) {
+    c_error(MEM_REALLOC_FAIL, "no header on sent memory: %p", curr_region);
+    return;
+  }
+
+  bytes += (h_ptr->page_num * PAGE_SIZE);
+  c_dealloc(curr_region);
+  curr_region = c_alloc(bytes);
+}
+
 void push_free_stack(u32 i) {
   if (app.mem->pt.free_stack_top < app.mem->pt.len) {
     app.mem->pt.free_stack[app.mem->pt.free_stack_top++] = i;

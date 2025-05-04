@@ -141,11 +141,19 @@ void exec_program(process *sint_process) {
     if (strcmp(command, "V") == 0) {
       semaphore = strtok(NULL, "(");
       semaphore = strtok(semaphore, ")");
-      printf("Acessing critical storage session stored by %s", semaphore);
+      if (app.rdr.active)
+        wprintw(app.rdr.left_panel,
+                "Acessing critical storage session stored by %s", semaphore);
+      else
+        printf("Acessing critical storage session stored by %s", semaphore);
     } else if (strcmp(command, "P") == 0) {
       semaphore = strtok(NULL, "(");
       semaphore = strtok(semaphore, ")");
-      printf("Freeing critical storage session stored by %s", semaphore);
+      if (app.rdr.active)
+        wprintw(app.rdr.left_panel,
+                "Freeing critical storage session stored by %s", semaphore);
+      else
+        printf("Freeing critical storage session stored by %s", semaphore);
     } else {
       command = strtok(aux, " ");
       if (strcmp(command, "exec") == 0) {
@@ -155,6 +163,10 @@ void exec_program(process *sint_process) {
         else
           printf("Executing program for %dms...", time);
         sleep(time / 1000);
+        if (time >= 1000) {
+          c_realloc(sint_process->address_space,
+                    KB + sizeof(page) * (u32)time / 1000);
+        }
       } else if (strcmp(command, "write") == 0) {
         sint_process->fb->h->rw_count++; // Contabiliza o rw_count
 
