@@ -3,6 +3,8 @@
 
 #include "../../defines.h"
 
+void sleep_ms(int ms);
+
 bool is_power_of_two(uintptr_t x);
 
 int parse_string_to_int(char *str);

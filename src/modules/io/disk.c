@@ -1,6 +1,7 @@
 #include "disk.h"
 #include "../../chicos.h"
 #include "../cpu/cpu.h"
+#include "../utils/utils.h"
 
 extern App app;
 
@@ -12,7 +13,7 @@ void *init_disk(void *args) {
 }
 void disk_loop() {
   while (!app.loop_stop) {
-    sleep_ms(1);
+    usleep(10);
     if (app.disk.q.len > 0) {
       exec_io(&app.disk.q.queue[0]);
     }

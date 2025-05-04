@@ -84,6 +84,9 @@ void log_process(u32 pid) {
   case READY:
     strcpy(status, "READY");
     break;
+  case KILL:
+    strcpy(status, "KILL");
+    break;
   }
   // DEBUG INFO
   snprintf(res, 255, "process: %s\npid: %d\nstatus %s\nrw_count: %d\n", p.name,

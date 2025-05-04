@@ -1,5 +1,6 @@
 #include "render.h"
 #include "../../chicos.h"
+#include "../io/disk.h"
 #include "../memory/mem.h"
 #include "../user/user.h"
 #include <ctype.h>
@@ -130,6 +131,10 @@ void render_right_top_panel() {
   wattroff(p, COLOR_PAIR(1) | COLOR_PAIR(2));
   mvwprintw(p, 4, 1, "Used: %2.2f%%", used);
   mvwprintw(p, 5, 1, "Free: %2.2f%%", retrieve_free_mem_percentage());
+
+  mvwprintw(p, 7, 1, "Disk Queue:");
+  mvwprintw(p, 8, 1, "%d to be done", app.disk.q.len);
+
   wrefresh(p);
 }
 
@@ -159,18 +164,16 @@ void read_path(WINDOW *p) {
 
     // Atualiza a janela sempre
     mvwprintw(p, 3, 1, "Path: %s", path_buffer); // mostra string
-    wrefresh(p);
   }
 
   wrefresh(p);
-  // mvwgetstr(p, 3, 1, path_buffer);
   nodelay(p, TRUE);
 
-  if (open_file(path_buffer)) {
-    mvwprintw(p, 4, 1, "File openned");
+  if (valid_path(path_buffer)) {
+    interrupt_control(process_create, "%s", path_buffer);
     mvwprintw(p, 5, 1, "Last file openned path: %s", path_buffer);
   } else {
-    mvwprintw(p, 4, 1, "Error on file open");
+    mvwprintw(p, 4, 1, "File path is wrong");
   }
 }
 

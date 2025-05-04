@@ -69,11 +69,11 @@ void c_log(log_level level, status_code status, const char *str, ...) {
   vsnprintf (buffer, 255, str, arg_list);
   va_end(arg_list);
   time_t clk = time(NULL);
-  if (!app.rdr.active)
+  if (!app.rdr.active) {
     printf("[%s] - %s", ctime(&clk) ,buffer);
+    puts("");
+  }
 
   if (app.rdr.active)
     render_log(buffer);
-
-  puts("");
 }

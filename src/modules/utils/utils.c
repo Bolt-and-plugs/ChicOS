@@ -3,6 +3,8 @@
 #include "math.h"
 #include "stdint.h"
 
+void sleep_ms(int ms) { usleep(ms * 1000); }
+
 bool is_power_of_two(uintptr_t x) { return (x & (x - 1)) == 0; }
 
 int parse_string_to_int(char *str) {

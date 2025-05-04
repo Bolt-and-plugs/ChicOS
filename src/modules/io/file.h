@@ -28,6 +28,7 @@ file_buffer *open_file(const char *address);
 void exec_file(file_buffer *file);
 void close_file(file_buffer *fb);
 i32 counting_io_operations(file_buffer *fb);
+bool valid_path(const char *path);
 
 #endif
 

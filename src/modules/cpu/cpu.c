@@ -3,6 +3,7 @@
 #include "../io/disk.h"
 #include "../io/file.h"
 #include "../log/log.h"
+#include "../utils/utils.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -10,10 +11,6 @@
 #include <unistd.h>
 
 extern App app;
-
-void sleep_ms(int ms) {
-  usleep(ms * 1000);
-}
 
 void *init_cpu(void *arg) {
   if (arg)
@@ -28,7 +25,8 @@ void cpu_loop() {
   process *running_process;
 
   while (!app.loop_stop) {
-    if (app.debug) // esse if else é onde o gutias tava reclamando q ele da um sleep absurdo
+    if (app.debug) // esse if else é onde o gutias tava reclamando q ele da um
+                   // sleep absurdo
       sleep_ms(100);
     else
       sleep_ms(1000);
@@ -37,7 +35,7 @@ void cpu_loop() {
 
     // troca o status "RUNNING" para "READY" em qualquer processo
     scheduler_no_running();
-    
+
     // mata os processos marcados
     scheduler_kill_process();
 
@@ -47,7 +45,7 @@ void cpu_loop() {
       log_process(running_process->pid);
     }
 
-    if (app.cpu.quantum_time == 1)
+    if (app.cpu.quantum_time == 1 && app.debug)
       interrupt_control(process_create, "resources/sint2");
   }
 }
@@ -139,7 +137,8 @@ void exec_program(process *sint_process) {
     return;
   }
 
-  while (!feof((sint_process->fb->fp)) || sint_process->time_to_run > 0) { // time_to_run é no minimo 0
+  while (!feof((sint_process->fb->fp)) ||
+         sint_process->time_to_run > 0) { // time_to_run é no minimo 0
     if (!fgets(aux, sizeof(aux), sint_process->fb->fp)) {
       sys_call(process_kill, "%u", sint_process->pid);
       return;
@@ -151,56 +150,33 @@ void exec_program(process *sint_process) {
     if (strcmp(command, "V") == 0) {
       semaphore = strtok(NULL, "(");
       semaphore = strtok(semaphore, ")");
-      if (app.rdr.active)
-        wprintw(app.rdr.left_panel,
-                "Acessing critical storage session stored by %s", semaphore);
-      else
-        printf("Acessing critical storage session stored by %s", semaphore);
+      // TODO add semaphore
     } else if (strcmp(command, "P") == 0) {
       semaphore = strtok(NULL, "(");
       semaphore = strtok(semaphore, ")");
-      if (app.rdr.active)
-        wprintw(app.rdr.left_panel,
-                "Freeing critical storage session stored by %s", semaphore);
-      else
-        printf("Freeing critical storage session stored by %s", semaphore);
+      // TODO add semaphore
     } else {
       command = strtok(aux, " ");
       if (strcmp(command, "exec") == 0) {
         time = atoi(strtok(NULL, " "));
-        if (app.rdr.active)
-          wprintw(app.rdr.left_panel, "Executing program for %dms...", time);
-        else
-          printf("Executing program for %dms...", time);
-        
         u32 l_time = time > TIME_SLICE ? TIME_SLICE : time;
         sleep_ms(l_time); // sleep pelo menor tempo
-        
+
         sint_process->time_to_run -= l_time;
-        if (time >= MAX_TIME_MORE_PAGES) {
-          sint_process->address_space =
-              c_realloc(sint_process->address_space,
-                        KB + (sizeof(page) * l_time));
-        }
+        if (time >= MAX_TIME_MORE_PAGES)
+          sint_process->address_space = c_realloc(sint_process->address_space,
+                                                  KB + (sizeof(page) * l_time));
 
         return; // n deixa dar sint_process->time_to_run--
       } else if (strcmp(command, "write") == 0) {
         sint_process->fb->h->rw_count++; // Contabiliza o rw_count
 
         time = atoi(strtok(NULL, " "));
-        if (app.rdr.active)
-          wprintw(app.rdr.left_panel, "Writing on disk for %ums...", time);
-        else
-          printf("Writing on disk for %ums...", time);
         sys_call(disk_request, "%d", sint_process->pid);
       } else if (strcmp(command, "read") == 0) {
         sint_process->fb->h->rw_count++; // Contabiliza o rw_count
 
         time = atoi(strtok(NULL, " "));
-        if (app.rdr.active)
-          wprintw(app.rdr.left_panel, "Reading on disk for %dms...", time);
-        else
-          printf("Executing program for %dms...", time);
         sys_call(disk_request, "%d", sint_process->pid);
       } else if (strcmp(command, "print") == 0) {
       } else {
