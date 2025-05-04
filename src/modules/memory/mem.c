@@ -65,32 +65,38 @@ void clear_mem() {
 }
 
 void *c_alloc(u32 bytes) {
+  c_info("Allocating %d bytes", bytes);
   if (bytes == 0)
     return NULL;
 
   semaphoreP(&app.mem->memory_s);
   u32 num_pages = (bytes + sizeof(alloc_header) + PAGE_SIZE - 1) / PAGE_SIZE;
-
+  c_info("Pages to be allocated: %d", num_pages);
+  c_info("Free pages: %d", app.mem->pt.free_page_num);
   if (num_pages > app.mem->pt.free_page_num || num_pages > app.mem->pt.len) {
-    int not_used_page = second_chance();
-    if (not_used_page == -1) {
-      c_error(MEM_FULL, "Memory full even after page replacement!");
-      semaphoreV(&app.mem->memory_s);
-      return NULL;
+    c_info("Not enough memory to allocate %d pages", num_pages);
+    while(num_pages > app.mem->pt.free_page_num){
+      int not_used_page = second_chance();
+      c_info("Not used page %d", not_used_page);
+      if (not_used_page == -1) {
+        c_error(MEM_FULL, "Memory full even after page replacement!");
+        semaphoreV(&app.mem->memory_s);
+        return NULL;
+      }
+  
+      app.mem->pt.pages[not_used_page].free = true;
+      app.mem->pt.free_page_num++;
+      push_free_stack(not_used_page);
     }
-
-    app.mem->pt.pages[not_used_page].free = true;
-    app.mem->pt.free_page_num++;
-    push_free_stack(not_used_page);
-
     semaphoreV(&app.mem->memory_s);
   }
 
   void *ptr = NULL;
   for (int i = 0; i < app.mem->pt.len; i++) {
     bool contiguos_region = true;
-    if (i + num_pages >= app.mem->pt.len)
+    if (i + num_pages >= app.mem->pt.len){
       break;
+    }
     for (int j = i; j < i + num_pages; j++) {
       if (!app.mem->pt.pages[j].free)
         contiguos_region = false;
@@ -99,6 +105,7 @@ void *c_alloc(u32 bytes) {
     if (!contiguos_region)
       continue;
     if (contiguos_region) {
+      c_info("Found %d pages at %d", num_pages, i);
       ptr = (void *)((char *)app.mem->pool + (i * PAGE_SIZE));
       app.mem->pt.free_page_num -= num_pages;
       for (int j = i; j < i + num_pages; j++) {
@@ -198,6 +205,7 @@ int second_chance() {
 
   sem_wait(&app.mem->memory_s);
   do {
+    c_info("Page %d", curr);
     page *p = &app.mem->pt.pages[curr];
     if (!(p->used)) {
       p->used = false; // Usa a  segunda chance da página
