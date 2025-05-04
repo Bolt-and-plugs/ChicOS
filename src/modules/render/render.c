@@ -74,11 +74,13 @@ void render_left_panel() {
     strcpy(app.rdr.output_buff, "init");
   } else {
     int i = 0;
-    // app.pcb.last=10;
-    while (i < app.pcb.last) {
-      mvwprintw(app.rdr.left_panel, i + 2, 1, "%s\tid: %d\tSTATUS= %d",
-                app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid,
-                app.pcb.process_stack[i].status);
+    //app.pcb.last=1;
+    while (i <= app.pcb.last) {
+      mvwprintw(app.rdr.left_panel, i+2, 1, "\tProcess: %s\tid: %d\tSTATUS= %d", 
+        app.pcb.process_stack[i].name,
+        app.pcb.process_stack[i].pid,
+        app.pcb.process_stack[i].status);
+      wrefresh(app.rdr.left_panel);
       i++;
     }
   }
@@ -111,36 +113,43 @@ void render_right_top_panel() {
 }
 
 void read_path(WINDOW *p){
-  nodelay(p, FALSE);
+  nodelay(p, TRUE);  // nodelay TRUE para não travar
+  keypad(p, TRUE);
+
   char path_buffer[MAX_ADDRESS_SIZE];
+  path_buffer[0] = '\0';   // inicializa vazio
 
-  //PARTE PARA MOSTRAR OQ ESTA ESCREVENDO (AINDA NAO FUNCIONA)
-  // keypad(p, TRUE);
-  // int idx = 0, maker;
+  int idx = 0, maker;
 
-  // while(maker = wgetch(p) != '\n') {
+  while(1) {
+    maker = wgetch(p);
 
-  //   if(maker == KEY_BACKSPACE || maker == 127 || maker == 8 && idx > 0) {
-  //       idx--;
-  //       path_buffer[idx] = '\0';
-  //   }
-  //   else if(idx < sizeof(path_buffer)-1){
-  //       path_buffer[idx++] = maker;
-  //       path_buffer[idx] = '\0';
-  //     }
+    if (maker != ERR) {   // só processa se houve tecla
+      if((maker == KEY_BACKSPACE || maker == 127 || maker == 8) && idx > 0) {
+          idx--;
+          path_buffer[idx] = '\0';
+      }
+      else if(idx < sizeof(path_buffer)-1 && maker >= 32 && maker <= 126) {
+          path_buffer[idx++] = maker;
+          path_buffer[idx] = '\0';
+      }
+      else if (maker == '\n') {
+          break;  // ENTER finaliza
+      }
+    }
 
-  //   //refresh the window with the text until now
-  //   mvwprintw(p, 3, 1, "Path: %-*s", COLS-4, "");
-  //   mvwprintw(p, 3, 1, "Path: %s", path_buffer);
-  //   wrefresh(p);
-  // }
+    // Atualiza a janela sempre
+    mvwprintw(p, 3, 1, "Path: %s", path_buffer);    // mostra string
+    wrefresh(p);
+  }
   
   wrefresh(p);
-  mvwgetstr(p, 3, 1, path_buffer);
+  //mvwgetstr(p, 3, 1, path_buffer);
   nodelay(p, TRUE);
 
   if(open_file(path_buffer)) {
     mvwprintw(p, 4, 1, "File openned");
+    mvwprintw(p, 5, 1, "Last file openned path: %s", path_buffer);
   }
   else {
     mvwprintw(p, 4, 1, "Error on file open");
