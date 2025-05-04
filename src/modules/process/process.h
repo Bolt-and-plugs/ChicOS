@@ -23,11 +23,8 @@ typedef struct __process {
   u32 pid;
   p_status status;
   u32 time_to_run;
-
   // memory
-  page_table pt;
   void *address_space;
-
   // disk
   file_buffer *fb;
 } process;
@@ -36,6 +33,7 @@ typedef struct __PCB {
   process process_stack[MAX_PCB];
   u8 curr;
   u8 last; // não pode ser usado de forma confiavel para indicar o ultimo elemento
+  sem_t pcb_s;
 } PCB;
 
 void init_pcb(void);

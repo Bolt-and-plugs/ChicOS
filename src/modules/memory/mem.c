@@ -65,40 +65,57 @@ void clear_mem() {
 }
 
 void *c_alloc(u32 bytes) {
+  c_info("Allocating %d bytes", bytes);
   if (bytes == 0)
     return NULL;
 
-  semaphoreP(&app.mem->memory_s);
   u32 num_pages = (bytes + sizeof(alloc_header) + PAGE_SIZE - 1) / PAGE_SIZE;
 
-  if (num_pages > app.mem->pt.free_page_num || num_pages > app.mem->pt.len) {
-    int not_used_page = second_chance();
-    if (not_used_page == -1) {
-      c_error(MEM_FULL, "Memory full even after page replacement!");
-      semaphoreV(&app.mem->memory_s);
-      return NULL;
-    }
-
-    app.mem->pt.pages[not_used_page].free = true;
-    app.mem->pt.free_page_num++;
-    push_free_stack(not_used_page);
-
-    semaphoreV(&app.mem->memory_s);
+  if (bytes >= app.mem->size) {
+    c_error(MEM_ALLOC_FAIL,
+            "greater chunk of memory than physical memory holds");
+    return NULL;
   }
 
+  c_info("Pages to be allocated: %d\n Free pages: %d", num_pages,
+         app.mem->pt.free_page_num);
+  if (num_pages > app.mem->pt.free_page_num || num_pages > app.mem->pt.len) {
+    c_info("Not enough memory to allocate %d pages", num_pages);
+    while (num_pages > app.mem->pt.free_page_num) {
+      int not_used_page = second_chance();
+      c_info("Not used page %d", not_used_page);
+      if (not_used_page == -1) {
+        c_error(MEM_FULL, "Memory full even after page replacement!");
+        semaphoreV(&app.mem->memory_s);
+        return NULL;
+      }
+
+      semaphoreP(&app.mem->memory_s);
+      app.mem->pt.pages[not_used_page].free = true;
+      app.mem->pt.free_page_num++;
+      semaphoreV(&app.mem->memory_s);
+      push_free_stack(not_used_page);
+    }
+  }
+
+  semaphoreP(&app.mem->memory_s);
   void *ptr = NULL;
   for (int i = 0; i < app.mem->pt.len; i++) {
     bool contiguos_region = true;
-    if (i + num_pages >= app.mem->pt.len)
+    if (i + num_pages > app.mem->pt.len) {
       break;
+    }
     for (int j = i; j < i + num_pages; j++) {
-      if (!app.mem->pt.pages[j].free)
+      if (!app.mem->pt.pages[j].free) {
         contiguos_region = false;
+        break;
+      }
     }
 
     if (!contiguos_region)
       continue;
     if (contiguos_region) {
+      c_info("Found %d pages at %d", num_pages, i);
       ptr = (void *)((char *)app.mem->pool + (i * PAGE_SIZE));
       app.mem->pt.free_page_num -= num_pages;
       for (int j = i; j < i + num_pages; j++) {
@@ -113,14 +130,35 @@ void *c_alloc(u32 bytes) {
   }
 
   if (!ptr) {
-    c_error(MEM_ALLOC_FAIL, "Failed to allocate memory");
     semaphoreV(&app.mem->memory_s);
+    c_crit_error(MEM_ALLOC_FAIL,
+                 "Failed to allocate %d bytes of memory with %d pages", bytes,
+                 num_pages);
     return NULL;
   }
 
   semaphoreV(&app.mem->memory_s);
   c_debug(MEM_STATUS, "Allocated %d pages for %d bytes", num_pages, bytes);
   return (void *)(char *)ptr + sizeof(alloc_header);
+}
+
+void c_realloc(void *curr_region, u32 bytes) {
+  if (!curr_region) {
+    c_error(MEM_REALLOC_FAIL, "memory chunck not allocated for reallocing");
+    return;
+  }
+  alloc_header *h_ptr = get_header(curr_region);
+  if (!curr_region) {
+    c_error(MEM_REALLOC_FAIL, "no header on sent memory: %p", curr_region);
+    return;
+  }
+
+  bytes += (h_ptr->page_num * PAGE_SIZE);
+
+  void *buffer = c_alloc(bytes);
+  memcpy(buffer, curr_region, h_ptr->page_num * PAGE_SIZE);
+  c_dealloc(curr_region);
+  curr_region = buffer;
 }
 
 void push_free_stack(u32 i) {
@@ -144,8 +182,8 @@ void c_dealloc(void *mem) {
     app.mem->pt.pages[i].free = true;
     push_free_stack(i);
   }
-  app.mem->pt.free_page_num += h_ptr->page_num;
 
+  app.mem->pt.free_page_num += h_ptr->page_num;
   semaphoreV(&app.mem->memory_s);
 }
 
@@ -198,14 +236,14 @@ int second_chance() {
 
   sem_wait(&app.mem->memory_s);
   do {
+    c_info("Page %d", curr);
     page *p = &app.mem->pt.pages[curr];
     if (!(p->used)) {
       p->used = false; // Usa a  segunda chance da página
       sem_post(&app.mem->memory_s);
-      return (
-          i = (curr + 1) %
-              app.mem->pt.len); // Retorna o índice da página a ser substituída
-                                // e atualiza o ínicio da lista    }
+      return (i = (curr + 1) %
+                  app.mem->pt.len); // Retorna o índice da página a ser
+                                    // substituída e atualiza o ínicio da lista
     }
     p->used = false;
     curr = (curr + 1) %

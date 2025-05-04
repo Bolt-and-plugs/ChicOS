@@ -4,6 +4,7 @@
 #include "../user/user.h"
 #include <ctype.h>
 #include <locale.h>
+#include <pthread.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -71,6 +72,15 @@ void render_left_panel() {
   if (strcmp(app.rdr.output_buff, "init") != 0) {
     mvwprintw(app.rdr.left_panel, 2, 1, app.rdr.output_buff);
     strcpy(app.rdr.output_buff, "init");
+  } else {
+    int i = 0;
+    // app.pcb.last=10;
+    while (i < app.pcb.last) {
+      mvwprintw(app.rdr.left_panel, i + 2, 1, "%s\tid: %d\tSTATUS= %d",
+                app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid,
+                app.pcb.process_stack[i].status);
+      i++;
+    }
   }
   wrefresh(app.rdr.left_panel);
 }
@@ -100,11 +110,50 @@ void render_right_top_panel() {
   wrefresh(p);
 }
 
+void read_path(WINDOW *p){
+  nodelay(p, FALSE);
+  char path_buffer[MAX_ADDRESS_SIZE];
+
+  //PARTE PARA MOSTRAR OQ ESTA ESCREVENDO (AINDA NAO FUNCIONA)
+  // keypad(p, TRUE);
+  // int idx = 0, maker;
+
+  // while(maker = wgetch(p) != '\n') {
+
+  //   if(maker == KEY_BACKSPACE || maker == 127 || maker == 8 && idx > 0) {
+  //       idx--;
+  //       path_buffer[idx] = '\0';
+  //   }
+  //   else if(idx < sizeof(path_buffer)-1){
+  //       path_buffer[idx++] = maker;
+  //       path_buffer[idx] = '\0';
+  //     }
+
+  //   //refresh the window with the text until now
+  //   mvwprintw(p, 3, 1, "Path: %-*s", COLS-4, "");
+  //   mvwprintw(p, 3, 1, "Path: %s", path_buffer);
+  //   wrefresh(p);
+  // }
+  
+  wrefresh(p);
+  mvwgetstr(p, 3, 1, path_buffer);
+  nodelay(p, TRUE);
+
+  if(open_file(path_buffer)) {
+    mvwprintw(p, 4, 1, "File openned");
+  }
+  else {
+    mvwprintw(p, 4, 1, "Error on file open");
+  }
+}
+
 void render_right_bottom_panel() {
   WINDOW *p = app.rdr.right_bottom;
-  werase(p);
   box(p, 0, 0);
-  mvwprintw(p, 1, 1, "Enter command: (not implemented)");
+  mvwprintw(p, 1, 1, "Press 'p' and enter a path of a file");
+  char char_to_stop = wgetch(p);
+  if(char_to_stop == 'p' || char_to_stop == 'P')
+    read_path(p);
   wrefresh(p);
 }
 
@@ -119,6 +168,7 @@ void init_renderer() {
 
 // Main dashboard loop
 void render_loop() {
+  char path[MAX_ADDRESS_SIZE];
   signal(SIGWINCH, handle_resize);
   nodelay(stdscr, TRUE);
   while (!app.loop_stop) {
@@ -130,6 +180,7 @@ void render_loop() {
       clear_renderer();
       init_renderer();
     }
+    nodelay(app.rdr.right_bottom, TRUE);
     wbkgd(stdscr, COLOR_PAIR(1));
     status_bar();
     render_left_panel();
@@ -242,7 +293,8 @@ user *login_flow() {
 void render_log(const char *statement) {
   semaphoreP(&app.rdr.renderer_s);
   napms(100);
-  strcpy(app.rdr.output_buff, statement);
+  if(app.rdr.output_buff)
+    strcpy(app.rdr.output_buff, statement);
   semaphoreV(&app.rdr.renderer_s);
 }
 

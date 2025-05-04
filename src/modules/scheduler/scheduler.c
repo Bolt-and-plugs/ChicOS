@@ -41,17 +41,16 @@ process *scheduler_get_process() {
     if (candidate->status == BLOCKED)
       continue;
 
-      if (!selected || candidate->fb->h->rw_count > selected->fb->h->rw_count) {
-        selected = candidate;
-        app.pcb.curr = (u8)i;
-      } else if (
-        candidate->fb->h->rw_count == selected->fb->h->rw_count
-        && candidate->pid < selected->pid
-      ) {
-        // nesse caso selected existe e seu rw_count é menor ou igual o de candidate, além do óbvio
-        selected = candidate;
-        app.pcb.curr = (u8)i;
-      }
+    if (!selected || candidate->fb->h->rw_count > selected->fb->h->rw_count) {
+      selected = candidate;
+      app.pcb.curr = (u8)i;
+    } else if (candidate->fb->h->rw_count == selected->fb->h->rw_count &&
+               candidate->pid < selected->pid) {
+      // nesse caso selected existe e seu rw_count é menor ou igual o de
+      // candidate, além do óbvio
+      selected = candidate;
+      app.pcb.curr = (u8)i;
+    }
   }
 
   if (!selected) {
