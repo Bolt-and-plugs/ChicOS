@@ -25,7 +25,7 @@ void cpu_loop() {
 
   while (!app.loop_stop) {
     if (app.debug)
-      usleep(1000000);
+      usleep(100000);
     else
       sleep(1);
 
@@ -38,8 +38,7 @@ void cpu_loop() {
       log_process(running_process->pid);
     }
 
-    if (app.cpu.quantum_time == 1)
-      interrupt_control(process_create, "resources/sint2");
+    interrupt_control(process_create, "resources/sint2");
   }
 }
 

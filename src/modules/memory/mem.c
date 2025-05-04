@@ -69,13 +69,19 @@ void *c_alloc(u32 bytes) {
   if (bytes == 0)
     return NULL;
 
-  semaphoreP(&app.mem->memory_s);
   u32 num_pages = (bytes + sizeof(alloc_header) + PAGE_SIZE - 1) / PAGE_SIZE;
-  c_info("Pages to be allocated: %d", num_pages);
-  c_info("Free pages: %d", app.mem->pt.free_page_num);
+
+  if (bytes >= app.mem->size) {
+    c_error(MEM_ALLOC_FAIL,
+            "greater chunk of memory than physical memory holds");
+    return NULL;
+  }
+
+  c_info("Pages to be allocated: %d\n Free pages: %d", num_pages,
+         app.mem->pt.free_page_num);
   if (num_pages > app.mem->pt.free_page_num || num_pages > app.mem->pt.len) {
     c_info("Not enough memory to allocate %d pages", num_pages);
-    while(num_pages > app.mem->pt.free_page_num){
+    while (num_pages > app.mem->pt.free_page_num) {
       int not_used_page = second_chance();
       c_info("Not used page %d", not_used_page);
       if (not_used_page == -1) {
@@ -83,23 +89,27 @@ void *c_alloc(u32 bytes) {
         semaphoreV(&app.mem->memory_s);
         return NULL;
       }
-  
+
+      semaphoreP(&app.mem->memory_s);
       app.mem->pt.pages[not_used_page].free = true;
       app.mem->pt.free_page_num++;
+      semaphoreV(&app.mem->memory_s);
       push_free_stack(not_used_page);
     }
-    semaphoreV(&app.mem->memory_s);
   }
 
+  semaphoreP(&app.mem->memory_s);
   void *ptr = NULL;
   for (int i = 0; i < app.mem->pt.len; i++) {
     bool contiguos_region = true;
-    if (i + num_pages >= app.mem->pt.len){
+    if (i + num_pages > app.mem->pt.len) {
       break;
     }
     for (int j = i; j < i + num_pages; j++) {
-      if (!app.mem->pt.pages[j].free)
+      if (!app.mem->pt.pages[j].free) {
         contiguos_region = false;
+        break;
+      }
     }
 
     if (!contiguos_region)
@@ -120,8 +130,10 @@ void *c_alloc(u32 bytes) {
   }
 
   if (!ptr) {
-    c_error(MEM_ALLOC_FAIL, "Failed to allocate memory");
     semaphoreV(&app.mem->memory_s);
+    c_crit_error(MEM_ALLOC_FAIL,
+                 "Failed to allocate %d bytes of memory with %d pages", bytes,
+                 num_pages);
     return NULL;
   }
 
@@ -210,10 +222,9 @@ int second_chance() {
     if (!(p->used)) {
       p->used = false; // Usa a  segunda chance da página
       sem_post(&app.mem->memory_s);
-      return (
-          i = (curr + 1) %
-              app.mem->pt.len); // Retorna o índice da página a ser substituída
-                                // e atualiza o ínicio da lista    }
+      return (i = (curr + 1) %
+                  app.mem->pt.len); // Retorna o índice da página a ser
+                                    // substituída e atualiza o ínicio da lista
     }
     p->used = false;
     curr = (curr + 1) %
