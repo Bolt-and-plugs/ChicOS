@@ -75,12 +75,4 @@ void scheduler_kill_process() {
     
     // app.pcb.last--;
   }
-
-  if (!selected) {
-    c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "No runnable process found");
-    return NULL;
-  }
-
-  selected->status = RUNNING;
-  return selected;
 }

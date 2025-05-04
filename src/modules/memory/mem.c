@@ -160,7 +160,7 @@ void *c_realloc(void *curr_region, u32 bytes) {
 
   void *buffer = c_alloc(total_size);
   if (!buffer) {
-    c_errorM_REALLOC_FAIL, "Failed to realloc %d + %d bytes", old_size,
+    c_error(MEM_REALLOC_FAIL, "Failed to realloc %d + %d bytes", old_size,
             bytes);
     return NULL;
   }
