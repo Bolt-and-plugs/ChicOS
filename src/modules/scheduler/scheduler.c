@@ -75,7 +75,7 @@ void scheduler_kill_process() {
       for (int j = i + 1; j < MAX_PCB; j++) { // n sei se da mem leak
         semaphoreP(&app.pcb.pcb_s);
         app.pcb.process_stack[j - 1] = app.pcb.process_stack[j];
-        app.pcb.last--;
+        // app.pcb.last--;
         semaphoreV(&app.pcb.pcb_s);
       }
     }
