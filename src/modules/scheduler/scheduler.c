@@ -61,3 +61,26 @@ process *scheduler_get_process() {
   selected->status = RUNNING;
   return selected;
 }
+
+void scheduler_kill_process() {
+  for (int i = 0; i < MAX_PCB; i++) {
+    process *candidate = &app.pcb.process_stack[i];
+
+    if (candidate->status == KILL) {
+      // aloca os outros processos por cima do processo morto
+      for (int j = i + 1; j < MAX_PCB; j++) { // n sei se da mem leak
+        app.pcb.process_stack[j - 1] = app.pcb.process_stack[j];
+      }
+    }
+    
+    app.pcb.last--;
+  }
+
+  if (!selected) {
+    c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "No runnable process found");
+    return NULL;
+  }
+
+  selected->status = RUNNING;
+  return selected;
+}

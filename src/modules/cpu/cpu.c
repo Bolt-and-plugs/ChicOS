@@ -34,8 +34,13 @@ void cpu_loop() {
       sleep_ms(100);
 
     app.cpu.quantum_time++;
-    scheduler_no_running(); // troca o status "RUNNING" para "READY" em qualquer
-                            // processo
+
+    // troca o status "RUNNING" para "READY" em qualquer processo
+    scheduler_no_running();
+    
+    // mata os processos marcados
+    scheduler_kill_process();
+
     running_process = scheduler_get_process();
     if (running_process) {
       exec_program(running_process);
