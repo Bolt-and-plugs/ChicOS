@@ -154,8 +154,11 @@ void c_realloc(void *curr_region, u32 bytes) {
   }
 
   bytes += (h_ptr->page_num * PAGE_SIZE);
+
+  void *buffer = c_alloc(bytes);
+  memcpy(buffer, curr_region, h_ptr->page_num * PAGE_SIZE);
   c_dealloc(curr_region);
-  curr_region = c_alloc(bytes);
+  curr_region = buffer;
 }
 
 void push_free_stack(u32 i) {

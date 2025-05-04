@@ -164,8 +164,9 @@ void exec_program(process *sint_process) {
           printf("Executing program for %dms...", time);
         sleep(time / 1000);
         if (time >= 1000) {
-          c_realloc(sint_process->address_space,
-                    KB + sizeof(page) * (u32)time / 1000);
+          sint_process->address_space =
+              c_realloc(sint_process->address_space,
+                        KB + sizeof(page) * (u32)time / 1000);
         }
       } else if (strcmp(command, "write") == 0) {
         sint_process->fb->h->rw_count++; // Contabiliza o rw_count
