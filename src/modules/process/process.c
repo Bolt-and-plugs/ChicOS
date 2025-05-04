@@ -90,7 +90,6 @@ void log_process(u32 pid) {
 }
 
 process *p_find(u32 pid) {
-  process *p = NULL;
   u8 retry = 5;
 
   while (retry-- > 0) {

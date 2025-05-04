@@ -293,7 +293,8 @@ user *login_flow() {
 void render_log(const char *statement) {
   semaphoreP(&app.rdr.renderer_s);
   napms(100);
-  strcpy(app.rdr.output_buff, statement);
+  if(app.rdr.output_buff)
+    strcpy(app.rdr.output_buff, statement);
   semaphoreV(&app.rdr.renderer_s);
 }
 

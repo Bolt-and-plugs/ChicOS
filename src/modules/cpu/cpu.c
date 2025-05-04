@@ -38,7 +38,8 @@ void cpu_loop() {
       log_process(running_process->pid);
     }
 
-    interrupt_control(process_create, "resources/sint2");
+    if (app.cpu.quantum_time == 1)
+      interrupt_control(process_create, "resources/sint2");
   }
 }
 
@@ -129,12 +130,17 @@ void exec_program(process *sint_process) {
   }
 
   while (!feof((sint_process->fb->fp)) || sint_process->time_to_run >= 0) {
-    fgets(aux, sizeof(aux), sint_process->fb->fp);
+    if (!fgets(aux, sizeof(aux), sint_process->fb->fp)) {
+      sys_call(process_kill, "%u", sint_process->pid);
+      return;
+    }
+
     strcpy(sem_aux, aux);
     command = strtok(sem_aux, "(");
 
     if (strcmp(command, "V") == 0) {
       semaphore = strtok(NULL, "(");
+      semaphore = strtok(semaphore, ")");
       printf("Acessing critical storage session stored by %s", semaphore);
     } else if (strcmp(command, "P") == 0) {
       semaphore = strtok(NULL, "(");
@@ -144,19 +150,28 @@ void exec_program(process *sint_process) {
       command = strtok(aux, " ");
       if (strcmp(command, "exec") == 0) {
         time = atoi(strtok(NULL, " "));
-        wprintw(app.rdr.left_panel, "Executing program for %dms...", time);
+        if (app.rdr.active)
+          wprintw(app.rdr.left_panel, "Executing program for %dms...", time);
+        else
+          printf("Executing program for %dms...", time);
         sleep(time / 1000);
       } else if (strcmp(command, "write") == 0) {
         sint_process->fb->h->rw_count++; // Contabiliza o rw_count
 
         time = atoi(strtok(NULL, " "));
-        wprintw(app.rdr.left_panel, "Writing on disk for %ums...", time);
+        if (app.rdr.active)
+          wprintw(app.rdr.left_panel, "Writing on disk for %ums...", time);
+        else
+          printf("Writing on disk for %ums...", time);
         sys_call(disk_request, "%d", sint_process->pid);
       } else if (strcmp(command, "read") == 0) {
         sint_process->fb->h->rw_count++; // Contabiliza o rw_count
 
         time = atoi(strtok(NULL, " "));
-        wprintw(app.rdr.left_panel, "Reading on disk for %dms...", time);
+        if (app.rdr.active)
+          wprintw(app.rdr.left_panel, "Reading on disk for %dms...", time);
+        else
+          printf("Executing program for %dms...", time);
         sys_call(disk_request, "%d", sint_process->pid);
       } else if (strcmp(command, "print") == 0) {
       } else {
