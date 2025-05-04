@@ -1,6 +1,7 @@
 #include "file.h"
 #include "../log/log.h"
 #include "../memory/mem.h"
+#include "../semaphore/semaphore.h"
 
 void read_header(file_buffer *fb) {
   file_header *header = c_alloc(sizeof(file_header));
@@ -27,6 +28,7 @@ void read_header(file_buffer *fb) {
     if (c != ' ')
       header->semaphores[i++] = c;
     c = fgetc(fb->fp);
+    init_semaphore(c);
   }
 
   header->semaphores[i] = '\0';
@@ -35,7 +37,7 @@ void read_header(file_buffer *fb) {
   fb->h->rw_count = 0;
 }
 
-// Não vamo mais precisar dessa função linda, carlos
+// Não vamo mais precisar dessa função linda, mario
 i32 counting_io_operations(file_buffer *fb) {
   char aux[128];
   i32 count = 0;

@@ -7,7 +7,6 @@
 
 #define MAX_PCB 10
 #define MAX_SIZE_PROC_NAME 32
-#define MAX_SIZE_SEMAPHORES 32
 #define QUANTUM_TIME (1000 / MAX_PCB)
 
 typedef enum {

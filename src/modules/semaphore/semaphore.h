@@ -1,19 +1,23 @@
 #ifndef _SEMAPHORE
 #define _SEMAPHORE
-
+#define MAX_SIZE_SEMAPHORES 32
 #include <semaphore.h>
 
 
 typedef struct __semaphore {
-  sem_t s;
-  int id;
+  sem_t* s;
+  char nome;
+  u16 id;
 } semaphore;
 
 typedef struct __semaphore_list {
-  semaphore *l;
+  semaphore l[MAX_SIZE_SEMAPHORES];
+  int last;
 } semaphore_list;
 
 void semaphoreP(sem_t *s);
 void semaphoreV(sem_t *s);
+void init_semaphore_list();
+void init_semaphore(char nome);
 
 #endif

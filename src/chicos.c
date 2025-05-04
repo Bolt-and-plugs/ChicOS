@@ -26,6 +26,7 @@ bool set_envvar(const char *mode) {
 void init_app(int mem_size, bool should_render) {
   init_mem(mem_size);
   init_pcb();
+  init_semaphore_list();
 
   signal(SIGINT, handle_signal);
 

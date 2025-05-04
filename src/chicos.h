@@ -20,6 +20,7 @@ typedef struct __App {
   bool debug;
   renderer rdr;
   user *user;
+  semaphore_list *semaphores;
 } App;
 
 void handle_signal(sig_atomic_t signal);
