@@ -31,7 +31,7 @@ void cpu_loop() {
     if (app.debug) // esse if else é onde o gutias tava reclamando q ele da um sleep absurdo
       sleep_ms(100);
     else
-      sleep_ms(100);
+      sleep_ms(1000);
 
     app.cpu.quantum_time++;
 

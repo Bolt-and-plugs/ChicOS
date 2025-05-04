@@ -12,7 +12,7 @@ void *init_disk(void *args) {
 }
 void disk_loop() {
   while (!app.loop_stop) {
-    usleep(100);
+    sleep_ms(1);
     if (app.disk.q.len > 0) {
       exec_io(&app.disk.q.queue[0]);
     }

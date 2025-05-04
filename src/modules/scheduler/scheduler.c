@@ -58,7 +58,7 @@ process *scheduler_get_process() {
   }
 
   if (!selected) {
-    c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "No runnable process found");
+    c_debug(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "No runnable process found");
     return NULL;
   }
 

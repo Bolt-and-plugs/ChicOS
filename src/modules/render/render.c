@@ -70,19 +70,37 @@ void render_left_panel() {
             app.cpu.quantum_time);
 
   if (strcmp(app.rdr.output_buff, "init") != 0) {
-    mvwprintw(app.rdr.left_panel, 2, 1, app.rdr.output_buff);
+    mvwprintw(app.rdr.left_panel, 10, 1, app.rdr.output_buff);
     strcpy(app.rdr.output_buff, "init");
   }
   int i = 0;
   // app.pcb.last=1;
-  while (i <= app.pcb.last) {
+  while (i < app.pcb.last) {
     if (!app.pcb.process_stack[0].address_space) {
-      mvwprintw(app.rdr.left_panel, i + 2, 1, "%u  last: %u", i, app.pcb.last);
+      mvwprintw(app.rdr.left_panel, 4, 1, "%u  last: %u", i, app.pcb.last);
     } else {
-      mvwprintw(app.rdr.left_panel, i + 2, 1,
-                "\tProcess: %s\tid: %d\tSTATUS= % d ",
-                app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid,
-                app.pcb.process_stack[i].status);
+
+      char status[10];
+      switch ((int)app.pcb.process_stack[i].status) {
+      case RUNNING:
+        strcpy(status, "RUNNING");
+        break;
+      case BLOCKED:
+        strcpy(status, "BLOCKED");
+        break;
+      case NEW:
+        strcpy(status, "NEW");
+        break;
+      case READY:
+        strcpy(status, "READY");
+        break;
+      case KILL:
+        strcpy(status, "KILLING");
+        break;
+      }
+      mvwprintw(
+          app.rdr.left_panel, i + 3, 1, "\tProcess: %s \t|id: %d\t|STATUS= %s ",
+          app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid, status);
     }
     i++;
   }
