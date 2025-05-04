@@ -11,6 +11,10 @@
 
 extern App app;
 
+void sleep_ms(int ms) {
+  usleep(ms * 1000);
+}
+
 void *init_cpu(void *arg) {
   if (arg)
     c_info(arg);
@@ -25,9 +29,9 @@ void cpu_loop() {
 
   while (!app.loop_stop) {
     if (app.debug)
-      usleep(1000000);
+      sleep_ms(1000);
     else
-      sleep(1);
+      sleep_ms(1000);
 
     app.cpu.quantum_time++;
     scheduler_no_running(); // troca o status "RUNNING" para "READY" em qualquer processo
