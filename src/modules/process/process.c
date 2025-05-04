@@ -84,8 +84,9 @@ void log_process(u32 pid) {
     strcpy(status, "READY");
     break;
   }
-  snprintf(res, 255, "process: %s\npid: %d\nstatus %s\nrw_count: %d\n", p.name,
-           p.pid, status, p.fb->h->rw_count);
+  // DEBUG INFO
+  // snprintf(res, 255, "process: %s\npid: %d\nstatus %s\nrw_count: %d\n", p.name,
+  //          p.pid, status, p.fb->h->rw_count);
   c_info(res);
 }
 
