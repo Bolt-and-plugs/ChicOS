@@ -170,6 +170,11 @@ void *c_realloc(void *curr_region, u32 bytes) {
 
   return buffer;
 }
+void push_free_stack(u32 i) {
+  if (app.mem->pt.free_stack_top < app.mem->pt.len) {
+    app.mem->pt.free_stack[app.mem->pt.free_stack_top++] = i;
+  }
+}
 
 void c_dealloc(void *mem) {
   semaphoreP(&app.mem->memory_s);
