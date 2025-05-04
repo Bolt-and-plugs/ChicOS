@@ -11,7 +11,7 @@ typedef struct __semaphore {
 } semaphore;
 
 typedef struct __semaphore_list {
-  semaphore l[MAX_SIZE_SEMAPHORES];
+  semaphore *l[MAX_SIZE_SEMAPHORES];
   int last;
 } semaphore_list;
 

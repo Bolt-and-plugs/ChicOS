@@ -28,13 +28,19 @@ void init_semaphore_list() {
   }
   app.semaphores->last = 0;
   for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++) {
-    app.semaphores->l[i].s = NULL;
-    app.semaphores->l[i].nome = '\0';
-    app.semaphores->l[i].id = -1;
+    app.semaphores->l[i]->id = 0;
+    app.semaphores->l[i]->nome ='/0';
+    app.semaphores->l[i]->s = NULL;
   }
 }
 
 void init_semaphore(char nome) {
+  for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++)
+    if (app.semaphores->l[i]->nome == nome) {
+      c_error(SEMAPHORE_INIT_ERROR, "Semaphore already exists");
+      return;
+    }
+  
   if (app.semaphores->last >= MAX_SIZE_SEMAPHORES) {
     c_error(SEMAPHORE_INIT_ERROR, "Semaphore list is full");
     return;
@@ -48,7 +54,6 @@ void init_semaphore(char nome) {
 
   sem_init(sem->s, 0, 1);
 
-  app.semaphores->l[app.semaphores->last] = *sem;
+  app.semaphores->l[app.semaphores->last] = sem;
   app.semaphores->last++;
-  free(sem);
 }
