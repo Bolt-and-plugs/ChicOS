@@ -12,7 +12,7 @@ void scheduler_no_running() {
     }
 
     if (!is_mem_free(app.pcb.process_stack[i].address_space)) {
-      app.pcb.last = i - 1;
+      // app.pcb.last = i - 1;
       break;
     }
 
