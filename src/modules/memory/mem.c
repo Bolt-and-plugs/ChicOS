@@ -32,7 +32,7 @@ void init_mem(u32 mem_size) {
 
   for (u32 i = 0; i < mem->pt.len; i++) {
     mem->pt.pages[i].id = i;
-    mem->pt.pages[i].p = (u32)memory_pool + (i * PAGE_SIZE);
+    mem->pt.pages[i].p = memory_pool + (i * PAGE_SIZE);
     mem->pt.pages[i].free = true;
     mem->pt.pages[i].used = false;
     push_free_stack(i);
