@@ -142,26 +142,33 @@ void *c_alloc(u32 bytes) {
   return (void *)(char *)ptr + sizeof(alloc_header);
 }
 
-void c_realloc(void *curr_region, u32 bytes) {
+void *c_realloc(void *curr_region, u32 bytes) {
   if (!curr_region) {
-    c_error(MEM_REALLOC_FAIL, "memory chunck not allocated for reallocing");
-    return;
+    c_error(MEM_REALLOC_FAIL, "NULL pointer passed to realloc");
+    return NULL;
   }
+
   alloc_header *h_ptr = get_header(curr_region);
-  if (!curr_region) {
-    c_error(MEM_REALLOC_FAIL, "no header on sent memory: %p", curr_region);
-    return;
+  if (!h_ptr) {
+    c_error(MEM_REALLOC_FAIL, "No valid header found for memory: %p",
+            curr_region);
+    return NULL;
   }
 
-  bytes += (h_ptr->page_num * PAGE_SIZE);
+  u32 old_size = h_ptr->page_num * PAGE_SIZE - sizeof(alloc_header);
+  u32 total_size = old_size + bytes;
+
+  void *buffer = c_alloc(total_size);
+  if (!buffer) {
+    c_error(MEM_REALLOC_FAIL, "Failed to realloc %d + %d bytes", old_size,
+            bytes);
+    return NULL;
+  }
+
+  memcpy(buffer, curr_region, old_size);
   c_dealloc(curr_region);
-  curr_region = c_alloc(bytes);
-}
 
-void push_free_stack(u32 i) {
-  if (app.mem->pt.free_stack_top < app.mem->pt.len) {
-    app.mem->pt.free_stack[app.mem->pt.free_stack_top++] = i;
-  }
+  return buffer;
 }
 
 void c_dealloc(void *mem) {
