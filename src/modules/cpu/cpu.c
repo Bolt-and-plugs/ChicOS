@@ -160,9 +160,8 @@ void exec_program(process *sint_process) {
       if (strcmp(command, "exec") == 0) {
         time = atoi(strtok(NULL, " "));
         u32 l_time = time > TIME_SLICE ? TIME_SLICE : time;
-        sleep_ms(l_time); // sleep pelo menor tempo
+        sleep_ms_with_time(l_time, &sint_process->time_to_run);
 
-        sint_process->time_to_run -= l_time;
         if (time >= MAX_TIME_MORE_PAGES)
           sint_process->address_space = c_realloc(sint_process->address_space,
                                                   KB + (sizeof(page) * l_time));
