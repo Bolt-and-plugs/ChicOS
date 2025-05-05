@@ -19,7 +19,9 @@ void scheduler_no_running() {
     if (app.pcb.process_stack[i].status == RUNNING) {
       c_info("proccess %s (%d) was running and is now ready\n",
              app.pcb.process_stack->name, i);
+      semaphoreP(&app.pcb.pcb_s);
       app.pcb.process_stack[i].status = READY;
+      semaphoreV(&app.pcb.pcb_s);
     }
   }
 }

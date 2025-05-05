@@ -99,9 +99,10 @@ void render_left_panel() {
         strcpy(status, "KILLING");
         break;
       }
-      mvwprintw(
-          app.rdr.left_panel, i + 3, 1, "\tProcess: %s \t|\tid: %d\t|\tSTATUS= %s \t|\ttime: %u",
-          app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid, status, app.pcb.process_stack[i].time_to_run);
+      mvwprintw(app.rdr.left_panel, i + 3, 1,
+                "\tProcess: %s \t|\tid: %d\t|\tSTATUS= %s \t|\ttime: %u",
+                app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid,
+                status, app.pcb.process_stack[i].time_to_run);
     }
     i++;
   }
@@ -142,6 +143,8 @@ void read_path(WINDOW *p) {
   nodelay(p, TRUE); // nodelay TRUE para não travar
   keypad(p, TRUE);
 
+  int y, x;
+  getmaxyx(p, y, x);
   char path_buffer[MAX_ADDRESS_SIZE];
   path_buffer[0] = '\0'; // inicializa vazio
 
@@ -163,7 +166,10 @@ void read_path(WINDOW *p) {
     }
 
     // Atualiza a janela sempre
-    mvwprintw(p, 3, 1, "Path: %s", path_buffer); // mostra string
+    mvwprintw(p, 3, 1, "Path: %-*s", x - 4, path_buffer);
+    werase(p);
+    box(p, 0, 0);
+    mvwprintw(p, 3, 1, "Path: %s", path_buffer);
   }
 
   wrefresh(p);
