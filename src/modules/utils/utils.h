@@ -3,7 +3,7 @@
 
 #include "../../defines.h"
 
-void sleep_ms(int ms);
+void sleep_ms(u32 ms);
 
 void sleep_ms_with_time(u32 ms, u32 *ts);
 

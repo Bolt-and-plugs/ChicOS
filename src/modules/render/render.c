@@ -76,11 +76,10 @@ void render_left_panel() {
   }
   int i = 0;
   // app.pcb.last=1;
-  while (i < app.pcb.last && i < MAX_PCB) {
-    if (!app.pcb.process_stack[0].address_space) {
+  while (i < app.pcb.last) {
+    if (!app.pcb.process_stack[0].address_space && app.debug) {
       mvwprintw(app.rdr.left_panel, 4, 1, "%u  last: %u", i, app.pcb.last);
     } else {
-
       char status[10];
       switch ((int)app.pcb.process_stack[i].status) {
       case RUNNING:
@@ -98,10 +97,14 @@ void render_left_panel() {
       case KILL:
         strcpy(status, "KILLING");
         break;
+      default:
+        strcpy(status, "IDLE");
+        break;
       }
-      mvwprintw(
-          app.rdr.left_panel, i + 3, 1, "\tProcess: %s \t|\tid: %d\t|\tSTATUS= %s \t|\ttime: %u",
-          app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid, status, app.pcb.process_stack[i].time_to_run);
+      mvwprintw(app.rdr.left_panel, i + 3, 1,
+                "\tProcess: %s \t|\tid: %d\t|\tSTATUS= %s \t|\ttime: %u",
+                app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid,
+                status, app.pcb.process_stack[i].time_to_run);
     }
     i++;
   }
@@ -142,6 +145,8 @@ void read_path(WINDOW *p) {
   nodelay(p, TRUE); // nodelay TRUE para não travar
   keypad(p, TRUE);
 
+  int y, x;
+  getmaxyx(p, y, x);
   char path_buffer[MAX_ADDRESS_SIZE];
   path_buffer[0] = '\0'; // inicializa vazio
 
@@ -163,7 +168,10 @@ void read_path(WINDOW *p) {
     }
 
     // Atualiza a janela sempre
-    mvwprintw(p, 3, 1, "Path: %s", path_buffer); // mostra string
+    mvwprintw(p, 3, 1, "Path: %-*s", x - 4, path_buffer);
+    werase(p);
+    box(p, 0, 0);
+    mvwprintw(p, 3, 1, "Path: %s", path_buffer);
   }
 
   wrefresh(p);

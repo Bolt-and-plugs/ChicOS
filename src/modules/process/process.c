@@ -123,7 +123,6 @@ void p_kill(u32 pid) {
   if (p->address_space)
     c_dealloc(p->address_space);
   p->status = KILL;
-  // app.pcb.last--;
   sem_post(&app.pcb.pcb_s);
 }
 

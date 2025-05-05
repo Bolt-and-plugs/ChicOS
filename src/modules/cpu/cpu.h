@@ -7,7 +7,7 @@
 #include "../scheduler/scheduler.h"
 #include "../semaphore/semaphore.h"
 
-#define TIME_SLICE 10
+#define TIME_SLICE 1000
 #define MAX_TIME_MORE_PAGES 1000
 
 typedef enum {

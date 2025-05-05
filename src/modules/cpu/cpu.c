@@ -55,6 +55,7 @@ void sys_call(events e, const char *str, ...) {
   char buffer[MAX_ADDRESS_SIZE];
   u32 pid, time, bytes;
   void *ptr;
+  char str_buf[4096];
 
   va_list arg_list;
   va_start(arg_list, str);
@@ -72,7 +73,8 @@ void sys_call(events e, const char *str, ...) {
     p_interrupt(pid);
     break;
   case process_create:
-    pid = p_create((char *)buffer);
+    sscanf(buffer, "%s", str_buf);
+    pid = p_create(str_buf);
     log_process(pid);
     break;
   case process_kill:
@@ -160,20 +162,24 @@ void exec_program(process *sint_process) {
       if (strcmp(command, "exec") == 0) {
         time = atoi(strtok(NULL, " "));
         u32 l_time = time > TIME_SLICE ? TIME_SLICE : time;
+        semaphoreP(&app.cpu.cpu_s);
         sleep_ms_with_time(l_time, &sint_process->time_to_run);
-
         if (time >= MAX_TIME_MORE_PAGES)
           sint_process->address_space = c_realloc(sint_process->address_space,
                                                   KB + (sizeof(page) * l_time));
+        semaphoreV(&app.cpu.cpu_s);
 
         return; // n deixa dar sint_process->time_to_run--
       } else if (strcmp(command, "write") == 0) {
+        semaphoreP(&app.cpu.cpu_s);
         sint_process->fb->h->rw_count++; // Contabiliza o rw_count
-
+        semaphoreV(&app.cpu.cpu_s);
         time = atoi(strtok(NULL, " "));
         sys_call(disk_request, "%d", sint_process->pid);
       } else if (strcmp(command, "read") == 0) {
+        semaphoreP(&app.cpu.cpu_s);
         sint_process->fb->h->rw_count++; // Contabiliza o rw_count
+        semaphoreV(&app.cpu.cpu_s);
 
         time = atoi(strtok(NULL, " "));
         sys_call(disk_request, "%d", sint_process->pid);
@@ -182,7 +188,6 @@ void exec_program(process *sint_process) {
         c_error(DISK_FILE_READ_ERROR, "Found invalid command!: %s", command);
       }
     }
-    sint_process->time_to_run--;
     return;
   }
 
