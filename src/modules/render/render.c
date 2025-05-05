@@ -76,11 +76,10 @@ void render_left_panel() {
   }
   int i = 0;
   // app.pcb.last=1;
-  while (i < app.pcb.last && i < MAX_PCB) {
-    if (!app.pcb.process_stack[0].address_space) {
+  while (i < app.pcb.last) {
+    if (!app.pcb.process_stack[0].address_space && app.debug) {
       mvwprintw(app.rdr.left_panel, 4, 1, "%u  last: %u", i, app.pcb.last);
     } else {
-
       char status[10];
       switch ((int)app.pcb.process_stack[i].status) {
       case RUNNING:
@@ -97,6 +96,9 @@ void render_left_panel() {
         break;
       case KILL:
         strcpy(status, "KILLING");
+        break;
+      default:
+        strcpy(status, "IDLE");
         break;
       }
       mvwprintw(app.rdr.left_panel, i + 3, 1,
