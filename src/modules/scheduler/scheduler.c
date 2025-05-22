@@ -84,6 +84,6 @@ void scheduler_kill_process() {
       app.pcb.last--;
       semaphoreV(&app.pcb.pcb_s);
     }
-  }
 
+  }
 }

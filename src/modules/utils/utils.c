@@ -12,21 +12,16 @@ void sleep_ms_with_time(u32 ms, u32 *ts) {
   }
 }
 
-bool is_power_of_two(uintptr_t x) { return (x & (x - 1)) == 0; }
-
-int parse_string_to_int(char *str) {
-  int size = 0;
-  int length = strlen(str);
-  int val;
-  for (int i = 0, j = length - 1; i < length; i++, j--) {
-    val = (str[i] - '0');
-    if (val > 0 && val < INT32_MAX / pow(10, i))
-      size = size * 10 + val;
+int power(int a, int b) {
+  int o = 1;
+  for (int i = 0; i < b; i++) {
+    o *= a;
   }
-  if (size < 0 || val >= INT32_MAX)
-    return 0;
-  return size;
+
+  return o;
 }
+
+bool is_power_of_two(uintptr_t x) { return (x & (x - 1)) == 0; }
 
 bool valid_int(int v) { return (v > 0 && v < INT32_MAX) ? true : false; }
 
