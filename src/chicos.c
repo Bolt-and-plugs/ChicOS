@@ -81,7 +81,7 @@ void handle_args(int *args, int argc, char **argv) {
 
     // sets memory size on args
     if (strcmp(str_arg, "--mem-size") == 0 || strcmp(str_arg, "-ms") == 0) {
-      int val = parse_string_to_int(argv[i + 1]);
+      int val = atoi(argv[i + 1]);
       if (val <= 0 || val >= 4 * MB || !valid_int(val)) {
         c_crit_error(MEM_ERROR, "Bad system length");
       }
