@@ -20,6 +20,16 @@ void clear_pcb(void) {
   }
 }
 
+u32 get_pid(u32 seed) {
+  bool exists = false;
+
+  for (u8 i = 0; i < MAX_PCB; i++)
+    if (seed == app.pcb.process_stack[i].pid)
+      exists = true;
+
+  return !exists ? app.cpu.quantum_time : get_pid(app.cpu.quantum_time + 1);
+}
+
 u32 p_create(char *address) {
   char ret[16];
   char *name;
@@ -39,7 +49,7 @@ u32 p_create(char *address) {
     return -1;
   }
 
-  process p = {.pid = app.cpu.quantum_time,
+  process p = {.pid = get_pid(app.cpu.quantum_time),
                .status = NEW,
                .address_space = c_alloc(KB),
                .time_to_run = TIME_SLICE};

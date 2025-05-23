@@ -102,7 +102,7 @@ void render_left_panel() {
         break;
       }
       mvwprintw(app.rdr.left_panel, i + 3, 1,
-                "\tProcess: %s \t|\tid: %d\t|\tSTATUS= %s \t|\ttime: %u",
+                "\tProcess: %s \t|\tid: %d\t|\tSTATUS= %.20s\t|\ttime: %u",
                 app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid,
                 status, app.pcb.process_stack[i].time_to_run);
     }
@@ -190,8 +190,10 @@ void render_right_bottom_panel() {
   box(p, 0, 0);
   mvwprintw(p, 1, 1, "Press 'p' and enter a path of a file");
   char char_to_stop = wgetch(p);
+  echo();
   if (char_to_stop == 'p' || char_to_stop == 'P')
     read_path(p);
+  noecho();
   wrefresh(p);
 }
 
