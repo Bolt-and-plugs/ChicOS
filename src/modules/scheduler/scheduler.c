@@ -26,6 +26,7 @@ void scheduler_no_running() {
 
 process *scheduler_get_process() {
   if (!app.pcb.process_stack[0].address_space) {
+    c_info("No process currently running");
     return NULL;
   }
 
@@ -51,7 +52,7 @@ process *scheduler_get_process() {
   }
 
   if (!selected) {
-    c_debug(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "No runnable process found");
+    c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "No runnable process found");
     return NULL;
   }
 
@@ -75,5 +76,6 @@ void scheduler_kill_process() {
       app.pcb.last--;
       semaphoreV(&app.pcb.pcb_s);
     }
+
   }
 }
