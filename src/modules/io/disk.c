@@ -21,12 +21,12 @@ void disk_loop() {
 }
 
 void simulate_io(u32 pid, u32 time_to_run) {
-  blocked_process p = {.time_to_run = time_to_run, .id = pid};
+  io_req p = {.time_to_run = time_to_run, .id = pid};
   q_put(p);
 }
 
-void exec_io(blocked_process *p) {
-  blocked_process local_p = *p;
+void exec_io(io_req *p) {
+  io_req local_p = *p;
   if (p->time_to_run > 0) {
     p->time_to_run--;
     return;
@@ -36,15 +36,15 @@ void exec_io(blocked_process *p) {
   interrupt_control(disk_finish, "%u", local_p.id);
 }
 
-void q_put(blocked_process p) {
+void q_put(io_req p) {
   app.disk.q.queue[app.disk.q.len] = p;
   app.disk.q.len++;
 }
-void q_remove(blocked_process p) {
+void q_remove(io_req p) {
   int i;
   for (i = 0; i < app.disk.q.len - 1; i++) {
     app.disk.q.queue[i] = app.disk.q.queue[i + 1];
   }
   app.disk.q.queue[--app.disk.q.len] =
-      (blocked_process){.time_to_run = 0, .id = 0};
+      (io_req){.time_to_run = 0, .id = 0};
 }
