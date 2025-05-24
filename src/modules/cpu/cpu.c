@@ -51,7 +51,7 @@ void cpu_loop() {
 }
 
 void sys_call(events e, const char *str, ...) {
-  semaphoreP(&app.cpu.cpu_s);
+  sem_wait(&app.cpu.cpu_s);
   char buffer[MAX_ADDRESS_SIZE];
   u32 pid, time, bytes;
   void *ptr;
@@ -92,11 +92,11 @@ void sys_call(events e, const char *str, ...) {
     semaphoreV((sem_t *)buffer);
     break;
   }
-  semaphoreV(&app.cpu.cpu_s);
+  sem_post(&app.cpu.cpu_s);
 }
 
 void interrupt_control(events e, const char *str, ...) {
-  semaphoreP(&app.cpu.cpu_s);
+  sem_wait(&app.cpu.cpu_s);
   char buffer[MAX_ADDRESS_SIZE];
   va_list arg_list;
   va_start(arg_list, str);
@@ -127,7 +127,7 @@ void interrupt_control(events e, const char *str, ...) {
     memory_load_finish(ptr);
     break;
   }
-  semaphoreV(&app.cpu.cpu_s);
+  sem_post(&app.cpu.cpu_s);
 }
 
 void exec_program(process *sint_process) {
@@ -162,24 +162,24 @@ void exec_program(process *sint_process) {
       if (strcmp(command, "exec") == 0) {
         time = atoi(strtok(NULL, " "));
         u32 l_time = time > TIME_SLICE ? TIME_SLICE : time;
-        semaphoreP(&app.cpu.cpu_s);
+        sem_wait(&app.cpu.cpu_s);
         sleep_ms_with_time(l_time, &sint_process->time_to_run);
         if (time >= MAX_TIME_MORE_PAGES)
           sint_process->address_space = c_realloc(sint_process->address_space,
                                                   KB + (sizeof(page) * l_time));
-        semaphoreV(&app.cpu.cpu_s);
+        sem_post(&app.cpu.cpu_s);
 
         return; // n deixa dar sint_process->time_to_run--
       } else if (strcmp(command, "write") == 0) {
-        semaphoreP(&app.cpu.cpu_s);
+        sem_wait(&app.cpu.cpu_s);
         sint_process->fb->h->rw_count++; // Contabiliza o rw_count
-        semaphoreV(&app.cpu.cpu_s);
+        sem_post(&app.cpu.cpu_s);
         time = atoi(strtok(NULL, " "));
         sys_call(disk_request, "%d", sint_process->pid);
       } else if (strcmp(command, "read") == 0) {
-        semaphoreP(&app.cpu.cpu_s);
+        sem_wait(&app.cpu.cpu_s);
         sint_process->fb->h->rw_count++; // Contabiliza o rw_count
-        semaphoreV(&app.cpu.cpu_s);
+        sem_post(&app.cpu.cpu_s);
 
         time = atoi(strtok(NULL, " "));
         sys_call(disk_request, "%d", sint_process->pid);

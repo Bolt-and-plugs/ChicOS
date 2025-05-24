@@ -5,12 +5,16 @@
 
 extern App app;
 
+// TODO criar mutex aqui
+
 void semaphoreP(sem_t *s) {
   if (!s) {
     c_error(SEMAPHORE_WAIT_ERROR, "Semaphore does not exist");
     return;
   }
-  sem_wait(s);
+  // sem_wait(mutex);
+  sem_wait(s); // TODO adaptar semaforo para nossa impl
+  // sem_post(mutex);
 }
 
 void semaphoreV(sem_t *s) {
@@ -18,7 +22,9 @@ void semaphoreV(sem_t *s) {
     c_error(SEMAPHORE_POST_ERROR, "Semaphore does not exist");
     return;
   }
-  sem_post(s);
+  // sem_wait(mutex);
+  sem_post(s); // TODO adaptar semaforo para nossa impl
+  // sem_post(mutex);
 }
 
 void init_semaphore_list() {

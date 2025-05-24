@@ -17,9 +17,9 @@ void scheduler_no_running() {
     if (app.pcb.process_stack[i].status == RUNNING) {
       c_info("proccess %s (%d) was running and is now ready\n",
              app.pcb.process_stack->name, i);
-      semaphoreP(&app.pcb.pcb_s);
+      sem_wait(&app.pcb.pcb_s);
       app.pcb.process_stack[i].status = READY;
-      semaphoreV(&app.pcb.pcb_s);
+      sem_post(&app.pcb.pcb_s);
     }
   }
 }
@@ -41,12 +41,11 @@ process *scheduler_get_process() {
     if (candidate->status == BLOCKED)
       continue;
 
-    if (!selected || candidate->fb->h->rw_count > selected->fb->h->rw_count) {
+    if (!selected ||
+        candidate->fb->h->rw_count < selected->fb->h->rw_count) {
       selected = candidate;
     } else if (candidate->fb->h->rw_count == selected->fb->h->rw_count &&
                candidate->pid < selected->pid) {
-      // nesse caso selected existe e seu rw_count é menor ou igual o de
-      // candidate, além do óbvio
       selected = candidate;
     }
   }
@@ -66,16 +65,15 @@ void scheduler_kill_process() {
     process *candidate = &app.pcb.process_stack[i];
 
     if (candidate->status == KILL) {
-      // aloca os outros processos por cima do processo morto
-      for (int j = i + 1; j < MAX_PCB; j++) { // n sei se da mem leak
-        semaphoreP(&app.pcb.pcb_s);
+      // alloc another process over the dead one
+      for (int j = i + 1; j < MAX_PCB; j++) {
+        sem_wait(&app.pcb.pcb_s);
         app.pcb.process_stack[j - 1] = app.pcb.process_stack[j];
-        semaphoreV(&app.pcb.pcb_s);
+        sem_post(&app.pcb.pcb_s);
       }
-      semaphoreP(&app.pcb.pcb_s);
+      sem_wait(&app.pcb.pcb_s);
       app.pcb.last--;
-      semaphoreV(&app.pcb.pcb_s);
+      sem_post(&app.pcb.pcb_s);
     }
-
   }
 }

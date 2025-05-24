@@ -5,7 +5,7 @@
 #include <semaphore.h>
 
 typedef struct __semaphore {
-  sem_t *s;
+  sem_t *s; // sem mais isso aqui @carlos pilantra
   char nome;
   u16 id;
 } semaphore;

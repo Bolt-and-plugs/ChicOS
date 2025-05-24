@@ -74,6 +74,7 @@ void c_log(log_level level, status_code status, const char *str, ...) {
     puts("");
   }
 
+  // TODO remove from here
   if (app.rdr.active)
     render_log(buffer);
 }

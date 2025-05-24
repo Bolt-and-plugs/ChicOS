@@ -18,8 +18,8 @@ typedef enum {
   disk_finish = 5,       // sinalização de final de E/S para disco
   mem_load_req = 6,       // chamada de operação de carregamento na memória
   mem_load_finish = 7,    // sinalização de final de carregamento
-  fs_request = 8,        // chamada para operação no sistema de arquivos
-  fs_finish = 9,         // sinalização de final de operação no sistema de arquivos
+  // fs_request = 8,        // chamada para operação no sistema de arquivos
+  // fs_finish = 9,         // sinalização de final de operação no sistema de arquivos
   semaphore_p = 10,      // tratamento de bloqueio de processo
   semaphore_v = 11,      // tratamento de desbloqueio de processo
   print_request = 14,    // chamada de operação de entrada/saída para impressão

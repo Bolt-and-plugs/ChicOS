@@ -86,19 +86,19 @@ void *c_alloc(u32 bytes) {
       c_info("Not used page %d", not_used_page);
       if (not_used_page == -1) {
         c_error(MEM_FULL, "Memory full even after page replacement!");
-        semaphoreV(&app.mem->memory_s);
+        sem_post(&app.mem->memory_s);
         return NULL;
       }
 
-      semaphoreP(&app.mem->memory_s);
+      sem_wait(&app.mem->memory_s);
       app.mem->pt.pages[not_used_page].free = true;
       app.mem->pt.free_page_num++;
-      semaphoreV(&app.mem->memory_s);
+      sem_post(&app.mem->memory_s);
       push_free_stack(not_used_page);
     }
   }
 
-  semaphoreP(&app.mem->memory_s);
+  sem_wait(&app.mem->memory_s);
   void *ptr = NULL;
   for (u32 i = 0; i < app.mem->pt.len; i++) {
     bool contiguos_region = true;
@@ -130,14 +130,14 @@ void *c_alloc(u32 bytes) {
   }
 
   if (!ptr) {
-    semaphoreV(&app.mem->memory_s);
+    sem_post(&app.mem->memory_s);
     c_crit_error(MEM_ALLOC_FAIL,
                  "Failed to allocate %d bytes of memory with %d pages", bytes,
                  num_pages);
     return NULL;
   }
 
-  semaphoreV(&app.mem->memory_s);
+  sem_post(&app.mem->memory_s);
   c_debug(MEM_STATUS, "Allocated %d pages for %d bytes", num_pages, bytes);
   return (void *)(char *)ptr + sizeof(alloc_header);
 }
@@ -177,11 +177,11 @@ void push_free_stack(u32 i) {
 }
 
 void c_dealloc(void *mem) {
-  semaphoreP(&app.mem->memory_s);
+  sem_wait(&app.mem->memory_s);
   if (!mem) {
     c_error(MEM_DEALLOC_FAIL,
             "Trying to deallocate a non allocated memory region");
-    semaphoreV(&app.mem->memory_s);
+    sem_post(&app.mem->memory_s);
     return;
   }
 
@@ -193,7 +193,7 @@ void c_dealloc(void *mem) {
   }
 
   app.mem->pt.free_page_num += h_ptr->page_num;
-  semaphoreV(&app.mem->memory_s);
+  sem_post(&app.mem->memory_s);
 }
 
 alloc_header *get_header(void *ptr) {

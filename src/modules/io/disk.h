@@ -4,18 +4,18 @@
 #include "../../defines.h"
 #include "../process/process.h"
 
-typedef struct __blocked_process {
+typedef struct __io_req {
   u32 id;
   u32 time_to_run;
-} blocked_process;
+} io_req;
 
-typedef struct __blocked_queue {
-  blocked_process queue[MAX_PCB];
+typedef struct __queue_req {
+  io_req queue[MAX_PCB];
   u8 len;
-} blocked_queue;
+} queue_req;
 
 typedef struct __disk {
-  blocked_queue q;
+  queue_req q;
   pthread_t disk_t;
   sem_t disk_s;
 } disk;
@@ -23,10 +23,10 @@ typedef struct __disk {
 void *init_disk(void *args);
 void disk_loop();
 void simulate_io(u32 pid, u32 time_to_run);
+void exec_io(io_req *p);
 
-void exec_io(blocked_process *p);
-
-void q_put(blocked_process p);
-void q_remove(blocked_process p);
+// TODO change io logic -> SSTF
+void q_put(io_req p);
+void q_remove(io_req p);
 
 #endif
