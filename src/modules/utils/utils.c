@@ -12,6 +12,8 @@ void sleep_ms_with_time(u32 ms, u32 *ts) {
   }
 }
 
-bool is_power_of_two(uintptr_t x) { return (x & (x - 1)) == 0; }
-
 bool valid_int(int v) { return (v > 0 && v < INT32_MAX) ? true : false; }
+
+u32 abs_diff(u32 a, u32 b) {
+    return a > b ? a - b : b - a;
+}
