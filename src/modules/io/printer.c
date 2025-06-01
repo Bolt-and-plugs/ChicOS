@@ -10,7 +10,7 @@ print_list *head = NULL;
 
 void start_print_queue()
 {
-    head = alloc(sizeof(print_list));
+    head = c_alloc(sizeof(print_list));
     head->prox = NULL;
 }
 
@@ -23,14 +23,14 @@ void add_to_print_queue(char* new_print_request)
     }
     else
     {
-        print_list *new = alloc(sizeof(print_list));
+        print_list *new = c_alloc(sizeof(print_list));
         strcpy(new->print_args, new_print_request);
         new->prox = head;
         head = new;
     }
 }
 
-char* pop_to_print_queue()
+char* pop_from_print_queue()
 {
     if(head == NULL)
     {

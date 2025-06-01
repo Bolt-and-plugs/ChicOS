@@ -338,10 +338,20 @@ void render_log(const char *statement) {
   sem_post(&app.rdr.renderer_s);
 }
 
+void welcome_screen() {
+  WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
+  mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting");
+  mvwprintw(welcome, LINES / 2 +1, (COLS - 11) / 2, "Bem vindo!");
+  wrefresh(welcome);
+  napms(1500);
+  delwin(welcome);
+}
+
 void *init_render(void *arg) {
   bootstrap_ui();
   // app.user = login_flow();
   // if (!app.user) return NULL;
+  welcome_screen();
   init_renderer();
   render_loop();
   clear_renderer();
