@@ -340,10 +340,27 @@ void render_log(const char *statement) {
 
 void welcome_screen() {
   WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
-  mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting");
+  mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting.");
   mvwprintw(welcome, LINES / 2 +1, (COLS - 11) / 2, "Bem vindo!");
   wrefresh(welcome);
-  napms(1500);
+  for(int i=0;i<6;i++)
+  {
+    napms(100);
+    wmove(welcome, LINES / 2, 2);
+    wclrtoeol(welcome);
+    mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting..");
+    wrefresh(welcome);
+    napms(100);
+    wmove(welcome, LINES / 2, 2);
+    wclrtoeol(welcome);
+    mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting...");
+    wrefresh(welcome);
+    napms(100);
+    wmove(welcome, LINES / 2, 2);
+    wclrtoeol(welcome);
+    mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting.");
+    wrefresh(welcome);
+  }
   delwin(welcome);
 }
 
