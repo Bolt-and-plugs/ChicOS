@@ -10,4 +10,4 @@ struct print_list
 
 void start_print_queue();
 void add_to_print_queue(char* new_print_request);
-char* pop_to_print_queue();
+char* pop_from_print_queue();

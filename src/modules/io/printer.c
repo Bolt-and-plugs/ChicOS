@@ -7,11 +7,13 @@
 #include "../../defines.h"
 
 print_list *head = NULL;
+print_list *tail = NULL;
 
 void start_print_queue()
 {
     head = c_alloc(sizeof(print_list));
     head->prox = NULL;
+    tail = head;
 }
 
 void add_to_print_queue(char* new_print_request)
@@ -25,8 +27,8 @@ void add_to_print_queue(char* new_print_request)
     {
         print_list *new = c_alloc(sizeof(print_list));
         strcpy(new->print_args, new_print_request);
-        new->prox = head;
-        head = new;
+        tail->prox = new;
+        tail = new;
     }
 }
 
@@ -40,7 +42,7 @@ char* pop_from_print_queue()
 
     print_list *curr = head, *past = curr;
 
-    while(curr->prox != NULL)
+    while(curr != tail)
     {
         past = curr;
         curr = curr->prox;
@@ -48,7 +50,8 @@ char* pop_from_print_queue()
 
     past->prox = NULL;
     char popped_word[128];
-    strcpy(popped_word, curr->print_args);
+    strcpy(popped_word, tail->print_args);
+    tail = past;
     free(curr);
     return popped_word;
 }

@@ -340,24 +340,40 @@ void render_log(const char *statement) {
 
 void welcome_screen() {
   WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
+  mvwprintw(welcome, 2, (COLS - 98) / 2, 
+  "________/\\\\\\\\\\\\\\\\\\__/\\\\\\___________________________________/\\\\\\\\\\__________/\\\\\\\\\\\\\\\\\\\\\\___        ");
+  mvwprintw(welcome, 3, (COLS - 98) / 2, 
+  " _____/\\\\\\////////__\\/\\\\\\_________________________________/\\\\\\///\\\\\\______/\\\\\\/////////\\\\\\_       ");
+  mvwprintw(welcome, 4, (COLS - 98) / 2, 
+  "  ___/\\\\\\/___________\\/\\\\\\__________/\\\\\\_________________/\\\\\\/__\\///\\\\\\___\\//\\\\\\______\\///__      ");
+  mvwprintw(welcome, 5, (COLS - 98) / 2, 
+  "   __/\\\\\\_____________\\/\\\\\\_________\\///______/\\\\\\\\\\\\\\\\__/\\\\\\______\\//\\\\\\___\\////\\\\\\_________     ");
+  mvwprintw(welcome, 6, (COLS - 98) / 2, 
+  "    _\\/\\\\\\_____________\\/\\\\\\\\\\\\\\\\\\\\___/\\\\\\___/\\\\\\//////__\\/\\\\\\_______\\/\\\\\\______\\////\\\\\\______    ");
+  mvwprintw(welcome, 7, (COLS - 98) / 2, 
+  "     _\\//\\\\\\____________\\/\\\\\\/////\\\\\\_\\/\\\\\\__/\\\\\\_________\\//\\\\\\______/\\\\\\__________\\////\\\\\\___   ");
+  mvwprintw(welcome, 8, (COLS - 98) / 2, 
+  "      __\\///\\\\\\__________\\/\\\\\\___\\/\\\\\\_\\/\\\\\\_\\//\\\\\\_________\\///\\\\\\__/\\\\\\_____/\\\\\\______\\//\\\\\\__  ");
+  mvwprintw(welcome, 9, (COLS - 98) / 2, 
+  "       ____\\////\\\\\\\\\\\\\\\\\\_\\/\\\\\\___\\/\\\\\\_\\/\\\\\\__\\///\\\\\\\\\\\\\\\\____\\///\\\\\\\\\\/_____\\///\\\\\\\\\\\\\\\\\\\\\\/___ ");
+  mvwprintw(welcome, 10, (COLS - 98) / 2, 
+  "        _______\\/////////__\\///____\\///__\\///_____\\////////_______\\/////_________\\///////////_____");
+
   mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting.");
   mvwprintw(welcome, LINES / 2 +1, (COLS - 11) / 2, "Bem vindo!");
   wrefresh(welcome);
   for(int i=0;i<6;i++)
   {
     napms(100);
-    wmove(welcome, LINES / 2, 2);
-    wclrtoeol(welcome);
+    mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "                     ");
     mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting..");
     wrefresh(welcome);
     napms(100);
-    wmove(welcome, LINES / 2, 2);
-    wclrtoeol(welcome);
+    mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "                     ");
     mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting...");
     wrefresh(welcome);
     napms(100);
-    wmove(welcome, LINES / 2, 2);
-    wclrtoeol(welcome);
+    mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "                     ");
     mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting.");
     wrefresh(welcome);
   }
