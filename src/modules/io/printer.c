@@ -40,18 +40,10 @@ char* pop_from_print_queue()
         return NULL;
     }
 
-    print_list *curr = head, *past = curr;
-
-    while(curr != tail)
-    {
-        past = curr;
-        curr = curr->prox;
-    }
-
-    past->prox = NULL;
+    print_list *aux = head; 
     char popped_word[128];
-    strcpy(popped_word, tail->print_args);
-    tail = past;
-    free(curr);
+    strcpy(popped_word, head->print_args);
+    head = head->prox;
+    free(aux);
     return popped_word;
 }
