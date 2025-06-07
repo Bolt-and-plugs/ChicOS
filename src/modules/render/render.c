@@ -359,22 +359,20 @@ void welcome_screen() {
   mvwprintw(welcome, 10, (COLS - 98) / 2, 
   "        _______\\/////////__\\///____\\///__\\///_____\\////////_______\\/////_________\\///////////_____");
 
-  mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting.");
-  mvwprintw(welcome, LINES / 2 +1, (COLS - 11) / 2, "Bem vindo!");
+  mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2, "Starting");
+  mvwprintw(welcome, LINES / 2, (COLS - 11) / 2, "Bem vindo!");
   wrefresh(welcome);
   for(int i=0;i<6;i++)
   {
     napms(100);
-    mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "                     ");
-    mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting..");
+    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 8, "   ");
+    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 8, ".");
     wrefresh(welcome);
     napms(100);
-    mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "                     ");
-    mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting...");
+    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 9, ".");
     wrefresh(welcome);
     napms(100);
-    mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "                     ");
-    mvwprintw(welcome, LINES / 2, (COLS - 19) / 2, "ChicOS is starting.");
+    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 10, ".");
     wrefresh(welcome);
   }
   delwin(welcome);
