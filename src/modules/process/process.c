@@ -51,8 +51,9 @@ u32 p_create(char *address) {
 
   process p = {.pid = get_pid(app.cpu.quantum_time),
                .status = NEW,
-               .address_space = c_alloc(KB),
+               .address_space = NULL,
                .time_to_run = TIME_SLICE};
+  memory_load_req(&p, KB);
 
   strcpy(p.name, name);
   p.fb = open_file(addr);

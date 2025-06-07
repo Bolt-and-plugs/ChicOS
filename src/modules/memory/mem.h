@@ -2,6 +2,7 @@
 #define _MEMORY
 
 #include "../../defines.h"
+#include "../process/process.h"
 
 #define MB 1048576
 #define KB 1024
@@ -65,9 +66,9 @@ float retrieve_free_mem_percentage(void);
 
 float retrieve_used_mem_percentage(void);
 
-void memory_load_finish(void *dest);
+void memory_load_finish(process *p);
 
-void memory_load_req(void *dest, u32 bytes);
+void memory_load_req(process *p, u32 bytes);
 
 int second_chance();
 

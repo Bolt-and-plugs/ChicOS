@@ -214,11 +214,20 @@ void print_page_table_status() {
   }
 }
 
-void memory_load_req(void *dest, u32 bytes) {
-  dest = c_alloc(bytes);
-} // TODO save ptr into process
+void memory_load_req(process *p, u32 bytes) {
+  if (p == NULL) {
+    c_error(MEM_ALLOC_FAIL, "no process allocated for memory load req");
+    return;
+  }
+  
+  p->address_space = c_alloc(bytes);
+  memory_load_finish(p);
+}
 
-void memory_load_finish(void *dest) { c_dealloc(dest); }
+void memory_load_finish(process *p) {
+  // TODO: MARIO MUDA ESSE PRINT AQUI PELO AMOR DE DEUS
+  c_info("memory of process (pid=%d) loaded into %p", (int)p->pid, p->address_space);
+}
 
 bool is_mem_free(void *ptr) {
   if (!ptr)
