@@ -3,7 +3,6 @@
 
 #include "../../defines.h"
 #include "../io/file.h"
-#include "../memory/mem.h"
 
 #define MAX_PCB 10
 #define MAX_SIZE_PROC_NAME 32

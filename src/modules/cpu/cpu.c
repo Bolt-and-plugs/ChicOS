@@ -27,7 +27,7 @@ void cpu_loop() {
   while (!app.loop_stop) {
     if (app.debug) // esse if else é onde o gutias tava reclamando q ele da um
                    // sleep absurdo
-      sleep_ms(100);
+      sleep_ms(10000);
     else
       sleep_ms(1000);
 
