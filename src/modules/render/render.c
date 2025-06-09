@@ -65,7 +65,6 @@ void status_bar() {
 }
 
 void render_left_panel() {
-  // Use um alias para facilitar a leitura
   WINDOW *panel = app.rdr.left_panel;
 
   werase(panel);
