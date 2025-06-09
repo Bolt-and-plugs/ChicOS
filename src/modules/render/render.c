@@ -12,7 +12,11 @@
 extern App app;
 volatile sig_atomic_t resized = 0;
 
-void handle_resize(int sig) { resized = 1; }
+void handle_resize(int sig) {
+  if (sig) {
+    resized = 1;
+  }
+}
 
 // Initialize curses modes
 void bootstrap_ui() {
@@ -138,8 +142,8 @@ void render_right_top_panel() {
   WINDOW *p = app.rdr.right_top;
   werase(p);
   box(p, 0, 0);
-  int y, x;
-  getmaxyx(p, y, x);
+  int x;
+  x = getmaxx(p);
   float used = retrieve_used_mem_percentage();
   int barw = x - 4;
   int filled = (int)(used * barw / 100.0);
@@ -165,8 +169,8 @@ void render_right_top_panel() {
 
 int read_path(WINDOW *p) {
   char path_buffer[MAX_ADDRESS_SIZE] = {0};
-  int max_y, max_x;
-  getmaxyx(p, max_y, max_x);
+  int max_x;
+  max_x = getmaxx(p);
 
   keypad(p, TRUE);
   noecho();
@@ -180,7 +184,7 @@ int read_path(WINDOW *p) {
   box(p, 0, 0);
   wrefresh(p);
 
-  int idx = 0;
+  u32 idx = 0;
   int ch;
 
   while (1) {
@@ -244,7 +248,6 @@ void init_renderer() {
 
 // Main dashboard loop
 void render_loop() {
-  char path[MAX_ADDRESS_SIZE];
   signal(SIGWINCH, handle_resize);
   nodelay(stdscr, TRUE);
   while (!app.loop_stop) {
@@ -289,7 +292,8 @@ user get_credentials(WINDOW *win) {
   mvwgetnstr(u, 1, 1, login.username, sizeof(login.username) - 1);
   noecho();
   keypad(p, TRUE);
-  int ch, pos = 0;
+  int ch = 0;
+  u32 pos;
   wmove(p, 1, 1);
   wrefresh(p);
   while ((ch = wgetch(p)) != '\n') {
@@ -366,7 +370,7 @@ user *login_flow() {
   return usr;
 }
 
-void render_log(const char *statement) {
+void render_log(char *statement) {
   sem_wait(&app.rdr.renderer_s);
   napms(100);
   if (app.rdr.output_buff)
@@ -436,6 +440,8 @@ void welcome_screen() {
 }
 
 void *init_render(void *arg) {
+  if (app.debug)
+    c_info("%s", arg);
   bootstrap_ui();
   // app.user = login_flow();
   // if (!app.user) return NULL;
