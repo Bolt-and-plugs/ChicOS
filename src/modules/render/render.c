@@ -65,51 +65,74 @@ void status_bar() {
 }
 
 void render_left_panel() {
-  werase(app.rdr.left_panel);
-  box(app.rdr.left_panel, 0, 0);
-  mvwprintw(app.rdr.left_panel, 1, 1, "CPU - quantum time: %ld",
-            app.cpu.quantum_time);
+  // Use um alias para facilitar a leitura
+  WINDOW *panel = app.rdr.left_panel;
+
+  werase(panel);
+  box(panel, 0, 0);
+
+  mvwprintw(panel, 1, 2, "CPU Quantum Time: %ld", app.cpu.quantum_time);
+
+  const int start_y = 3;
+  const int col_name_x = 2;
+  const int col_pid_x = 20;
+  const int col_status_x = 28;
+  const int col_time_x = 42;
+  const int col_rw_count = 54;
+
+  // printa cabeçalho da tabela (APENAS UMA VEZ)
+  wattron(panel, A_BOLD | A_UNDERLINE);
+  mvwprintw(panel, start_y, col_name_x, "Process Name");
+  mvwprintw(panel, start_y, col_pid_x, "PID");
+  mvwprintw(panel, start_y, col_status_x, "Status");
+  mvwprintw(panel, start_y, col_time_x, "Time Left");
+  mvwprintw(panel, start_y, col_rw_count, "R/W Count");
+  wattroff(panel, A_BOLD | A_UNDERLINE);
+
+  int current_row = start_y + 1;
+  for (int i = 0; i < app.pcb.last; i++) {
+    char status[10];
+    switch (app.pcb.process_stack[i].status) {
+    case RUNNING:
+      strcpy(status, "RUNNING");
+      break;
+    case BLOCKED:
+      strcpy(status, "BLOCKED");
+      break;
+    case NEW:
+      strcpy(status, "NEW");
+      break;
+    case READY:
+      strcpy(status, "READY");
+      break;
+    case KILL:
+      strcpy(status, "KILLING");
+      break;
+    default:
+      strcpy(status, "IDLE");
+      break;
+    }
+
+    mvwprintw(panel, current_row, col_name_x, "%-15.15s",
+              app.pcb.process_stack[i].name);
+    mvwprintw(panel, current_row, col_pid_x, "%-5d",
+              app.pcb.process_stack[i].pid);
+    mvwprintw(panel, current_row, col_status_x, "%-10s", status);
+    mvwprintw(panel, current_row, col_time_x, "%-5u",
+              app.pcb.process_stack[i].time_to_run);
+    mvwprintw(panel, current_row, col_rw_count, "%-3u",
+              app.pcb.process_stack[i].fb->h->rw_count);
+
+    current_row++;
+  }
 
   if (strcmp(app.rdr.output_buff, "init") != 0) {
-    mvwprintw(app.rdr.left_panel, 10, 1, app.rdr.output_buff);
+    mvwprintw(panel, current_row + 1, 1, "System Message: %s",
+              app.rdr.output_buff);
     strcpy(app.rdr.output_buff, "init");
   }
-  int i = 0;
-  // app.pcb.last=1;
-  while (i < app.pcb.last) {
-    if (!app.pcb.process_stack[0].address_space && app.debug) {
-      mvwprintw(app.rdr.left_panel, 4, 1, "%u  last: %u", i, app.pcb.last);
-    } else {
-      char status[10];
-      switch ((int)app.pcb.process_stack[i].status) {
-      case RUNNING:
-        strcpy(status, "RUNNING");
-        break;
-      case BLOCKED:
-        strcpy(status, "BLOCKED");
-        break;
-      case NEW:
-        strcpy(status, "NEW");
-        break;
-      case READY:
-        strcpy(status, "READY");
-        break;
-      case KILL:
-        strcpy(status, "KILLING");
-        break;
-      default:
-        strcpy(status, "IDLE");
-        break;
-      }
-      mvwprintw(app.rdr.left_panel, i + 3, 1,
-                "\tProcess: %s \t|\tid: %d\t|\tSTATUS= %.20s\t|\ttime: %u",
-                app.pcb.process_stack[i].name, app.pcb.process_stack[i].pid,
-                status, app.pcb.process_stack[i].time_to_run);
-    }
-    i++;
-  }
 
-  wrefresh(app.rdr.left_panel);
+  wrefresh(panel);
 }
 
 void render_right_top_panel() {
@@ -340,30 +363,51 @@ void render_log(const char *statement) {
 
 void welcome_screen() {
   WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
-  mvwprintw(welcome, 2, (COLS - 98) / 2, 
-  "________/\\\\\\\\\\\\\\\\\\__/\\\\\\___________________________________/\\\\\\\\\\__________/\\\\\\\\\\\\\\\\\\\\\\___        ");
-  mvwprintw(welcome, 3, (COLS - 98) / 2, 
-  " _____/\\\\\\////////__\\/\\\\\\_________________________________/\\\\\\///\\\\\\______/\\\\\\/////////\\\\\\_       ");
-  mvwprintw(welcome, 4, (COLS - 98) / 2, 
-  "  ___/\\\\\\/___________\\/\\\\\\__________/\\\\\\_________________/\\\\\\/__\\///\\\\\\___\\//\\\\\\______\\///__      ");
-  mvwprintw(welcome, 5, (COLS - 98) / 2, 
-  "   __/\\\\\\_____________\\/\\\\\\_________\\///______/\\\\\\\\\\\\\\\\__/\\\\\\______\\//\\\\\\___\\////\\\\\\_________     ");
-  mvwprintw(welcome, 6, (COLS - 98) / 2, 
-  "    _\\/\\\\\\_____________\\/\\\\\\\\\\\\\\\\\\\\___/\\\\\\___/\\\\\\//////__\\/\\\\\\_______\\/\\\\\\______\\////\\\\\\______    ");
-  mvwprintw(welcome, 7, (COLS - 98) / 2, 
-  "     _\\//\\\\\\____________\\/\\\\\\/////\\\\\\_\\/\\\\\\__/\\\\\\_________\\//\\\\\\______/\\\\\\__________\\////\\\\\\___   ");
-  mvwprintw(welcome, 8, (COLS - 98) / 2, 
-  "      __\\///\\\\\\__________\\/\\\\\\___\\/\\\\\\_\\/\\\\\\_\\//\\\\\\_________\\///\\\\\\__/\\\\\\_____/\\\\\\______\\//\\\\\\__  ");
-  mvwprintw(welcome, 9, (COLS - 98) / 2, 
-  "       ____\\////\\\\\\\\\\\\\\\\\\_\\/\\\\\\___\\/\\\\\\_\\/\\\\\\__\\///\\\\\\\\\\\\\\\\____\\///\\\\\\\\\\/_____\\///\\\\\\\\\\\\\\\\\\\\\\/___ ");
-  mvwprintw(welcome, 10, (COLS - 98) / 2, 
-  "        _______\\/////////__\\///____\\///__\\///_____\\////////_______\\/////_________\\///////////_____");
+  mvwprintw(
+      welcome, 2, (COLS - 98) / 2,
+      "________/\\\\\\\\\\\\\\\\\\__/\\\\\\___________________________________/"
+      "\\\\\\\\\\__________/\\\\\\\\\\\\\\\\\\\\\\___        ");
+  mvwprintw(welcome, 3, (COLS - 98) / 2,
+            " _____/\\\\\\////////__\\/\\\\\\_________________________________/"
+            "\\\\\\///\\\\\\______/\\\\\\/////////\\\\\\_       ");
+  mvwprintw(welcome, 4, (COLS - 98) / 2,
+            "  "
+            "___/\\\\\\/___________\\/\\\\\\__________/\\\\\\_________________/"
+            "\\\\\\/__\\///\\\\\\___\\//\\\\\\______\\///__      ");
+  mvwprintw(
+      welcome, 5, (COLS - 98) / 2,
+      "   "
+      "__/\\\\\\_____________\\/\\\\\\_________\\///______/\\\\\\\\\\\\\\\\__/"
+      "\\\\\\______\\//\\\\\\___\\////\\\\\\_________     ");
+  mvwprintw(
+      welcome, 6, (COLS - 98) / 2,
+      "    "
+      "_\\/\\\\\\_____________\\/\\\\\\\\\\\\\\\\\\\\___/\\\\\\___/\\\\\\//////"
+      "__\\/\\\\\\_______\\/\\\\\\______\\////\\\\\\______    ");
+  mvwprintw(
+      welcome, 7, (COLS - 98) / 2,
+      "     "
+      "_\\//\\\\\\____________\\/\\\\\\/////\\\\\\_\\/\\\\\\__/"
+      "\\\\\\_________\\//\\\\\\______/\\\\\\__________\\////\\\\\\___   ");
+  mvwprintw(
+      welcome, 8, (COLS - 98) / 2,
+      "      "
+      "__\\///\\\\\\__________\\/\\\\\\___\\/\\\\\\_\\/\\\\\\_\\//"
+      "\\\\\\_________\\///\\\\\\__/\\\\\\_____/\\\\\\______\\//\\\\\\__  ");
+  mvwprintw(welcome, 9, (COLS - 98) / 2,
+            "       "
+            "____\\////\\\\\\\\\\\\\\\\\\_\\/\\\\\\___\\/\\\\\\_\\/\\\\\\__\\//"
+            "/\\\\\\\\\\\\\\\\____\\///\\\\\\\\\\/_____\\///"
+            "\\\\\\\\\\\\\\\\\\\\\\/___ ");
+  mvwprintw(welcome, 10, (COLS - 98) / 2,
+            "        "
+            "_______\\/////////__\\///____\\///__\\///_____\\////////_______\\/"
+            "////_________\\///////////_____");
 
   mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2, "Starting");
   mvwprintw(welcome, LINES / 2, (COLS - 11) / 2, "Bem vindo!");
   wrefresh(welcome);
-  for(int i=0;i<6;i++)
-  {
+  for (int i = 0; i < 6; i++) {
     napms(100);
     mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 8, "   ");
     mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 8, ".");
