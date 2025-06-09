@@ -96,11 +96,10 @@ void handle_args(int *args, int argc, char **argv) {
   // print help
   if (args[0] == HELP) {
     puts("Valid Arguments:");
-    puts("    -ms, --mem-size -> (integer) Memory size in bytes");
-    puts("    -nr, --no_render -> Disables UI rendering");
+    puts("\t-ms, --mem-size -> (integer) Memory size in bytes");
+    puts("\t-nr, --no_render -> (store_true / bool) Disables UI rendering");
     exit(-1);
   }
-
   puts("");
 }
 

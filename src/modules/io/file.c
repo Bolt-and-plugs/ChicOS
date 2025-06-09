@@ -45,26 +45,6 @@ void read_header(file_buffer *fb) {
   fb->h->rw_count = 0;
 }
 
-// Não vamo mais precisar dessa função linda, mario
-i32 counting_io_operations(file_buffer *fb) {
-  char aux[128];
-  i32 count = 0;
-  while (!feof(fb->fp)) {
-    fscanf(fb->fp, "%s", aux);
-    if (strcmp(aux, "write") == 0 || strcmp(aux, "read") == 0) {
-      count++;
-    }
-  }
-
-  char seeker[128];
-  int value;
-  while (!feof(fb->fp)) {
-    fscanf(fb->fp, "%s %d", seeker, &value);
-  }
-
-  return count;
-}
-
 file_buffer *open_file(const char *address) {
   file_buffer *fb = c_alloc(sizeof(file_buffer));
 

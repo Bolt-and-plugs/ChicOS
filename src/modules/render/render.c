@@ -79,7 +79,7 @@ void render_left_panel() {
   const int col_time_x = 42;
   const int col_rw_count = 54;
 
-  // printa cabeçalho da tabela (APENAS UMA VEZ)
+  // print header in a table format (ONLY ONCE)
   wattron(panel, A_BOLD | A_UNDERLINE);
   mvwprintw(panel, start_y, col_name_x, "Process Name");
   mvwprintw(panel, start_y, col_pid_x, "PID");
