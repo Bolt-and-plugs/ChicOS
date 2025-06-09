@@ -164,58 +164,72 @@ void render_right_top_panel() {
   wrefresh(p);
 }
 
-void read_path(WINDOW *p) {
-  nodelay(p, TRUE); // nodelay TRUE para não travar
+int read_path(WINDOW *p) {
+  char path_buffer[MAX_ADDRESS_SIZE] = {0};
+  int max_y, max_x;
+  getmaxyx(p, max_y, max_x);
+
   keypad(p, TRUE);
+  noecho();
 
-  int y, x;
-  getmaxyx(p, y, x);
-  char path_buffer[MAX_ADDRESS_SIZE];
-  path_buffer[0] = '\0'; // inicializa vazio
+  wmove(p, 4, 1);
+  wclrtoeol(p);
+  wmove(p, 5, 1);
+  wclrtoeol(p);
 
-  int idx = 0, maker;
+  mvwprintw(p, 3, 1, "Path: ");
+  box(p, 0, 0);
+  wrefresh(p);
+
+  int idx = 0;
+  int ch;
 
   while (1) {
-    maker = wgetch(p);
+    ch = wgetch(p);
 
-    if (maker != ERR) { // só processa se houve tecla
-      if ((maker == KEY_BACKSPACE || maker == 127 || maker == 8) && idx > 0) {
+    if (ch == ERR)
+      continue;
+
+    if (ch == '\n') {
+      break;
+    } else if (ch == 27) {
+      return 0;
+    } else if (ch == KEY_BACKSPACE || ch == 127 || ch == 8) {
+      if (idx > 0) {
         idx--;
         path_buffer[idx] = '\0';
-      } else if (idx < sizeof(path_buffer) - 1 && maker >= 32 && maker <= 126) {
-        path_buffer[idx++] = maker;
-        path_buffer[idx] = '\0';
-      } else if (maker == '\n') {
-        break; // ENTER finaliza
       }
+    } else if (idx < sizeof(path_buffer) - 1 && ch >= 32 && ch <= 126) {
+      path_buffer[idx++] = ch;
+      path_buffer[idx] = '\0';
     }
 
-    // Atualiza a janela sempre
-    mvwprintw(p, 3, 1, "Path: %-*s", x - 4, path_buffer);
-    werase(p);
-    box(p, 0, 0);
-    mvwprintw(p, 3, 1, "Path: %s", path_buffer);
+    mvwprintw(p, 3, 7, "%-*s", max_x - 8, path_buffer);
+    wmove(p, 3, 7 + idx);
+    wrefresh(p);
   }
-
-  wrefresh(p);
-  nodelay(p, TRUE);
 
   if (valid_path(path_buffer)) {
     interrupt_control(process_create, "%s", path_buffer);
-    mvwprintw(p, 5, 1, "Last file openned path: %s", path_buffer);
+    mvwprintw(p, 5, 1, "Last file opened: %s", path_buffer);
+    wclrtoeol(p);
   } else {
-    mvwprintw(p, 4, 1, "File path is wrong");
+    mvwprintw(p, 4, 1, "Error: Invalid or non-existent file path.");
+    wclrtoeol(p);
   }
-}
 
+  wrefresh(p);
+  return 1;
+}
 void render_right_bottom_panel() {
   WINDOW *p = app.rdr.right_bottom;
   box(p, 0, 0);
   mvwprintw(p, 1, 1, "Press 'p' and enter a path of a file");
   char char_to_stop = wgetch(p);
   echo();
-  if (char_to_stop == 'p' || char_to_stop == 'P')
-    read_path(p);
+  int cancel = 0;
+  if (char_to_stop == 'p' || char_to_stop == 'P' || cancel)
+    cancel = read_path(p);
   noecho();
   wrefresh(p);
 }
