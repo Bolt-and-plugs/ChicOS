@@ -1,8 +1,8 @@
-sint2
+sint3
 2
 1
 424
-s t f
+s t v h d
 
 exec 4000
 read 20
