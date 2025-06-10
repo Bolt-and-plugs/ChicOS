@@ -1,8 +1,8 @@
-sint2
+sint4
 2
 1
 424
-s t f
+s t v h d
 
 exec 4000
 read 20
@@ -10,7 +10,9 @@ exec 500
 read 30
 exec 5000
 V(s)
+V(t)
 exec 200
+P(t)
 exec 10000
 write 20
 P(s)

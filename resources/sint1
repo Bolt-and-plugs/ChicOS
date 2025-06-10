@@ -1,16 +1,14 @@
-sint2
+sint1
 2
 1
 424
-s t f
+s
 
 exec 4000
 read 20
 exec 500
 read 30
 exec 5000
-V(s)
 exec 200
 exec 10000
 write 20
-P(s)

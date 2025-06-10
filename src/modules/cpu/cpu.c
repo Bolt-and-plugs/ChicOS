@@ -50,6 +50,7 @@ void sys_call(events e, const char *str, ...) {
   u32 pid, time, bytes;
   void *ptr;
   char str_buf[4096];
+  char sem;
 
   va_list arg_list;
   va_start(arg_list, str);
@@ -80,10 +81,12 @@ void sys_call(events e, const char *str, ...) {
     memory_load_req(ptr, bytes);
     break;
   case semaphore_p:
-    semaphoreP((sem_t *)buffer);
+    sscanf(buffer, "%c %d", &sem, &pid);
+    semaphoreP(get_semaphore_by_name(sem), pid);
     break;
   case semaphore_v:
-    semaphoreV((sem_t *)buffer);
+    sscanf(buffer, "%c %d", &sem, &pid);
+    semaphoreV(get_semaphore_by_name(sem), pid);
     break;
   }
   sem_post(&app.cpu.cpu_s);
@@ -125,7 +128,7 @@ void interrupt_control(events e, const char *str, ...) {
 }
 
 void exec_program(process *sint_process) {
-  char *semaphore, *command, aux[16], sem_aux[16];
+  char *semaphore_name, *command, aux[16], sem_aux[16];
   u32 time;
 
   if (sint_process->fb->fp == NULL) {
@@ -133,8 +136,7 @@ void exec_program(process *sint_process) {
     return;
   }
 
-  while (!feof((sint_process->fb->fp)) ||
-         sint_process->time_to_run > 0) { // time_to_run é no minimo 0
+  while (!feof((sint_process->fb->fp)) || sint_process->time_to_run > 0) {
     if (!fgets(aux, sizeof(aux), sint_process->fb->fp)) {
       sys_call(process_kill, "%u", sint_process->pid);
       return;
@@ -144,13 +146,13 @@ void exec_program(process *sint_process) {
     command = strtok(sem_aux, "(");
 
     if (strcmp(command, "V") == 0) {
-      semaphore = strtok(NULL, "(");
-      semaphore = strtok(semaphore, ")");
-      // TODO add semaphore
+      semaphore_name = strtok(NULL, "(");
+      semaphore_name = strtok(semaphore_name, ")");
+      sys_call(semaphore_v, "%c %d", semaphore_name[0], sint_process->pid);
     } else if (strcmp(command, "P") == 0) {
-      semaphore = strtok(NULL, "(");
-      semaphore = strtok(semaphore, ")");
-      // TODO add semaphore
+      semaphore_name = strtok(NULL, "(");
+      semaphore_name = strtok(semaphore_name, ")");
+      sys_call(semaphore_p, "%c %d", semaphore_name[0], sint_process->pid);
     } else {
       command = strtok(aux, " ");
       if (strcmp(command, "exec") == 0) {
@@ -163,16 +165,16 @@ void exec_program(process *sint_process) {
                                                   KB + (sizeof(page) * l_time));
         sem_post(&app.cpu.cpu_s);
 
-        return; // n deixa dar sint_process->time_to_run--
+        return;
       } else if (strcmp(command, "write") == 0) {
         sem_wait(&app.cpu.cpu_s);
-        sint_process->fb->h->rw_count++; // Contabiliza o rw_count
+        sint_process->fb->h->rw_count++;
         sem_post(&app.cpu.cpu_s);
         time = atoi(strtok(NULL, " "));
         sys_call(disk_request, "%d", sint_process->pid);
       } else if (strcmp(command, "read") == 0) {
         sem_wait(&app.cpu.cpu_s);
-        sint_process->fb->h->rw_count++; // Contabiliza o rw_count
+        sint_process->fb->h->rw_count++;
         sem_post(&app.cpu.cpu_s);
 
         time = atoi(strtok(NULL, " "));
