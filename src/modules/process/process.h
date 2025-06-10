@@ -2,7 +2,7 @@
 #define _PROCESS
 
 #include "../../defines.h"
-#include "../io/file.h"
+#include "../fs/synt.h"
 
 #define MAX_PCB 10
 #define MAX_SIZE_PROC_NAME 32

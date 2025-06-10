@@ -2,7 +2,7 @@
 #define _CPU
 
 #include "../../defines.h"
-#include "../io/file.h"
+#include "../fs/synt.h"
 #include "../process/process.h"
 #include "../scheduler/scheduler.h"
 #include "../semaphore/semaphore.h"
