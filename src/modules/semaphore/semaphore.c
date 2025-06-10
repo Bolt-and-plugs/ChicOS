@@ -13,13 +13,28 @@ u32 waiter_get(u32 *waiters) {
 
 void waiter_put(u32 *waiters, u32 pid) { return; }
 
+
+void waiter_pop(u32 *waiters, u32 pid) {}
+
+u32 owner_get(u32 *owners) {
+  u32 pid;
+
+  return pid;
+}
+
+int owner_pop(u32 *owners, u32 pid) {
+  return 0;
+}
+
+void owner_put(u32 *owners, u32 pid) { return; }
+
 u32 get_waiters_size(u32 *waiters) {
   u32 count = 0;
 
   return count;
 }
 
-void semaphoreP(semaphore *s, u32 pid) {
+void semaphoreP(semaphore *s, u32 pid) { // update semaphore to return either success or failure (wait or pass)
   if (!s) {
     c_error(SEMAPHORE_WAIT_ERROR, "Semaphore does not exist");
     return;
@@ -27,21 +42,28 @@ void semaphoreP(semaphore *s, u32 pid) {
 
   sem_wait(&app.semaphores->mutex);
   if (get_waiters_size(s->waiters) >= s->value) {
+    // handle if pop is unsuccesful
     waiter_put(s->waiters, pid);
-    // waits here?
     sem_post(&app.semaphores->mutex);
+    return;
   }
 
   s->value--;
+  owner_put(s->owners, pid);
   sem_post(&app.semaphores->mutex);
 }
 
-void semaphoreV(semaphore *s, u32 pid) {
+void semaphoreV(semaphore *s, u32 pid) {// update semaphore to return either success or failure (wait or pass)
   if (!s) {
     c_error(SEMAPHORE_POST_ERROR, "Semaphore does not exist");
     return;
   }
   sem_wait(&app.semaphores->mutex);
+  int op = owner_pop(s->owners, pid);
+  if(op != 0) {
+    // handle if pop is unsuccesful
+    sem_post(&app.semaphores->mutex);
+  }
   s->value++;
   sem_post(&app.semaphores->mutex);
 }
