@@ -8,6 +8,7 @@
 
 print_list *head = NULL;
 print_list *tail = NULL;
+int count = 0;
 
 void start_print_queue() {
   head = c_alloc(sizeof(print_list));
@@ -28,14 +29,17 @@ void add_to_print_queue(char *new_print_request) {
 }
 
 char *pop_from_print_queue() {
-  if (head == NULL) {
-    // c_error()
-    return NULL;
-  }
+    if (head == NULL) {
+        //c_error(QUEUE_EMPTY, "The print queue is empty");
+        return NULL;
+    }
 
     print_list *aux = head;
     char popped_word[128];
+
     strcpy(popped_word, head->print_args);
+    if(head == tail)
+        tail = tail->prox;
     head = head->prox;
     free(aux);
     return popped_word;

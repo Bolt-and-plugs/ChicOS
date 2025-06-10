@@ -7,7 +7,7 @@
 
 typedef struct __renderer {
   bool active;
-  WINDOW *status_win, *left_panel, *right_top, *right_bottom;
+  WINDOW *status_win, *left_panel, *right_top, *right_bottom, *left_bottom;
   char* output_buff;
   sem_t renderer_s;
 } renderer;

@@ -1,6 +1,7 @@
 #include "render.h"
 #include "../../chicos.h"
 #include "../io/disk.h"
+#include "../io/printer.h"
 #include "../memory/mem.h"
 #include "../user/user.h"
 #include <ctype.h>
@@ -48,6 +49,7 @@ void clear_renderer() {
   delwin(app.rdr.left_panel);
   delwin(app.rdr.right_top);
   delwin(app.rdr.right_bottom);
+  delwin(app.rdr.left_bottom);
   if (!app.debug) {
     WINDOW *goodbye = create_newwin(LINES, COLS, 0, 0);
     mvwprintw(goodbye, LINES / 2, (COLS - 10) / 2, "ATÉ MAIS!");
@@ -224,16 +226,47 @@ int read_path(WINDOW *p) {
   wrefresh(p);
   return 1;
 }
+
+void print_event(WINDOW *panel) {
+  char *words_to_print[5];
+  int j=0;
+
+  for(int i=0; i<5;i++){
+    strcpy(words_to_print[i], pop_from_print_queue());
+  }
+
+  while(words_to_print[j] != NULL) {
+    mvwprintw(panel, 1, j+3, words_to_print[j]);
+  }
+  napms(5000);
+}
+
+void render_left_bottom_panel() {
+  WINDOW *panel = app.rdr.left_bottom;
+  werase(panel);
+  box(panel, 0, 0);
+
+  mvwprintw(panel, 0, 1, "Last 5 prints:");
+
+  //print_event(panel);
+
+  wrefresh(panel);
+}
+
 void render_right_bottom_panel() {
   WINDOW *p = app.rdr.right_bottom;
   box(p, 0, 0);
+
   mvwprintw(p, 1, 1, "Press 'p' and enter a path of a file");
+
   char char_to_stop = wgetch(p);
   echo();
+
   int cancel = 0;
   if (char_to_stop == 'p' || char_to_stop == 'P' || cancel)
     cancel = read_path(p);
   noecho();
+
   wrefresh(p);
 }
 
@@ -244,6 +277,7 @@ void init_renderer() {
   app.rdr.right_top = create_newwin((LINES - 1) / 2, COLS / 2, 1, COLS / 2);
   app.rdr.right_bottom =
       create_newwin((LINES - 1) / 2, COLS / 2, 1 + (LINES - 1) / 2, COLS / 2);
+  app.rdr.left_bottom = create_newwin(10, (COLS / 2)-2, LINES - 11, 1);
 }
 
 // Main dashboard loop
@@ -265,6 +299,7 @@ void render_loop() {
     render_left_panel();
     render_right_top_panel();
     render_right_bottom_panel();
+    render_left_bottom_panel();
     napms(100);
   }
 }

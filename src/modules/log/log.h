@@ -35,6 +35,7 @@ typedef enum {
   SEMAPHORE_WAIT_ERROR = 503,
   THREAD_INIT_ERROR = 504,
   INVALID_INPUT = 600,
+  QUEUE_EMPTY = 700,
 
 } status_code;
 
