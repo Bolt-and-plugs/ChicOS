@@ -1,13 +1,11 @@
 #include "cpu.h"
 #include "../../chicos.h"
 #include "../io/disk.h"
-#include "../io/file.h"
 #include "../log/log.h"
 #include "../utils/utils.h"
 
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 extern App app;
@@ -25,18 +23,14 @@ void cpu_loop() {
   process *running_process;
 
   while (!app.loop_stop) {
-    if (app.debug) // esse if else é onde o gutias tava reclamando q ele da um
-                   // sleep absurdo
-      sleep_ms(10000);
-    else
+    if (app.debug)
       sleep_ms(1000);
+    else
+      sleep_ms(5000);
 
     app.cpu.quantum_time++;
 
-    // troca o status "RUNNING" para "READY" em qualquer processo
     scheduler_no_running();
-
-    // mata os processos marcados
     scheduler_kill_process();
 
     running_process = scheduler_get_process();

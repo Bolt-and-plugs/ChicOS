@@ -1,6 +1,6 @@
 #include "user.h"
 #include "../../defines.h"
-#include "../io/file.h"
+#include "../fs/synt.h"
 #include "../log/log.h"
 #include "../memory/mem.h"
 #include <ctype.h>

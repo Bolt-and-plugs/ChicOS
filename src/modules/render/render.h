@@ -14,6 +14,6 @@ typedef struct __renderer {
 
 void print_logo(WINDOW *win);
 void *init_render(void* arg);
-void render_log(const char *statement);
+void render_log(char *statement);
 
 #endif

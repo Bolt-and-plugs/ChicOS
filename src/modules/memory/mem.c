@@ -225,7 +225,7 @@ void memory_load_req(process *p, u32 bytes) {
 }
 
 void memory_load_finish(process *p) {
-  // TODO: MARIO MUDA ESSE PRINT AQUI PELO AMOR DE DEUS
+  // TODO: MARIO PLS FIX THIS
   c_info("memory of process (pid=%d) loaded into %p", (int)p->pid, p->address_space);
 }
 
