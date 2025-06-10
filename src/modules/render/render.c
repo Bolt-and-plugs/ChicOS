@@ -229,14 +229,14 @@ int read_path(WINDOW *p) {
 
 void print_event(WINDOW *panel) {
   char *words_to_print[5];
-  int j=0;
+  int j = 0;
 
-  for(int i=0; i<5;i++){
+  for (int i = 0; i < 5; i++) {
     strcpy(words_to_print[i], pop_from_print_queue());
   }
 
-  while(words_to_print[j] != NULL) {
-    mvwprintw(panel, 1, j+3, words_to_print[j]);
+  while (words_to_print[j] != NULL) {
+    mvwprintw(panel, 1, j + 3, words_to_print[j]);
   }
   napms(5000);
 }
@@ -246,9 +246,9 @@ void render_left_bottom_panel() {
   werase(panel);
   box(panel, 0, 0);
 
-  mvwprintw(panel, 0, 1, "Last 5 prints:");
+  mvwprintw(panel, 0, 1, " System Monitor: ");
 
-  //print_event(panel);
+  // print_event(panel);
 
   wrefresh(panel);
 }
@@ -277,7 +277,7 @@ void init_renderer() {
   app.rdr.right_top = create_newwin((LINES - 1) / 2, COLS / 2, 1, COLS / 2);
   app.rdr.right_bottom =
       create_newwin((LINES - 1) / 2, COLS / 2, 1 + (LINES - 1) / 2, COLS / 2);
-  app.rdr.left_bottom = create_newwin(10, (COLS / 2)-2, LINES - 11, 1);
+  app.rdr.left_bottom = create_newwin(10, (COLS / 2) - 2, LINES - 11, 1);
 }
 
 // Main dashboard loop
@@ -415,6 +415,9 @@ void render_log(char *statement) {
 
 void welcome_screen() {
   WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
+
+  int names_x = 30;
+
   mvwprintw(
       welcome, 2, (COLS - 98) / 2,
       "________/\\\\\\\\\\\\\\\\\\__/\\\\\\___________________________________/"
@@ -456,8 +459,14 @@ void welcome_screen() {
             "_______\\/////////__\\///____\\///__\\///_____\\////////_______\\/"
             "////_________\\///////////_____");
 
-  mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2, "Starting");
+  mvwprintw(welcome, LINES / 2, (COLS - 8) / 2, "Starting");
   mvwprintw(welcome, LINES / 2, (COLS - 11) / 2, "Bem vindo!");
+
+  mvwprintw(welcome, names_x, (COLS - 11) / 2, "Created By");
+  mvwprintw(welcome, names_x + 1, (COLS - 11) / 2, "CEN-s");
+  mvwprintw(welcome, names_x + 2, (COLS - 11) / 2, "Felipe-gsilva");
+  mvwprintw(welcome, names_x + 3, (COLS - 11) / 2, "marioluci0");
+  mvwprintw(welcome, names_x + 4, (COLS - 11) / 2, "RenanSpim");
   wrefresh(welcome);
   for (int i = 0; i < 6; i++) {
     napms(100);
