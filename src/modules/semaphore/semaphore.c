@@ -5,26 +5,45 @@
 
 extern App app;
 
-// TODO criar mutex aqui
+u32 waiter_get(u32 *waiters) {
+  u32 pid;
 
-void semaphoreP(sem_t *s) {
+  return pid;
+}
+
+void waiter_put(u32 *waiters, u32 pid) { return; }
+
+u32 get_waiters_size(u32 *waiters) {
+  u32 count = 0;
+
+  return count;
+}
+
+void semaphoreP(semaphore *s, u32 pid) {
   if (!s) {
     c_error(SEMAPHORE_WAIT_ERROR, "Semaphore does not exist");
     return;
   }
-  // sem_wait(mutex);
-  sem_wait(s); // TODO adaptar semaforo para nossa impl
-  // sem_post(mutex);
+
+  sem_wait(&app.semaphores->mutex);
+  if (get_waiters_size(s->waiters) >= s->value) {
+    waiter_put(s->waiters, pid);
+    // waits here?
+    sem_post(&app.semaphores->mutex);
+  }
+
+  s->value--;
+  sem_post(&app.semaphores->mutex);
 }
 
-void semaphoreV(sem_t *s) {
+void semaphoreV(semaphore *s, u32 pid) {
   if (!s) {
     c_error(SEMAPHORE_POST_ERROR, "Semaphore does not exist");
     return;
   }
-  // sem_wait(mutex);
-  sem_post(s); // TODO adaptar semaforo para nossa impl
-  // sem_post(mutex);
+  sem_wait(&app.semaphores->mutex);
+  s->value++;
+  sem_post(&app.semaphores->mutex);
 }
 
 void init_semaphore_list() {
@@ -37,30 +56,33 @@ void init_semaphore_list() {
   for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++) {
     app.semaphores->l[i].id = 0;
     app.semaphores->l[i].nome = '\0';
-    app.semaphores->l[i].s = NULL;
+    app.semaphores->l[i].waiters = NULL;
   }
 }
 
-void init_semaphore(char nome) {
+int init_semaphore(char nome, u32 pid, u32 value) {
   for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++)
     if (app.semaphores->l[i].nome == nome) {
       c_error(SEMAPHORE_INIT_ERROR, "Semaphore already exists");
-      return;
+      return -1;
     }
 
   if (app.semaphores->last >= MAX_SIZE_SEMAPHORES) {
     c_error(SEMAPHORE_INIT_ERROR, "Semaphore list is full");
-    return;
+    return -1;
   }
 
   semaphore *sem = c_alloc(sizeof(semaphore));
 
   sem->nome = nome;
   sem->id = app.cpu.quantum_time;
-  sem->s = (sem_t *)c_alloc(sizeof(sem_t));
+  sem->waiters = (u32 *)c_alloc(sizeof(u32) * (DEFAULT_WAITERS_NUM + value));
 
-  sem_init(sem->s, 0, 1);
+  sem->owners = (u32 *)c_alloc(sizeof(u32) * (DEFAULT_OWNERS_NUM));
+  sem->owners[0] = pid;
+  sem->value = value;
 
   app.semaphores->l[app.semaphores->last] = *sem;
   app.semaphores->last++;
+  return 0;
 }

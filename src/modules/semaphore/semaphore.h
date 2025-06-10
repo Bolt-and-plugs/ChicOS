@@ -1,23 +1,28 @@
 #ifndef _SEMAPHORE
 #define _SEMAPHORE
 #define MAX_SIZE_SEMAPHORES 32
+#define DEFAULT_WAITERS_NUM 64
+#define DEFAULT_OWNERS_NUM 64
 #include "../../defines.h"
 #include <semaphore.h>
 
 typedef struct __semaphore {
-  sem_t *s; // sem mais isso aqui @carlos_pilantra
-  char nome;
   u16 id;
+  char nome;
+  u32 *waiters;
+  u32 *owners;
+  u8 value;
 } semaphore;
 
 typedef struct __semaphore_list {
   semaphore l[MAX_SIZE_SEMAPHORES];
   int last;
+  sem_t mutex;
 } semaphore_list;
 
-void semaphoreP(sem_t *s);
-void semaphoreV(sem_t *s);
+void semaphoreP(semaphore *s, u32 pid);
+void semaphoreV(semaphore *s, u32 pid);
 void init_semaphore_list();
-void init_semaphore(char nome);
+int init_semaphore(char nome, u32 pid, u32 value);
 
 #endif
