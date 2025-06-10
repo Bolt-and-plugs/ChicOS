@@ -28,14 +28,14 @@ void add_to_print_queue(char *new_print_request) {
   }
 }
 
-char *pop_from_print_queue() {
+char* pop_from_print_queue() {
     if (head == NULL) {
         //c_error(QUEUE_EMPTY, "The print queue is empty");
         return NULL;
     }
 
     print_list *aux = head;
-    char popped_word[128];
+    char *popped_word = c_alloc(sizeof(char)*128);
 
     strcpy(popped_word, head->print_args);
     if(head == tail)
