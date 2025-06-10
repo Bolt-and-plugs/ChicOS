@@ -36,7 +36,7 @@ void read_header(file_buffer *fb) {
     if (c != ' ')
       header->semaphores[i++] = c;
     c = fgetc(fb->fp);
-    init_semaphore(c);
+    init_semaphore(c, 1);
   }
 
   header->semaphores[i] = '\0';

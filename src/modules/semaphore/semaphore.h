@@ -23,6 +23,7 @@ typedef struct __semaphore_list {
 void semaphoreP(semaphore *s, u32 pid);
 void semaphoreV(semaphore *s, u32 pid);
 void init_semaphore_list();
-int init_semaphore(char nome, u32 pid, u32 value);
+int init_semaphore(char nome, u32 value);
+semaphore *get_semaphore_by_name(char name);
 
 #endif

@@ -60,9 +60,9 @@ void init_semaphore_list() {
   }
 }
 
-int init_semaphore(char nome, u32 pid, u32 value) {
+int init_semaphore(char nome, u32 value) {
   for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++)
-    if (app.semaphores->l[i].nome == nome) {
+    if (get_semaphore_by_name(nome) != NULL) {
       c_error(SEMAPHORE_INIT_ERROR, "Semaphore already exists");
       return -1;
     }
@@ -79,10 +79,17 @@ int init_semaphore(char nome, u32 pid, u32 value) {
   sem->waiters = (u32 *)c_alloc(sizeof(u32) * (DEFAULT_WAITERS_NUM + value));
 
   sem->owners = (u32 *)c_alloc(sizeof(u32) * (DEFAULT_OWNERS_NUM));
-  sem->owners[0] = pid;
   sem->value = value;
 
   app.semaphores->l[app.semaphores->last] = *sem;
   app.semaphores->last++;
   return 0;
+}
+
+semaphore *get_semaphore_by_name(char name) {
+  for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++) {
+    if (app.semaphores->l[i].nome == name)
+      return &app.semaphores->l[i];
+  }
+  return NULL;
 }
