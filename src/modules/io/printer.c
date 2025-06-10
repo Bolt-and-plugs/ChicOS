@@ -33,10 +33,10 @@ char *pop_from_print_queue() {
     return NULL;
   }
 
-  print_list *aux = head;
-  char popped_word[128];
-  strcpy(popped_word, head->print_args);
-  head = head->prox;
-  free(aux);
-  return popped_word;
+    print_list *aux = head;
+    char popped_word[128];
+    strcpy(popped_word, head->print_args);
+    head = head->prox;
+    free(aux);
+    return popped_word;
 }
