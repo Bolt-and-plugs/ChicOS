@@ -227,18 +227,8 @@ int read_path(WINDOW *p) {
   return 1;
 }
 
+//TEM Q FAZER ISSO AKI
 void print_event(WINDOW *panel) {
-  char *words_to_print[5];
-  int j = 0;
-
-  for (int i = 0; i < 5; i++) {
-    strcpy(words_to_print[i], pop_from_print_queue());
-  }
-
-  while (words_to_print[j] != NULL) {
-    mvwprintw(panel, 1, j + 3, words_to_print[j]);
-  }
-  napms(5000);
 }
 
 void render_left_bottom_panel() {
@@ -246,9 +236,7 @@ void render_left_bottom_panel() {
   werase(panel);
   box(panel, 0, 0);
 
-  mvwprintw(panel, 0, 1, " System Monitor: ");
-
-  // print_event(panel);
+  mvwprintw(panel, 0, 1, "System monitor:");
 
   wrefresh(panel);
 }
