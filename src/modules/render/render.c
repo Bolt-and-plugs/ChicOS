@@ -416,7 +416,7 @@ void render_log(char *statement) {
 
 void welcome_screen() {
   WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
-  int names_y = 30;
+  int names_y = COLS / 5;
   const char *createdBy = "Created By", *name1 = "CEN-s",
              *name2 = "Felipe-gsilva", *name3 = "marioluci0",
              *name4 = "RenanSpim";
@@ -462,7 +462,7 @@ void welcome_screen() {
             "_______\\/////////__\\///____\\///__\\///_____\\////////_______\\/"
             "////_________\\///////////_____");
 
-  mvwprintw(welcome, LINES / 2, (COLS - 8) / 2, "Starting");
+
   mvwprintw(welcome, LINES / 2, (COLS - 11) / 2, "Bem vindo!");
 
   mvwprintw(welcome, names_y, (COLS - strlen(createdBy)) / 2, "%s", createdBy);
@@ -484,16 +484,32 @@ void welcome_screen() {
             name4);
 
   wrefresh(welcome);
+
+  mvwprintw(welcome, (LINES / 2) + 1, ((COLS - 8) / 2 ) - 4, "Starting");
   for (int i = 0; i < 6; i++) {
-    napms(100);
-    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 8, "   ");
+    napms(150);
+    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 4, "   ");
+    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 4, ".");
+    wrefresh(welcome);
+
+    napms(150);
+    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 5, ".");
+    wrefresh(welcome);
+
+    napms(150);
+    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 6, ".");
+    wrefresh(welcome);
+
+    napms(150);
+    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 7, ".");
+    wrefresh(welcome);
+
+    napms(150);
     mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 8, ".");
     wrefresh(welcome);
-    napms(100);
+
+    napms(150);
     mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 9, ".");
-    wrefresh(welcome);
-    napms(100);
-    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 10, ".");
     wrefresh(welcome);
   }
   delwin(welcome);
