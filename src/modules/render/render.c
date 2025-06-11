@@ -227,6 +227,7 @@ int read_path(WINDOW *p) {
   return 1;
 }
 
+<<<<<<< HEAD
 //TEM Q FAZER ISSO AKI
 void print_event(WINDOW *panel) {
   char *word_to_print = c_alloc(sizeof(char)*128);
@@ -241,6 +242,10 @@ void print_event(WINDOW *panel) {
   if(word_to_print != NULL)
     c_dealloc(word_to_print);
 }
+=======
+// TEM Q FAZER ISSO AKI
+void print_event(WINDOW *panel) {}
+>>>>>>> b2991f4083164c43023f0c079ac9222075b1c500
 
 void render_left_bottom_panel() {
   WINDOW *panel = app.rdr.left_bottom;
@@ -278,7 +283,7 @@ void init_renderer() {
   app.rdr.right_top = create_newwin((LINES - 1) / 2, COLS / 2, 1, COLS / 2);
   app.rdr.right_bottom =
       create_newwin((LINES - 1) / 2, COLS / 2, 1 + (LINES - 1) / 2, COLS / 2);
-  app.rdr.left_bottom = create_newwin(10, (COLS / 2)-2, LINES - 11, 1);
+  app.rdr.left_bottom = create_newwin(10, (COLS / 2) - 2, LINES - 11, 1);
 }
 
 // Main dashboard loop
@@ -416,6 +421,11 @@ void render_log(char *statement) {
 
 void welcome_screen() {
   WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
+  int names_y = 30;
+  const char *createdBy = "Created By", *name1 = "CEN-s",
+             *name2 = "Felipe-gsilva", *name3 = "marioluci0",
+             *name4 = "RenanSpim";
+
   mvwprintw(
       welcome, 2, (COLS - 98) / 2,
       "________/\\\\\\\\\\\\\\\\\\__/\\\\\\___________________________________/"
@@ -457,8 +467,27 @@ void welcome_screen() {
             "_______\\/////////__\\///____\\///__\\///_____\\////////_______\\/"
             "////_________\\///////////_____");
 
-  mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2, "Starting");
+  mvwprintw(welcome, LINES / 2, (COLS - 8) / 2, "Starting");
   mvwprintw(welcome, LINES / 2, (COLS - 11) / 2, "Bem vindo!");
+
+  mvwprintw(welcome, names_y, (COLS - strlen(createdBy)) / 2, "%s", createdBy);
+
+  int name_line_y = names_y + 2;
+  int quadrant_width = COLS / 4;
+
+  mvwprintw(welcome, name_line_y,
+            (0 * quadrant_width) + (quadrant_width - strlen(name1)) / 2, "%s",
+            name1);
+  mvwprintw(welcome, name_line_y,
+            (1 * quadrant_width) + (quadrant_width - strlen(name2)) / 2, "%s",
+            name2);
+  mvwprintw(welcome, name_line_y,
+            (2 * quadrant_width) + (quadrant_width - strlen(name3)) / 2, "%s",
+            name3);
+  mvwprintw(welcome, name_line_y,
+            (3 * quadrant_width) + (quadrant_width - strlen(name4)) / 2, "%s",
+            name4);
+
   wrefresh(welcome);
   for (int i = 0; i < 6; i++) {
     napms(100);

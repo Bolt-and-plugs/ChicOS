@@ -36,6 +36,7 @@ typedef enum {
   THREAD_INIT_ERROR = 504,
   INVALID_INPUT = 600,
   QUEUE_EMPTY = 700,
+  QUEUE_ERROR = 701,
 
 } status_code;
 
