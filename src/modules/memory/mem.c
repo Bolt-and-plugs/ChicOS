@@ -1,7 +1,8 @@
 #include "mem.h"
 #include "../../chicos.h"
 #include "../log/log.h"
-#include "../utils/utils.h"
+#include <ncurses.h>
+#include <stdbool.h>
 
 extern App app;
 
@@ -226,9 +227,10 @@ void memory_load_req(process *p, u32 bytes) {
 }
 
 void memory_load_finish(process *p) {
-  // TODO: MARIO PLS FIX THIS
-  c_info("memory of process (pid=%d) loaded into %p", (int)p->pid,
-         p->address_space);
+  char buffer[4096];
+  sscanf(buffer, "memory of process (pid=%d) loaded into %p", &p->pid,
+         &p->address_space);
+  interrupt_control(print_request, "%s", buffer);
 }
 
 bool is_mem_free(void *ptr) {

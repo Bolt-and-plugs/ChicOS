@@ -227,18 +227,15 @@ int read_path(WINDOW *p) {
   return 1;
 }
 
-void print_event(WINDOW *panel) {
-  char *word_to_print = c_alloc(sizeof(char)*128);
-  word_to_print[0] = '\0';
+void print_event(WINDOW *panel, char* buffer) {
+  buffer[0] = '\0';
 
-  for(int i=0;i<5;i++){
-    pop_from_print_queue(word_to_print);
-    if(word_to_print[0] == '\0')
+  for (int i = 0; i < 5; i++) {
+    pop_from_print_queue(buffer);
+    if (buffer[0] == '\0')
       break;
-    mvwprintw(panel, i+1, 1, "%s", word_to_print);
+    mvwprintw(panel, i + 1, 1, "%s", buffer);
   }
-  if(word_to_print != NULL)
-    c_dealloc(word_to_print);
 }
 
 void render_left_bottom_panel() {
@@ -248,7 +245,9 @@ void render_left_bottom_panel() {
 
   mvwprintw(panel, 0, 1, "System monitor:");
 
-  print_event(panel);
+  char *buffer = c_alloc(sizeof(char) * 128);
+
+  print_event(panel, buffer);
 
   wrefresh(panel);
 }
@@ -461,8 +460,7 @@ void welcome_screen() {
             "_______\\/////////__\\///____\\///__\\///_____\\////////_______\\/"
             "////_________\\///////////_____");
 
-
-  mvwprintw(welcome, (LINES / 2) + 1, ((COLS - 8) / 2 ) - 4, "Starting");
+  mvwprintw(welcome, (LINES / 2) + 1, ((COLS - 8) / 2) - 4, "Starting");
   mvwprintw(welcome, LINES / 2, (COLS - 11) / 2, "Bem vindo!");
 
   mvwprintw(welcome, names_y, (COLS - strlen(createdBy)) / 2, "%s", createdBy);

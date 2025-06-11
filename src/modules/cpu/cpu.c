@@ -1,6 +1,7 @@
 #include "cpu.h"
 #include "../../chicos.h"
 #include "../io/disk.h"
+#include "../io/printer.h"
 #include "../log/log.h"
 #include "../utils/utils.h"
 
@@ -88,6 +89,12 @@ void sys_call(events e, const char *str, ...) {
     sscanf(buffer, "%c %d", &sem, &pid);
     semaphoreV(get_semaphore_by_name(sem), pid);
     break;
+  case print_request:
+    add_to_print_queue((char *)buffer);
+    break;
+  case print_finish:
+    add_to_print_queue((char *)buffer);
+    break;
   }
   sem_post(&app.cpu.cpu_s);
 }
@@ -122,6 +129,12 @@ void interrupt_control(events e, const char *str, ...) {
   case mem_load_finish:
     sscanf(buffer, "%p", &ptr);
     memory_load_finish(ptr);
+    break;
+  case print_request:
+    add_to_print_queue((char *)buffer);
+    break;
+  case print_finish:
+    add_to_print_queue((char *)buffer);
     break;
   }
   sem_post(&app.cpu.cpu_s);
