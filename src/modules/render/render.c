@@ -227,9 +227,8 @@ int read_path(WINDOW *p) {
   return 1;
 }
 
-//TEM Q FAZER ISSO AKI
-void print_event(WINDOW *panel) {
-}
+// TEM Q FAZER ISSO AKI
+void print_event(WINDOW *panel) {}
 
 void render_left_bottom_panel() {
   WINDOW *panel = app.rdr.left_bottom;
@@ -403,8 +402,10 @@ void render_log(char *statement) {
 
 void welcome_screen() {
   WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
-
-  int names_x = 30;
+  int names_y = 30;
+  const char *createdBy = "Created By", *name1 = "CEN-s",
+             *name2 = "Felipe-gsilva", *name3 = "marioluci0",
+             *name4 = "RenanSpim";
 
   mvwprintw(
       welcome, 2, (COLS - 98) / 2,
@@ -450,11 +451,24 @@ void welcome_screen() {
   mvwprintw(welcome, LINES / 2, (COLS - 8) / 2, "Starting");
   mvwprintw(welcome, LINES / 2, (COLS - 11) / 2, "Bem vindo!");
 
-  mvwprintw(welcome, names_x, (COLS - 11) / 2, "Created By");
-  mvwprintw(welcome, names_x + 1, (COLS - 11) / 2, "CEN-s");
-  mvwprintw(welcome, names_x + 2, (COLS - 11) / 2, "Felipe-gsilva");
-  mvwprintw(welcome, names_x + 3, (COLS - 11) / 2, "marioluci0");
-  mvwprintw(welcome, names_x + 4, (COLS - 11) / 2, "RenanSpim");
+  mvwprintw(welcome, names_y, (COLS - strlen(createdBy)) / 2, "%s", createdBy);
+
+  int name_line_y = names_y + 2;
+  int quadrant_width = COLS / 4;
+
+  mvwprintw(welcome, name_line_y,
+            (0 * quadrant_width) + (quadrant_width - strlen(name1)) / 2, "%s",
+            name1);
+  mvwprintw(welcome, name_line_y,
+            (1 * quadrant_width) + (quadrant_width - strlen(name2)) / 2, "%s",
+            name2);
+  mvwprintw(welcome, name_line_y,
+            (2 * quadrant_width) + (quadrant_width - strlen(name3)) / 2, "%s",
+            name3);
+  mvwprintw(welcome, name_line_y,
+            (3 * quadrant_width) + (quadrant_width - strlen(name4)) / 2, "%s",
+            name4);
+
   wrefresh(welcome);
   for (int i = 0; i < 6; i++) {
     napms(100);
