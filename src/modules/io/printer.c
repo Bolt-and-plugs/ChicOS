@@ -17,30 +17,40 @@ void start_print_queue() {
 }
 
 void add_to_print_queue(char *new_print_request) {
+  print_list *new = c_alloc(sizeof(print_list));
   if (head == NULL) {
-    start_print_queue();
-    strcpy(head->print_args, new_print_request);
+    //start_print_queue();
+    strcpy(new->print_args, new_print_request);
+    head = new;
+    tail = new;
+    return;
   } else {
-    print_list *new = c_alloc(sizeof(print_list));
     strcpy(new->print_args, new_print_request);
     tail->prox = new;
     tail = new;
   }
 }
 
-char* pop_from_print_queue() {
+void pop_from_print_queue(char *popped_word) {
     if (head == NULL) {
         //c_error(QUEUE_EMPTY, "The print queue is empty");
-        return NULL;
+        strcpy(popped_word, "");
+        return;
     }
 
-    print_list *aux = head;
-    char *popped_word = c_alloc(sizeof(char)*128);
+    print_list *to_del = head;
 
-    strcpy(popped_word, head->print_args);
-    if(head == tail)
-        tail = tail->prox;
+    strncpy(popped_word, to_del->print_args, 127);
+    popped_word[127] = '\0';
+    if(head == tail){
+      if(head != NULL)
+        c_dealloc(head);
+      head = NULL;
+      tail = NULL;
+      return;
+    }
+
     head = head->prox;
-    free(aux);
-    return popped_word;
+    if(to_del != NULL)
+      c_dealloc(to_del);
 }

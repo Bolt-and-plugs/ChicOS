@@ -229,7 +229,17 @@ int read_path(WINDOW *p) {
 
 //TEM Q FAZER ISSO AKI
 void print_event(WINDOW *panel) {
+  char *word_to_print = c_alloc(sizeof(char)*128);
+  word_to_print[0] = '\0';
 
+  for(int i=0;i<5;i++){
+    pop_from_print_queue(word_to_print);
+    if(word_to_print[0] == '\0')
+      break;
+    mvwprintw(panel, i+1, 1, "%s", word_to_print);
+  }
+  if(word_to_print != NULL)
+    c_dealloc(word_to_print);
 }
 
 void render_left_bottom_panel() {
@@ -238,6 +248,8 @@ void render_left_bottom_panel() {
   box(panel, 0, 0);
 
   mvwprintw(panel, 0, 1, "System monitor:");
+
+  print_event(panel);
 
   wrefresh(panel);
 }
