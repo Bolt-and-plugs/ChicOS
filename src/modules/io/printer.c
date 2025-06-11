@@ -28,7 +28,6 @@ void add_to_print_queue(char *new_print_request) {
   }
 }
 
-<<<<<<< HEAD
 void pop_from_print_queue(char *popped_word) {
     if (head == NULL) {
         //c_error(QUEUE_EMPTY, "The print queue is empty");
@@ -51,21 +50,4 @@ void pop_from_print_queue(char *popped_word) {
     head = head->prox;
     if(to_del != NULL)
       c_dealloc(to_del);
-=======
-char *pop_from_print_queue() {
-  if (head == NULL) {
-    // c_error(QUEUE_EMPTY, "The print queue is empty");
-    return NULL;
-  }
-
-  print_list *aux = head;
-  char *popped_word = c_alloc(sizeof(char) * 128);
-
-  strcpy(popped_word, head->print_args);
-  if (head == tail)
-    tail = tail->prox;
-  head = head->prox;
-  free(aux);
-  return popped_word;
->>>>>>> b2991f4083164c43023f0c079ac9222075b1c500
 }

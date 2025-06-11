@@ -227,7 +227,6 @@ int read_path(WINDOW *p) {
   return 1;
 }
 
-<<<<<<< HEAD
 //TEM Q FAZER ISSO AKI
 void print_event(WINDOW *panel) {
   char *word_to_print = c_alloc(sizeof(char)*128);
@@ -242,10 +241,6 @@ void print_event(WINDOW *panel) {
   if(word_to_print != NULL)
     c_dealloc(word_to_print);
 }
-=======
-// TEM Q FAZER ISSO AKI
-void print_event(WINDOW *panel) {}
->>>>>>> b2991f4083164c43023f0c079ac9222075b1c500
 
 void render_left_bottom_panel() {
   WINDOW *panel = app.rdr.left_bottom;
