@@ -230,7 +230,7 @@ void memory_load_finish(process *p) {
   char buffer[4096];
   sscanf(buffer, "memory of process (pid=%d) loaded into %p", &p->pid,
          &p->address_space);
-  interrupt_control(print_request, "%s", buffer);
+  //interrupt_control(print_request, "%s", buffer);
 }
 
 bool is_mem_free(void *ptr) {
