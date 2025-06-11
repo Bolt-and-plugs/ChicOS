@@ -486,9 +486,9 @@ void welcome_screen() {
   wrefresh(welcome);
 
   mvwprintw(welcome, (LINES / 2) + 1, ((COLS - 8) / 2 ) - 4, "Starting");
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 3; i++) {
     napms(150);
-    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 4, "   ");
+    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 4, "      ");
     mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 4, ".");
     wrefresh(welcome);
 
