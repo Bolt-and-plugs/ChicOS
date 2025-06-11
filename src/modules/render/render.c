@@ -227,7 +227,6 @@ int read_path(WINDOW *p) {
   return 1;
 }
 
-//TEM Q FAZER ISSO AKI
 void print_event(WINDOW *panel) {
   char *word_to_print = c_alloc(sizeof(char)*128);
   word_to_print[0] = '\0';
@@ -274,11 +273,11 @@ void render_right_bottom_panel() {
 // Initialize renderer windows
 void init_renderer() {
   app.rdr.status_win = create_newwin(1, COLS, 0, 0);
-  app.rdr.left_panel = create_newwin(LINES - 1, COLS / 2, 1, 0);
+  app.rdr.left_panel = create_newwin(LINES - 11, COLS / 2, 1, 0);
   app.rdr.right_top = create_newwin((LINES - 1) / 2, COLS / 2, 1, COLS / 2);
   app.rdr.right_bottom =
       create_newwin((LINES - 1) / 2, COLS / 2, 1 + (LINES - 1) / 2, COLS / 2);
-  app.rdr.left_bottom = create_newwin(10, (COLS / 2) - 2, LINES - 11, 1);
+  app.rdr.left_bottom = create_newwin(10, COLS / 2, LINES - 10, 0);
 }
 
 // Main dashboard loop
@@ -462,7 +461,7 @@ void welcome_screen() {
             "_______\\/////////__\\///____\\///__\\///_____\\////////_______\\/"
             "////_________\\///////////_____");
 
-  mvwprintw(welcome, LINES / 2, (COLS - 8) / 2, "Starting");
+  mvwprintw(welcome, (LINES / 2)+1, (COLS - 8) / 2, "Starting");
   mvwprintw(welcome, LINES / 2, (COLS - 11) / 2, "Bem vindo!");
 
   mvwprintw(welcome, names_y, (COLS - strlen(createdBy)) / 2, "%s", createdBy);
