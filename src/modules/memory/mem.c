@@ -115,7 +115,8 @@ void *c_alloc(u32 bytes) {
     if (!contiguos_region)
       continue;
     if (contiguos_region) {
-      c_info("Found %d pages at %d", num_pages, i);
+      c_info("Found %d contiguos pages at range %d - %d", num_pages, i,
+             num_pages + i);
       ptr = (void *)((char *)app.mem->pool + (i * PAGE_SIZE));
       app.mem->pt.free_page_num -= num_pages;
       for (u32 j = i; j < i + num_pages; j++) {
@@ -219,14 +220,15 @@ void memory_load_req(process *p, u32 bytes) {
     c_error(MEM_ALLOC_FAIL, "no process allocated for memory load req");
     return;
   }
-  
+
   p->address_space = c_alloc(bytes);
   memory_load_finish(p);
 }
 
 void memory_load_finish(process *p) {
   // TODO: MARIO PLS FIX THIS
-  c_info("memory of process (pid=%d) loaded into %p", (int)p->pid, p->address_space);
+  c_info("memory of process (pid=%d) loaded into %p", (int)p->pid,
+         p->address_space);
 }
 
 bool is_mem_free(void *ptr) {
