@@ -24,7 +24,7 @@ typedef struct __process {
   // memory
   void *address_space;
   // disk
-  file_buffer *fb;
+  synt_buffer *fb;
 } process;
 
 typedef struct __PCB {

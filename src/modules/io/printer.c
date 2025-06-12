@@ -16,7 +16,7 @@ void init_print_queue() {
 void add_to_print_queue(char *new_print_request) {
   print_list *new = c_alloc(sizeof(print_list));
   if (head == NULL) {
-    // init_print_queue();
+    //init_print_queue();
     strcpy(new->print_args, new_print_request);
     head = new;
     tail = new;

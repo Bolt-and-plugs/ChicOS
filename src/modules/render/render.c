@@ -19,12 +19,13 @@ void handle_resize(int sig) {
   }
 }
 
-// Initialize curses modes
 void bootstrap_ui() {
   sem_init(&app.rdr.renderer_s, 0, 1);
   app.rdr.active = true;
   app.rdr.output_buff = c_alloc(4096);
+  app.rdr.print_event_buff = c_alloc(4096);
   strcpy(app.rdr.output_buff, "init");
+  strcpy(app.rdr.print_event_buff, "Initializing");
   setlocale(LC_ALL, "");
   initscr();
   cbreak();
@@ -36,7 +37,6 @@ void bootstrap_ui() {
   refresh();
 }
 
-// Create a boxed window
 WINDOW *create_newwin(int h, int w, int y, int x) {
   WINDOW *win = newwin(h, w, y, x);
   box(win, 0, 0);
@@ -131,7 +131,7 @@ void render_left_panel() {
     current_row++;
   }
 
-  if (strcmp(app.rdr.output_buff, "init") != 0) {
+  if (strcmp(app.rdr.output_buff, "init") != 0 && app.debug) {
     mvwprintw(panel, current_row + 1, 1, "System Message: %s",
               app.rdr.output_buff);
     strcpy(app.rdr.output_buff, "init");
@@ -227,14 +227,14 @@ int read_path(WINDOW *p) {
   return 1;
 }
 
-void print_event(WINDOW *panel, char* buffer) {
-  buffer[0] = '\0';
+void print_event(WINDOW *panel) {
+  app.rdr.print_event_buff[0] = '\0';
 
   for (int i = 0; i < 5; i++) {
-    pop_from_print_queue(buffer);
-    if (buffer[0] == '\0')
+    pop_from_print_queue(app.rdr.print_event_buff);
+    if (app.rdr.print_event_buff[0] == '\0')
       break;
-    mvwprintw(panel, i + 1, 1, "%s", buffer);
+    mvwprintw(panel, i + 1, 1, "%s", app.rdr.print_event_buff);
   }
 }
 
@@ -245,9 +245,7 @@ void render_left_bottom_panel() {
 
   mvwprintw(panel, 0, 1, "System monitor:");
 
-  char *buffer = c_alloc(sizeof(char) * 128);
-
-  print_event(panel, buffer);
+  print_event(panel);
 
   wrefresh(panel);
 }
@@ -269,7 +267,6 @@ void render_right_bottom_panel() {
   wrefresh(p);
 }
 
-// Initialize renderer windows
 void init_renderer() {
   app.rdr.status_win = create_newwin(1, COLS, 0, 0);
   app.rdr.left_panel = create_newwin(LINES - 11, COLS / 2, 1, 0);
@@ -279,7 +276,6 @@ void init_renderer() {
   app.rdr.left_bottom = create_newwin(10, COLS / 2, LINES - 10, 0);
 }
 
-// Main dashboard loop
 void render_loop() {
   signal(SIGWINCH, handle_resize);
   nodelay(stdscr, TRUE);
@@ -303,7 +299,6 @@ void render_loop() {
   }
 }
 
-// Get credentials via a simple form
 user get_credentials(WINDOW *win) {
   user login = {0};
   int y, x;
@@ -320,7 +315,6 @@ user get_credentials(WINDOW *win) {
   box(p, 0, 0);
   wrefresh(p);
   wrefresh(win);
-  // input
   echo();
   curs_set(1);
   mvwgetnstr(u, 1, 1, login.username, sizeof(login.username) - 1);
@@ -361,7 +355,6 @@ user *login_flow() {
     box(w, 0, 0);
     wrefresh(w);
 
-    // Get credentials
     login = get_credentials(w);
     retrieve_addr(&login, addr, sizeof(addr));
 
@@ -387,11 +380,9 @@ user *login_flow() {
         napms(2000);
       }
     } else if (usr != NULL) {
-      // Existing user and credentials matched
       app.user = usr;
       logged_in = true;
     } else {
-      // Wrong password
       mvwprintw(w, 2, 2, "Wrong password! Try again");
       wrefresh(w);
       napms(1000);

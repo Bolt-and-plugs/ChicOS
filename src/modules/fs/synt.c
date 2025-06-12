@@ -11,8 +11,8 @@ bool valid_path(const char *path) {
   return true;
 }
 
-void read_header(file_buffer *fb) {
-  file_header *header = c_alloc(sizeof(file_header));
+void read_header(synt_buffer *fb) {
+  synt_header *header = c_alloc(sizeof(synt_header));
   char c;
   int i = 0;
   char aux[256];
@@ -45,28 +45,28 @@ void read_header(file_buffer *fb) {
   fb->h->rw_count = 0;
 }
 
-file_buffer *open_file(const char *address) {
-  file_buffer *fb = c_alloc(sizeof(file_buffer));
+synt_buffer *open_file(const char *address) {
+  synt_buffer *sb = c_alloc(sizeof(synt_buffer));
 
   if (!address || strlen(address) >= MAX_ADDRESS_SIZE) {
     c_error(INVALID_INPUT, "address is bigger than max address or is missing");
     return NULL;
   }
 
-  strcpy(fb->address, address);
-  fb->fp = fopen(address, "r");
+  strcpy(sb->address, address);
+  sb->fp = fopen(address, "r");
 
-  if (!fb->fp) {
+  if (!sb->fp) {
     c_error(DISK_OPEN_ERROR, "Could not open file");
     return NULL;
   }
 
-  read_header(fb);
+  read_header(sb);
 
-  return fb;
+  return sb;
 }
 
-void close_file(file_buffer *fb) {
+void close_file(synt_buffer *fb) {
   if (fb->fp)
     fclose(fb->fp);
   c_dealloc(fb->h);

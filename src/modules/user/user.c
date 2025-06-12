@@ -1,6 +1,5 @@
 #include "user.h"
-#include "../../defines.h"
-#include "../fs/synt.h"
+#include "../../chicos.h"
 #include "../log/log.h"
 #include "../memory/mem.h"
 #include <ctype.h>
@@ -11,7 +10,8 @@
 #define MAX_LINE_LENGTH 64
 #define LOG_FILE "auth.log"
 
-// Get formatted timestamp for logs
+extern App app;
+
 const char *current_timestamp() {
   static char buffer[20];
   time_t now = time(NULL);
@@ -19,7 +19,6 @@ const char *current_timestamp() {
   return buffer;
 }
 
-// Log authentication events
 void log_event(const char *event, const char *username) {
   FILE *log = fopen(LOG_FILE, "a");
   if (log) {
@@ -28,31 +27,26 @@ void log_event(const char *event, const char *username) {
   }
 }
 
-// Get user file path
 void retrieve_addr(const user *u, char *dest, size_t addr_sz) {
   mkdir("resources/data", 0755);
   snprintf(dest, addr_sz, "resources/data/%s.us", u->username);
 }
 
-// Simple trim function
 void trim_whitespace(char *str) {
   if (!str)
     return;
 
-  // Trim trailing spaces
   char *end = str + strlen(str) - 1;
   while (end >= str && isspace((unsigned char)*end))
     end--;
   *(end + 1) = '\0';
 
-  // Trim leading spaces
   char *start = str;
   while (isspace((unsigned char)*start))
     start++;
   memmove(str, start, end - start + 2);
 }
 
-// Placeholder encryption
 char *encrypt(const char *password) {
   // TODO: Implement real encryption
   return (char *)password;
@@ -75,7 +69,6 @@ void write_login_data(const user *u) {
     return;
   }
 
-  // Write structured format
   fprintf(fp, "USERNAME: %s\nPASSWORD: %s\n", u->username,
           encrypt(u->password));
   fclose(fp);
@@ -110,7 +103,6 @@ user *read_login_data(const user *u) {
   }
   fclose(fp);
 
-  // Validation
   if (fields_found != 2) {
     log_event("INVALID_FILE_FORMAT", u->username);
     c_dealloc(local);
@@ -119,15 +111,15 @@ user *read_login_data(const user *u) {
 
   log_event("FILE_READ_OK", u->username);
 
-  // Debug logging (disable in production)
-  FILE *log = fopen(LOG_FILE, "a");
-  if (log) {
-    fprintf(log, "[%s] DEBUG Read values - username: '%s' password: '%s'\n",
-            current_timestamp(), local->username, local->password);
-    fclose(log);
+  if (app.debug) {
+    FILE *log = fopen(LOG_FILE, "a");
+    if (log) {
+      fprintf(log, "[%s] DEBUG Read values - username: '%s' password: '%s'\n",
+              current_timestamp(), local->username, local->password);
+      fclose(log);
+    }
   }
 
-  // Actual authentication check
   if (strcmp(local->username, u->username) == 0 &&
       strcmp(decrypt(local->password), u->password) == 0) {
     local->logged = true;

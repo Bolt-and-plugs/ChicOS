@@ -2,32 +2,27 @@
 #define _FILE
 
 #include "../../defines.h"
+#include "fs.h"
 
-#define MAX_ADDRESS_SIZE 4096
-
-typedef struct file_buffer file_buffer;
-typedef struct file_header file_header;
-
-struct file_header {
+typedef struct __synt_header {
   char name[128];
   i32 priority;
   i32 rw_count;
   i32 seg_flag;
   i32 seg_size;
   char semaphores[256];
-};
+} synt_header;
 
-struct file_buffer {
+typedef struct __synt_buffer {
   FILE *fp;
-  file_header *h;
+  synt_header *h;
   char address[MAX_ADDRESS_SIZE];
   u64 PC;
-};
+} synt_buffer;
 
-file_buffer *open_file(const char *address);
-void exec_file(file_buffer *file);
-void close_file(file_buffer *fb);
+synt_buffer *open_file(const char *address);
+void exec_file(synt_buffer *file);
+void close_file(synt_buffer *fb);
 bool valid_path(const char *path);
 
 #endif
-

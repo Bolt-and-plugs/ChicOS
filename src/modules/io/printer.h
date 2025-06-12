@@ -3,7 +3,7 @@
 typedef struct print_list print_list;
 
 struct print_list {
-  char print_args[128];
+  char print_args[4096];
   print_list *prox;
 };
 
