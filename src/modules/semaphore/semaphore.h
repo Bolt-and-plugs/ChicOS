@@ -10,7 +10,8 @@ typedef struct __semaphore {
   u16 id;
   char nome;
   u32 *waiters;
-  u32 *owners;
+  u8 tail;
+  u8 head;
   u8 value;
 } semaphore;
 

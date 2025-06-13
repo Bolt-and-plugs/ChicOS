@@ -11,60 +11,63 @@ u32 waiter_get(u32 *waiters) {
   return pid;
 }
 
-void waiter_put(u32 *waiters, u32 pid) { return; }
+void waiter_push(semaphore* sem, u32 pid) {
+  if ((sem->tail + 1) % DEFAULT_WAITERS_NUM == sem->head) {
+    c_error("Waiters queue is full");
+    return;
+  }
+  sem->waiters[sem->tail] = pid;
+  sem->tail = (sem->tail + 1) % DEFAULT_WAITERS_NUM;
+}
 
-
-void waiter_pop(u32 *waiters, u32 pid) {}
-
-u32 owner_get(u32 *owners) {
-  u32 pid;
-
+u32 waiter_pop(semaphore* sem) {
+  if (sem->head == sem->tail) {
+    c_error("Waiters queue is empty");
+    return -1;
+  }
+  u32 pid = sem->waiters[sem->head];
+  sem->head = (sem->head + 1) % DEFAULT_WAITERS_NUM;
   return pid;
 }
 
-int owner_pop(u32 *owners, u32 pid) {
-  return 0;
+u32 get_waiters_size(semaphore* sem){
+  return (sem->tail + DEFAULT_WAITERS_NUM - sem->head) % DEFAULT_WAITERS_NUM;
 }
 
-void owner_put(u32 *owners, u32 pid) { return; }
-
-u32 get_waiters_size(u32 *waiters) {
-  u32 count = 0;
-
-  return count;
-}
-
-void semaphoreP(semaphore *s, u32 pid) { // update semaphore to return either success or failure (wait or pass)
+void semaphoreP(semaphore *s, u32 pid) {
   if (!s) {
     c_error(SEMAPHORE_WAIT_ERROR, "Semaphore does not exist");
     return;
   }
 
   sem_wait(&app.semaphores->mutex);
-  if (get_waiters_size(s->waiters) >= s->value) {
-    // handle if pop is unsuccesful
-    waiter_put(s->waiters, pid);
-    sem_post(&app.semaphores->mutex);
-    return;
+
+  if (s->value > 0) {
+    s->value--;  
+  } else {
+    waiter_push(s, pid);  
+    app.pcb.process_stack[pid].status = BLOCKED;
   }
 
-  s->value--;
-  owner_put(s->owners, pid);
   sem_post(&app.semaphores->mutex);
 }
 
-void semaphoreV(semaphore *s, u32 pid) {// update semaphore to return either success or failure (wait or pass)
+
+void semaphoreV(semaphore *s, u32 pid) {
   if (!s) {
     c_error(SEMAPHORE_POST_ERROR, "Semaphore does not exist");
     return;
   }
+
   sem_wait(&app.semaphores->mutex);
-  int op = owner_pop(s->owners, pid);
-  if(op != 0) {
-    // handle if pop is unsuccesful
-    sem_post(&app.semaphores->mutex);
+
+  if (get_waiters_size(s) > 0) {
+    u32 pid = waiter_pop(s);
+    app.pcb.process_stack[pid].status = READY;
+  } else {
+    s->value++;  
   }
-  s->value++;
+
   sem_post(&app.semaphores->mutex);
 }
 
@@ -99,8 +102,8 @@ int init_semaphore(char nome, u32 value) {
   sem->nome = nome;
   sem->id = app.cpu.quantum_time;
   sem->waiters = (u32 *)c_alloc(sizeof(u32) * (DEFAULT_WAITERS_NUM + value));
-
-  sem->owners = (u32 *)c_alloc(sizeof(u32) * (DEFAULT_OWNERS_NUM));
+  sem->head = 0;
+  sem->tail = 0;
   sem->value = value;
 
   app.semaphores->l[app.semaphores->last] = *sem;
