@@ -13,7 +13,7 @@ u32 waiter_get(u32 *waiters) {
 
 void waiter_push(semaphore* sem, u32 pid) {
   if ((sem->tail + 1) % DEFAULT_WAITERS_NUM == sem->head) {
-    c_error("Waiters queue is full");
+    c_error(QUEUE_ERROR,"Waiters queue is full");
     return;
   }
   sem->waiters[sem->tail] = pid;
@@ -22,7 +22,7 @@ void waiter_push(semaphore* sem, u32 pid) {
 
 u32 waiter_pop(semaphore* sem) {
   if (sem->head == sem->tail) {
-    c_error("Waiters queue is empty");
+    c_error(QUEUE_EMPTY,"Waiters queue is empty");
     return -1;
   }
   u32 pid = sem->waiters[sem->head];
@@ -45,12 +45,15 @@ void semaphoreP(semaphore *s, u32 pid) {
   if (s->value > 0) {
     s->value--;  
   } else {
-    waiter_push(s, pid);  
+    waiter_push(s, pid);
+    sem_wait(&app.pcb.pcb_s);
     app.pcb.process_stack[pid].status = BLOCKED;
+    sem_post(&app.pcb.pcb_s);
   }
 
   sem_post(&app.semaphores->mutex);
 }
+
 
 
 void semaphoreV(semaphore *s, u32 pid) {
@@ -62,14 +65,17 @@ void semaphoreV(semaphore *s, u32 pid) {
   sem_wait(&app.semaphores->mutex);
 
   if (get_waiters_size(s) > 0) {
-    u32 pid = waiter_pop(s);
-    app.pcb.process_stack[pid].status = READY;
+    u32 waking_pid = waiter_pop(s);
+    sem_wait(&app.pcb.pcb_s);
+    app.pcb.process_stack[waking_pid].status = READY;
+    sem_post(&app.pcb.pcb_s);
   } else {
-    s->value++;  
+    s->value++;
   }
 
   sem_post(&app.semaphores->mutex);
 }
+
 
 void init_semaphore_list() {
   app.semaphores = (semaphore_list *)c_alloc(sizeof(semaphore_list));
