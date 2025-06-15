@@ -8,6 +8,7 @@ extern App app;
 void init_pcb(void) {
   app.pcb.last = 0;
   app.pcb.curr = 0;
+  app.pcb.last_pid = 0;
   sem_init(&app.pcb.pcb_s, 0, 1);
 }
 
@@ -49,7 +50,7 @@ u32 p_create(char *address) {
     return -1;
   }
 
-  process p = {.pid = get_pid(app.cpu.quantum_time),
+  process p = {.pid = app.pcb.last_pid++,
                .status = NEW,
                .address_space = NULL,
                .time_to_run = TIME_SLICE};

@@ -31,6 +31,7 @@ typedef struct __PCB {
   process process_stack[MAX_PCB];
   u8 curr;
   u8 last; 
+  u16 last_pid;
   sem_t pcb_s;
 } PCB;
 
