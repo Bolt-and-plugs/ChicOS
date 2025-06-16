@@ -42,6 +42,21 @@ void cpu_loop() {
 
     if (app.cpu.quantum_time == 1 && app.debug)
       interrupt_control(process_create, "resources/sint2");
+
+    if (app.cpu.quantum_time == 2 && app.debug)
+      interrupt_control(process_create, "resources/sint3");
+
+    if (app.cpu.quantum_time == 3 && app.debug)
+      interrupt_control(process_create, "resources/sint4");
+
+    if (app.cpu.quantum_time == 4 && app.debug)
+      interrupt_control(process_create, "resources/sint4");
+
+    if (app.cpu.quantum_time == 5 && app.debug)
+      interrupt_control(process_create, "resources/sint3");
+
+    if (app.cpu.quantum_time == 6 && app.debug)
+      interrupt_control(process_create, "resources/sint2");
   }
 }
 

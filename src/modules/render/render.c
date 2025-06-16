@@ -78,23 +78,23 @@ void render_left_panel() {
 
   mvwprintw(panel, 1, 2, "CPU Quantum Time: %ld", app.cpu.quantum_time);
 
-  const int start_y = 3;
+  const int start_process_y = 3;
   const int col_name_x = 2;
   const int col_pid_x = 20;
   const int col_status_x = 28;
-  const int col_time_x = 42;
+  const int col_time_x = 40;
   const int col_rw_count = 54;
 
   // print header in a table format (ONLY ONCE)
   wattron(panel, A_BOLD | A_UNDERLINE);
-  mvwprintw(panel, start_y, col_name_x, "Process Name");
-  mvwprintw(panel, start_y, col_pid_x, "PID");
-  mvwprintw(panel, start_y, col_status_x, "Status");
-  mvwprintw(panel, start_y, col_time_x, "Time Left");
-  mvwprintw(panel, start_y, col_rw_count, "R/W Count");
+  mvwprintw(panel, start_process_y, col_name_x, "Process Name");
+  mvwprintw(panel, start_process_y, col_pid_x, "PID");
+  mvwprintw(panel, start_process_y, col_status_x, "Status");
+  mvwprintw(panel, start_process_y, col_time_x, "CPU Time Left");
+  mvwprintw(panel, start_process_y, col_rw_count, "R/W Count");
   wattroff(panel, A_BOLD | A_UNDERLINE);
 
-  int current_row = start_y + 1;
+  int current_row = start_process_y + 1;
   for (int i = 0; i < app.pcb.last; i++) {
     char status[10];
     switch (app.pcb.process_stack[i].status) {
@@ -131,11 +131,16 @@ void render_left_panel() {
     current_row++;
   }
 
-  if (strcmp(app.rdr.output_buff, "init") != 0 && app.debug) {
-    mvwprintw(panel, current_row + 1, 1, "System Message: %s",
-              app.rdr.output_buff);
-    strcpy(app.rdr.output_buff, "init");
-  }
+
+  const int start_semaphore_y = MAX_PCB + 5;
+
+  // print header in a table format (ONLY ONCE)
+  wattron(panel, A_BOLD | A_UNDERLINE);
+  mvwprintw(panel, start_semaphore_y, col_name_x, "Sem Name");
+  mvwprintw(panel, start_semaphore_y, col_pid_x, "SID");
+  mvwprintw(panel, start_semaphore_y, col_status_x, "Waiters");
+  wattroff(panel, A_BOLD | A_UNDERLINE);
+
 
   wrefresh(panel);
 }
@@ -230,6 +235,11 @@ int read_path(WINDOW *p) {
 void print_event(WINDOW *panel) {
   app.rdr.print_event_buff[0] = '\0';
 
+  if (strcmp(app.rdr.output_buff, "init") != 0 && app.debug) {
+    mvwprintw(panel, 2, 1, "System Message: %s", app.rdr.output_buff);
+    strcpy(app.rdr.output_buff, "init");
+  }
+
   for (int i = 0; i < 5; i++) {
     pop_from_print_queue(app.rdr.print_event_buff);
     if (app.rdr.print_event_buff[0] == '\0')
@@ -243,7 +253,7 @@ void render_left_bottom_panel() {
   werase(panel);
   box(panel, 0, 0);
 
-  mvwprintw(panel, 0, 1, "System monitor:");
+  mvwprintw(panel, 0, 1, "System Logger:");
 
   print_event(panel);
 

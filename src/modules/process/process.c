@@ -153,6 +153,7 @@ void p_block(u32 pid) {
 
   sem_wait(&app.pcb.pcb_s);
   p->status = BLOCKED;
+  p->time_to_run = 0;
   sem_post(&app.pcb.pcb_s);
 }
 

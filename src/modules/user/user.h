@@ -3,9 +3,11 @@
 
 #include "../../defines.h"
 
+#define MAX_LINE_LENGTH 64
+
 typedef struct __user {
-  char username[32];
-  char password[32];
+  char username[MAX_LINE_LENGTH];
+  char password[MAX_LINE_LENGTH];
   bool logged;
 } user;
 

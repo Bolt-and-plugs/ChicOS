@@ -7,7 +7,6 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#define MAX_LINE_LENGTH 64
 #define LOG_FILE "auth.log"
 
 extern App app;
