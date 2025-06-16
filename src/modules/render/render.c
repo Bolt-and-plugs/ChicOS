@@ -183,7 +183,8 @@ void render_right_top_panel() {
   wattron(p, used > 80 ? COLOR_PAIR(1) : COLOR_PAIR(2));
   mvwprintw(p, 3, 2, "%.*s", filled, bar);
   wattroff(p, COLOR_PAIR(1) | COLOR_PAIR(2));
-  mvwprintw(p, 5, 1, "Used: %2.2f%% \\ Free: %2.2f%%", used, retrieve_free_mem_percentage());
+  mvwprintw(p, 5, 1, "Used: %2.2f%% \\ Free: %2.2f%%", used,
+            retrieve_free_mem_percentage());
   wrefresh(p);
 }
 
@@ -441,7 +442,7 @@ void render_log(char *statement) {
 
 void welcome_screen() {
   WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
-  int names_y = COLS / 5;
+  int names_y = COLS / 4;
   const char *createdBy = "Created By", *name1 = "CEN-s",
              *name2 = "Felipe-gsilva", *name3 = "marioluci0",
              *name4 = "RenanSpim";
@@ -496,8 +497,8 @@ void welcome_screen() {
   int quadrant_width = COLS / 4;
 
   mvwprintw(welcome, name_line_y,
-            (0 * quadrant_width) + (quadrant_width - strlen(name1)) / 2, "%s",
-            name1);
+            (0 * quadrant_width) + (quadrant_width - strlen(name1)) / 2, "%d",
+            names_y);
   mvwprintw(welcome, name_line_y,
             (1 * quadrant_width) + (quadrant_width - strlen(name2)) / 2, "%s",
             name2);
