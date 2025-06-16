@@ -76,13 +76,13 @@ void render_left_panel() {
   werase(panel);
   box(panel, 0, 0);
 
-  mvwprintw(panel, 1, 2, "CPU Quantum Time: %ld", app.cpu.quantum_time);
+  mvwprintw(panel, 0, 1, " CPU | Quantum Time: %ld ", app.cpu.quantum_time);
 
-  const int start_process_y = 3;
+  const int start_process_y = 2;
   const int col_name_x = 2;
   const int col_pid_x = 20;
   const int col_status_x = 28;
-  const int col_time_x = 40;
+  const int col_time_x = 37;
   const int col_rw_count = 54;
 
   // print header in a table format (ONLY ONCE)
@@ -130,17 +130,34 @@ void render_left_panel() {
 
     current_row++;
   }
-
+  if (app.pcb.last == 0) {
+    mvwprintw(panel, current_row, col_name_x, "------------");
+    mvwprintw(panel, current_row, col_pid_x, "-----");
+    mvwprintw(panel, current_row, col_status_x, "------");
+    mvwprintw(panel, current_row, col_time_x, "-------------");
+    mvwprintw(panel, current_row, col_rw_count, "---------");
+  }
 
   const int start_semaphore_y = MAX_PCB + 5;
 
-  // print header in a table format (ONLY ONCE)
   wattron(panel, A_BOLD | A_UNDERLINE);
-  mvwprintw(panel, start_semaphore_y, col_name_x, "Sem Name");
+  mvwprintw(panel, start_semaphore_y, col_name_x, "Semaphore Name");
   mvwprintw(panel, start_semaphore_y, col_pid_x, "SID");
-  mvwprintw(panel, start_semaphore_y, col_status_x, "Waiters");
+  mvwprintw(panel, start_semaphore_y, col_status_x, "Value");
+  mvwprintw(panel, start_semaphore_y, col_time_x, "Waiters");
   wattroff(panel, A_BOLD | A_UNDERLINE);
 
+  current_row = start_semaphore_y + 1;
+  for (int i = 0; i < app.semaphores->last; i++) {
+    mvwprintw(panel, current_row, col_name_x, "%c", app.semaphores->l[i].name);
+    mvwprintw(panel, current_row, col_pid_x, "%-5d", app.semaphores->l[i].id);
+    mvwprintw(panel, current_row, col_status_x, "%-2d",
+              app.semaphores->l[i].value);
+    for (int j = col_time_x; j < app.semaphores->l[i].waiters_last; j++) {
+      mvwprintw(panel, current_row, i, "%d ", app.semaphores->l[i].waiters[j]);
+    }
+    current_row++;
+  }
 
   wrefresh(panel);
 }
@@ -157,20 +174,16 @@ void render_right_top_panel() {
   if (filled > barw)
     filled = barw;
   char bar[barw + 1];
+  mvwprintw(p, 0, 1, "Memory Status:");
   memset(bar, '=', filled);
   memset(bar + filled, '-', barw - filled);
   bar[barw] = '\0';
-  mvwprintw(p, 1, 1, "Memory Usage:");
-  mvwprintw(p, 2, 1, "[%s]", bar);
+  mvwprintw(p, 2, 1, "RAM Usage:");
+  mvwprintw(p, 3, 1, "[%s]", bar);
   wattron(p, used > 80 ? COLOR_PAIR(1) : COLOR_PAIR(2));
-  mvwprintw(p, 2, 2, "%.*s", filled, bar);
+  mvwprintw(p, 3, 2, "%.*s", filled, bar);
   wattroff(p, COLOR_PAIR(1) | COLOR_PAIR(2));
-  mvwprintw(p, 4, 1, "Used: %2.2f%%", used);
-  mvwprintw(p, 5, 1, "Free: %2.2f%%", retrieve_free_mem_percentage());
-
-  mvwprintw(p, 7, 1, "Disk Queue:");
-  mvwprintw(p, 8, 1, "%d to be done", app.disk.q.len);
-
+  mvwprintw(p, 5, 1, "Used: %2.2f%% \\ Free: %2.2f%%", used, retrieve_free_mem_percentage());
   wrefresh(p);
 }
 
@@ -253,7 +266,7 @@ void render_left_bottom_panel() {
   werase(panel);
   box(panel, 0, 0);
 
-  mvwprintw(panel, 0, 1, "System Logger:");
+  mvwprintw(panel, 0, 1, " System Logger: ");
 
   print_event(panel);
 
@@ -264,6 +277,7 @@ void render_right_bottom_panel() {
   WINDOW *p = app.rdr.right_bottom;
   box(p, 0, 0);
 
+  mvwprintw(p, 0, 1, " User Input: ");
   mvwprintw(p, 1, 1, "Press 'p' and enter a path of a file");
 
   char char_to_stop = wgetch(p);
@@ -277,12 +291,23 @@ void render_right_bottom_panel() {
   wrefresh(p);
 }
 
+void render_right_mid_panel() {
+  WINDOW *p = app.rdr.right_mid;
+  mvwprintw(p, 0, 1, "Disk Status:");
+  mvwprintw(p, 8, 1, "Disk Queue:");
+  mvwprintw(p, 9, 1, "%d to be done", app.disk.q.len);
+  wrefresh(p);
+}
+
 void init_renderer() {
   app.rdr.status_win = create_newwin(1, COLS, 0, 0);
   app.rdr.left_panel = create_newwin(LINES - 11, COLS / 2, 1, 0);
-  app.rdr.right_top = create_newwin((LINES - 1) / 2, COLS / 2, 1, COLS / 2);
+  app.rdr.right_top = create_newwin((LINES - 10) / 2, COLS / 2, 1, COLS / 2);
+  app.rdr.right_mid = create_newwin((LINES - 11) / 2, COLS / 2,
+                                    ((LINES - 11) / 2) + 2, COLS / 2);
   app.rdr.right_bottom =
-      create_newwin((LINES - 1) / 2, COLS / 2, 1 + (LINES - 1) / 2, COLS / 2);
+      create_newwin(((LINES - 1) / 4) - 2, COLS / 2,
+                    1 + (LINES - ((LINES - 1) / 4) + 1), COLS / 2);
   app.rdr.left_bottom = create_newwin(10, COLS / 2, LINES - 10, 0);
 }
 
@@ -303,6 +328,7 @@ void render_loop() {
     status_bar();
     render_left_panel();
     render_right_top_panel();
+    render_right_mid_panel();
     render_right_bottom_panel();
     render_left_bottom_panel();
     napms(100);

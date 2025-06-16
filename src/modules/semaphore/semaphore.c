@@ -11,26 +11,28 @@ u32 waiter_get(u32 *waiters) {
   return pid;
 }
 
-void waiter_push(semaphore* sem, u32 pid) {
+void waiter_push(semaphore *sem, u32 pid) {
   if ((sem->tail + 1) % DEFAULT_WAITERS_NUM == sem->head) {
-    c_error(QUEUE_ERROR,"Waiters queue is full");
+    c_error(QUEUE_ERROR, "Waiters queue is full");
     return;
   }
   sem->waiters[sem->tail] = pid;
   sem->tail = (sem->tail + 1) % DEFAULT_WAITERS_NUM;
+  sem->waiters++;
 }
 
-u32 waiter_pop(semaphore* sem) {
+u32 waiter_pop(semaphore *sem) {
   if (sem->head == sem->tail) {
-    c_error(QUEUE_EMPTY,"Waiters queue is empty");
+    c_error(QUEUE_EMPTY, "Waiters queue is empty");
     return -1;
   }
   u32 pid = sem->waiters[sem->head];
   sem->head = (sem->head + 1) % DEFAULT_WAITERS_NUM;
+  sem->waiters--;
   return pid;
 }
 
-u32 get_waiters_size(semaphore* sem){
+u32 get_waiters_size(semaphore *sem) {
   return (sem->tail + DEFAULT_WAITERS_NUM - sem->head) % DEFAULT_WAITERS_NUM;
 }
 
@@ -43,7 +45,7 @@ void semaphoreP(semaphore *s, u32 pid) {
   sem_wait(&app.semaphores->mutex);
 
   if (s->value > 0) {
-    s->value--;  
+    s->value--;
   } else {
     waiter_push(s, pid);
     sem_wait(&app.pcb.pcb_s);
@@ -53,8 +55,6 @@ void semaphoreP(semaphore *s, u32 pid) {
 
   sem_post(&app.semaphores->mutex);
 }
-
-
 
 void semaphoreV(semaphore *s, u32 pid) {
   if (!s) {
@@ -76,7 +76,6 @@ void semaphoreV(semaphore *s, u32 pid) {
   sem_post(&app.semaphores->mutex);
 }
 
-
 void init_semaphore_list() {
   app.semaphores = (semaphore_list *)c_alloc(sizeof(semaphore_list));
   if (!app.semaphores) {
@@ -86,7 +85,7 @@ void init_semaphore_list() {
   app.semaphores->last = 0;
   for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++) {
     app.semaphores->l[i].id = 0;
-    app.semaphores->l[i].nome = '\0';
+    app.semaphores->l[i].name = '\0';
     app.semaphores->l[i].waiters = NULL;
   }
 }
@@ -105,9 +104,10 @@ int init_semaphore(char nome, u32 value) {
 
   semaphore *sem = c_alloc(sizeof(semaphore));
 
-  sem->nome = nome;
+  sem->name = nome;
   sem->id = app.cpu.quantum_time;
   sem->waiters = (u32 *)c_alloc(sizeof(u32) * (DEFAULT_WAITERS_NUM + value));
+  sem->waiters_last = 0;
   sem->head = 0;
   sem->tail = 0;
   sem->value = value;
@@ -119,7 +119,7 @@ int init_semaphore(char nome, u32 value) {
 
 semaphore *get_semaphore_by_name(char name) {
   for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++) {
-    if (app.semaphores->l[i].nome == name)
+    if (app.semaphores->l[i].name == name)
       return &app.semaphores->l[i];
   }
   return NULL;
