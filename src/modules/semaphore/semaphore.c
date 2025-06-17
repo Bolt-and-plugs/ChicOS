@@ -12,7 +12,6 @@ void waiter_push(semaphore *sem, u32 pid) {
   }
   sem->waiters[sem->tail] = pid;
   sem->tail = (sem->tail + 1) % DEFAULT_WAITERS_NUM;
-  sem->waiters++;
 }
 
 u32 waiter_pop(semaphore *sem) {
@@ -22,7 +21,6 @@ u32 waiter_pop(semaphore *sem) {
   }
   u32 pid = sem->waiters[sem->head];
   sem->head = (sem->head + 1) % DEFAULT_WAITERS_NUM;
-  sem->waiters--;
   return pid;
 }
 
@@ -36,18 +34,11 @@ void semaphoreP(semaphore *s, u32 pid) {
     return;
   }
 
-  sem_wait(&app.semaphores->mutex);
-
-  if (s->value > 0) {
-    s->value--;
-  } else {
+  s->value--;
+  if (s->value < 0) {
     waiter_push(s, pid);
-    sem_wait(&app.pcb.pcb_s);
     app.pcb.process_stack[pid].status = WAITING;
-    sem_post(&app.pcb.pcb_s);
   }
-
-  sem_post(&app.semaphores->mutex);
 }
 
 void semaphoreV(semaphore *s) {
@@ -56,18 +47,13 @@ void semaphoreV(semaphore *s) {
     return;
   }
 
-  sem_wait(&app.semaphores->mutex);
-
+  s->value++;
   if (get_waiters_size(s) > 0) {
+    c_info("waiter size:", get_waiters_size(s));
     u32 waking_pid = waiter_pop(s);
-    sem_wait(&app.pcb.pcb_s);
+    c_info("PID DO WAITER:", waking_pid);
     app.pcb.process_stack[waking_pid].status = READY;
-    sem_post(&app.pcb.pcb_s);
-  } else {
-    s->value++;
   }
-
-  sem_post(&app.semaphores->mutex);
 }
 
 void init_semaphore_list() {

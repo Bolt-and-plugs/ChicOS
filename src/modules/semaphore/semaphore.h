@@ -13,7 +13,7 @@ typedef struct __semaphore {
   u8 waiters_last;
   u8 tail;
   u8 head;
-  u8 value;
+  i8 value;
 } semaphore;
 
 typedef struct __semaphore_list {
