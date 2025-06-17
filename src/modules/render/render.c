@@ -186,7 +186,7 @@ void render_right_top_panel() {
   wattron(p, used > 80 ? COLOR_PAIR(1) : COLOR_PAIR(2));
   mvwprintw(p, 3, 2, "%.*s", filled, bar);
   wattroff(p, COLOR_PAIR(1) | COLOR_PAIR(2));
-  mvwprintw(p, 5, 1, "Used: %2.2f%% \\ Free: %2.2f%%", used,
+  mvwprintw(p, 5, 1, " Used: %2.2f%% \\ Free: %2.2f%%", used,
             retrieve_free_mem_percentage());
   wrefresh(p);
 }
@@ -249,11 +249,21 @@ int read_path(WINDOW *p) {
   return 1;
 }
 
+char *sanitize_str(char *str) {
+  for (int i = 0; i < strlen(str); i++) {
+    if (str[i] == '\n') {
+      str[i] = ' ';
+    }
+  }
+
+  return str;
+}
+
 void print_event(WINDOW *panel) {
   app.rdr.print_event_buff[0] = '\0';
 
   if (strcmp(app.rdr.output_buff, "init") != 0 && app.debug) {
-    mvwprintw(panel, 2, 1, "System Message: %s", app.rdr.output_buff);
+    mvwprintw(panel, 1, 2, "System Message: %-50s", sanitize_str(app.rdr.output_buff));
     strcpy(app.rdr.output_buff, "init");
   }
 
@@ -297,9 +307,9 @@ void render_right_bottom_panel() {
 
 void render_right_mid_panel() {
   WINDOW *p = app.rdr.right_mid;
-  mvwprintw(p, 0, 1, "Disk Status:");
-  mvwprintw(p, 8, 1, "Disk Queue:");
-  mvwprintw(p, 9, 1, "%d to be done", app.disk.q.len);
+  mvwprintw(p, 0, 1, " Disk Status: ");
+  mvwprintw(p, 2, 2, "Disk Queue:");
+  mvwprintw(p, 3, 2, "%d to be done", app.disk.q.len);
   wrefresh(p);
 }
 

@@ -195,22 +195,22 @@ void exec_program(process *sint_process) {
           sint_process->address_space = c_realloc(sint_process->address_space,
                                                   KB + (sizeof(page) * l_time));
         sem_post(&app.cpu.cpu_s);
-
         return;
       } else if (strcmp(command, "write") == 0) {
         sem_wait(&app.cpu.cpu_s);
         sint_process->fb->h->rw_count++;
         sem_post(&app.cpu.cpu_s);
-        time = atoi(strtok(NULL, " "));
-        sys_call(disk_request, "%d", sint_process->pid);
+        time = (u32)atoi(strtok(NULL, " "));
+        sys_call(disk_request, "%u %u", sint_process->pid, time);
       } else if (strcmp(command, "read") == 0) {
         sem_wait(&app.cpu.cpu_s);
         sint_process->fb->h->rw_count++;
         sem_post(&app.cpu.cpu_s);
-
-        time = atoi(strtok(NULL, " "));
-        sys_call(disk_request, "%d", sint_process->pid);
+        time = (u32)atoi(strtok(NULL, " "));
+        sys_call(disk_request, "%u %u", sint_process->pid, time);
       } else if (strcmp(command, "print") == 0) {
+        time = (u32)atoi(strtok(NULL, " "));
+        sys_call(print_request, "%d", time);
       } else {
         c_error(DISK_FILE_READ_ERROR, "Found invalid command!: %s", command);
       }
