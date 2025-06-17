@@ -216,7 +216,7 @@ void exec_program(process *sint_process) {
         sys_call(disk_request, "%u %u", sint_process->pid, time);
       } else if (strcmp(command, "print") == 0) {
         time = (u32)atoi(strtok(NULL, " "));
-        sys_call(print_request, "%u", time);
+        sys_call(print_request, "%s %u", "A-impressora-imprime", time);
       } else {
         c_error(DISK_FILE_READ_ERROR, "Found invalid command!: %s", command);
       }

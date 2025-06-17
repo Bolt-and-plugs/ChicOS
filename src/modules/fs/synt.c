@@ -33,10 +33,11 @@ void read_header(synt_buffer *fb) {
   c = fgetc(fb->fp);
 
   while (c != '\n') {
-    if (c != ' ')
+    if (c != ' '){
       header->semaphores[i++] = c;
+      init_semaphore(c, 1);
+    }
     c = fgetc(fb->fp);
-    init_semaphore(c, 1);
   }
 
   header->semaphores[i] = '\0';
