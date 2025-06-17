@@ -163,6 +163,13 @@ void render_left_panel() {
     current_row++;
   }
 
+  if (app.semaphores->last == 0) {
+    mvwprintw(panel, current_row, col_name_x, "-");
+    mvwprintw(panel, current_row, col_pid_x, "-----");
+    mvwprintw(panel, current_row, col_status_x, "--");
+    mvwprintw(panel, current_row, col_time_x - 1, "---");
+  }
+
   wrefresh(panel);
 }
 
@@ -469,6 +476,29 @@ void render_log(char *statement) {
   sem_post(&app.rdr.renderer_s);
 }
 
+void draw_dots(WINDOW *win, int repetitions) {
+  int start_y = LINES / 2;
+  int start_x = (COLS - 8) / 2 + 4;
+  int delay_ms = 100;
+  mvwprintw(win, start_y + 1, start_x - 8, "[            ]");
+
+  wrefresh(win);
+  for (int i = 0; i < repetitions; i++) {
+    for (int k = 0; k < 12; k++) {
+      mvwprintw(win, start_y + 1, start_x - 7 + k, ".");
+      wrefresh(win);
+      napms(delay_ms);
+    }
+    napms(300);
+    for (int k = 0; k < 12; k++) {
+      mvwprintw(win, start_y + 1, start_x - 7 + k, " ");
+      wrefresh(win);
+      napms(delay_ms / 2);
+    }
+    napms(300);
+  }
+}
+
 void welcome_screen() {
   WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
   int names_y = LINES - 5;
@@ -517,7 +547,6 @@ void welcome_screen() {
             "_______\\/////////__\\///____\\///__\\///_____\\////////_______\\/"
             "////_________\\///////////_____");
 
-  mvwprintw(welcome, (LINES / 2) + 1, ((COLS - 8) / 2) - 4, "Starting");
   mvwprintw(welcome, LINES / 2, (COLS - 11) / 2, "Bem vindo!");
 
   mvwprintw(welcome, names_y, (COLS - strlen(createdBy)) / 2, "%s", createdBy);
@@ -540,32 +569,8 @@ void welcome_screen() {
 
   wrefresh(welcome);
 
-  for (int i = 0; i < 3; i++) {
-    napms(150);
-    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 4, "      ");
-    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 4, ".");
-    wrefresh(welcome);
+  draw_dots(welcome, 3);
 
-    napms(150);
-    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 5, ".");
-    wrefresh(welcome);
-
-    napms(150);
-    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 6, ".");
-    wrefresh(welcome);
-
-    napms(150);
-    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 7, ".");
-    wrefresh(welcome);
-
-    napms(150);
-    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 8, ".");
-    wrefresh(welcome);
-
-    napms(150);
-    mvwprintw(welcome, LINES / 2 + 1, (COLS - 8) / 2 + 9, ".");
-    wrefresh(welcome);
-  }
   delwin(welcome);
 }
 
