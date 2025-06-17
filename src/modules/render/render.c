@@ -25,7 +25,7 @@ void bootstrap_ui() {
   app.rdr.output_buff = c_alloc(4096);
   app.rdr.print_event_buff = c_alloc(4096);
   strcpy(app.rdr.output_buff, "init");
-  strcpy(app.rdr.print_event_buff, "Initializing");
+  strcpy(app.rdr.print_event_buff, "init");
   setlocale(LC_ALL, "");
   initscr();
   cbreak();
@@ -251,7 +251,7 @@ int read_path(WINDOW *p) {
 
 char *sanitize_str(char *str) {
   for (int i = 0; i < strlen(str); i++) {
-    if (str[i] == '\n') {
+    if (str[i] == '\n' || str[i] == '-') {
       str[i] = ' ';
     }
   }
@@ -263,15 +263,16 @@ void print_event(WINDOW *panel) {
   app.rdr.print_event_buff[0] = '\0';
 
   if (strcmp(app.rdr.output_buff, "init") != 0 && app.debug) {
-    mvwprintw(panel, 1, 2, "System Message: %-50s", sanitize_str(app.rdr.output_buff));
+    mvwprintw(panel, 1, 2, "System Message: %-50s",
+              sanitize_str(app.rdr.output_buff));
     strcpy(app.rdr.output_buff, "init");
   }
 
-  for (int i = 0; i < 5; i++) {
+  for (int i = 1; i < 6; i++) {
     pop_from_print_queue(app.rdr.print_event_buff);
     if (app.rdr.print_event_buff[0] == '\0')
       break;
-    mvwprintw(panel, i + 1, 1, "%s", app.rdr.print_event_buff);
+    mvwprintw(panel, i + 1, 2, "%-50s", sanitize_str(app.rdr.print_event_buff));
   }
 }
 
