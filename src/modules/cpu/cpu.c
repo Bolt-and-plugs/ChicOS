@@ -108,10 +108,12 @@ void sys_call(events e, const char *str, ...) {
     semaphoreV(get_semaphore_by_name(sem));
     break;
   case print_request:
-    add_to_print_queue((char *)buffer);
+    sscanf(buffer, "%s %u", str_buf, &time);
+    add_to_print_queue(str_buf, time);
     break;
   case print_finish:
-    add_to_print_queue((char *)buffer);
+    sscanf(buffer, "%s %u", str_buf, &time);
+    add_to_print_queue(str_buf, time);
     break;
   }
   sem_post(&app.cpu.cpu_s);
@@ -120,6 +122,8 @@ void sys_call(events e, const char *str, ...) {
 void interrupt_control(events e, const char *str, ...) {
   sem_wait(&app.cpu.cpu_s);
   char buffer[MAX_ADDRESS_SIZE];
+  char str_buf[4096];
+  u32 time;
   va_list arg_list;
   va_start(arg_list, str);
   vsprintf(buffer, str, arg_list);
@@ -149,10 +153,12 @@ void interrupt_control(events e, const char *str, ...) {
     memory_load_finish(ptr);
     break;
   case print_request:
-    add_to_print_queue((char *)buffer);
+    sscanf(buffer, "%s %u", str_buf, &time);
+    add_to_print_queue(str_buf, time);
     break;
   case print_finish:
-    add_to_print_queue((char *)buffer);
+    sscanf(buffer, "%s %u", str_buf, &time);
+    add_to_print_queue(str_buf, time);
     break;
   }
   sem_post(&app.cpu.cpu_s);
@@ -210,7 +216,7 @@ void exec_program(process *sint_process) {
         sys_call(disk_request, "%u %u", sint_process->pid, time);
       } else if (strcmp(command, "print") == 0) {
         time = (u32)atoi(strtok(NULL, " "));
-        sys_call(print_request, "%d", time);
+        sys_call(print_request, "%u", time);
       } else {
         c_error(DISK_FILE_READ_ERROR, "Found invalid command!: %s", command);
       }
