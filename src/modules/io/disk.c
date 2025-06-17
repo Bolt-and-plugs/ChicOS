@@ -34,7 +34,7 @@ void sort_disk(u32 base) {
 
 void disk_loop() {
   while (!app.loop_stop) {
-    sleep_ms(10);
+    sleep_ms(5);
     if (app.disk.q.len > 1) 
       sort_disk(app.disk.current_track);
     if (app.disk.q.len > 0)

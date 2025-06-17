@@ -38,7 +38,7 @@ process *scheduler_get_process() {
     if (!candidate->address_space || is_mem_free(candidate->address_space))
       continue;
 
-    if (candidate->status == BLOCKED)
+    if (candidate->status == BLOCKED || candidate->status == WAITING)
       continue;
 
     if (!selected ||

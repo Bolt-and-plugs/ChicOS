@@ -18,6 +18,7 @@ typedef struct __semaphore {
 
 typedef struct __semaphore_list {
   semaphore l[MAX_SIZE_SEMAPHORES];
+  u64 max;
   int last;
   sem_t mutex;
 } semaphore_list;

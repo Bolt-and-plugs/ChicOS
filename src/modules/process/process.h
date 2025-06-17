@@ -14,6 +14,7 @@ typedef enum {
   READY = 1,
   BLOCKED = 2,
   KILL = 3,
+  WAITING = 4,
 } p_status;
 
 typedef struct __process {
@@ -30,7 +31,7 @@ typedef struct __process {
 typedef struct __PCB {
   process process_stack[MAX_PCB];
   u8 curr;
-  u8 last; 
+  u8 last;
   u16 last_pid;
   sem_t pcb_s;
 } PCB;

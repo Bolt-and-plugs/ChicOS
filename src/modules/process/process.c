@@ -90,6 +90,9 @@ void log_process(u32 pid) {
   case BLOCKED:
     strcpy(status, "BLOCKED");
     break;
+  case WAITING:
+    strcpy(status, "WAITING");
+    break;
   case NEW:
     strcpy(status, "NEW");
     break;

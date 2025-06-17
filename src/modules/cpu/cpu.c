@@ -41,22 +41,25 @@ void cpu_loop() {
     }
 
     if (app.cpu.quantum_time == 1 && app.debug)
-      interrupt_control(process_create, "resources/sint2");
+      interrupt_control(process_create, "resources/sint1");
 
     if (app.cpu.quantum_time == 2 && app.debug)
-      interrupt_control(process_create, "resources/sint3");
+      interrupt_control(process_create, "resources/sint1");
 
     if (app.cpu.quantum_time == 3 && app.debug)
-      interrupt_control(process_create, "resources/sint4");
+      interrupt_control(process_create, "resources/sint3");
 
     if (app.cpu.quantum_time == 4 && app.debug)
       interrupt_control(process_create, "resources/sint4");
 
     if (app.cpu.quantum_time == 5 && app.debug)
-      interrupt_control(process_create, "resources/sint3");
+      interrupt_control(process_create, "resources/sint1");
 
     if (app.cpu.quantum_time == 6 && app.debug)
       interrupt_control(process_create, "resources/sint2");
+
+    if (app.cpu.quantum_time == 7 && app.debug)
+      interrupt_control(process_create, "resources/sint3");
   }
 }
 
@@ -97,7 +100,7 @@ void sys_call(events e, const char *str, ...) {
     memory_load_req(ptr, bytes);
     break;
   case semaphore_p:
-    sscanf(buffer, "%c %d", &sem, &pid);
+    sscanf(buffer, "%c %u", &sem, &pid);
     semaphoreP(get_semaphore_by_name(sem), pid);
     break;
   case semaphore_v:
@@ -180,7 +183,7 @@ void exec_program(process *sint_process) {
     } else if (strcmp(command, "P") == 0) {
       semaphore_name = strtok(NULL, "(");
       semaphore_name = strtok(semaphore_name, ")");
-      sys_call(semaphore_p, "%c %d", semaphore_name[0], sint_process->pid);
+      sys_call(semaphore_p, "%c %u", semaphore_name[0], sint_process->pid);
     } else {
       command = strtok(aux, " ");
       if (strcmp(command, "exec") == 0) {

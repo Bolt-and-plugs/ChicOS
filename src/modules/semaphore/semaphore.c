@@ -43,7 +43,7 @@ void semaphoreP(semaphore *s, u32 pid) {
   } else {
     waiter_push(s, pid);
     sem_wait(&app.pcb.pcb_s);
-    app.pcb.process_stack[pid].status = BLOCKED;
+    app.pcb.process_stack[pid].status = WAITING;
     sem_post(&app.pcb.pcb_s);
   }
 
@@ -81,13 +81,15 @@ void init_semaphore_list() {
     app.semaphores->l[i].id = 0;
     app.semaphores->l[i].name = '\0';
     app.semaphores->l[i].waiters = NULL;
+    app.semaphores->max = 0;
   }
 }
 
-int init_semaphore(char nome, u32 value) {
+int init_semaphore(char name, u32 value) {
   for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++)
-    if (get_semaphore_by_name(nome) != NULL) {
-      c_error(SEMAPHORE_INIT_ERROR, "Semaphore already exists");
+    if (app.semaphores->l[i].name == name) {
+      c_error(SEMAPHORE_INIT_ERROR, "Semaphore with name: %c already exists",
+              name);
       return -1;
     }
 
@@ -98,8 +100,8 @@ int init_semaphore(char nome, u32 value) {
 
   semaphore *sem = c_alloc(sizeof(semaphore));
 
-  sem->name = nome;
-  sem->id = app.cpu.quantum_time;
+  sem->name = name;
+  sem->id = ++app.semaphores->max;
   sem->waiters = (u32 *)c_alloc(sizeof(u32) * (DEFAULT_WAITERS_NUM + value));
   sem->waiters_last = 0;
   sem->head = 0;

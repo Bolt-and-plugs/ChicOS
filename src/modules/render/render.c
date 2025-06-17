@@ -104,6 +104,9 @@ void render_left_panel() {
     case BLOCKED:
       strcpy(status, "BLOCKED");
       break;
+    case WAITING:
+      strcpy(status, "WAITING");
+      break;
     case NEW:
       strcpy(status, "NEW");
       break;
@@ -138,13 +141,13 @@ void render_left_panel() {
     mvwprintw(panel, current_row, col_rw_count, "---------");
   }
 
-  const int start_semaphore_y = MAX_PCB + 5;
+  const int start_semaphore_y = MAX_PCB + 4;
 
   wattron(panel, A_BOLD | A_UNDERLINE);
   mvwprintw(panel, start_semaphore_y, col_name_x, "Semaphore Name");
   mvwprintw(panel, start_semaphore_y, col_pid_x, "SID");
   mvwprintw(panel, start_semaphore_y, col_status_x, "Value");
-  mvwprintw(panel, start_semaphore_y, col_time_x, "Waiters");
+  mvwprintw(panel, start_semaphore_y, col_time_x - 1, "Waiters");
   wattroff(panel, A_BOLD | A_UNDERLINE);
 
   current_row = start_semaphore_y + 1;
@@ -153,8 +156,8 @@ void render_left_panel() {
     mvwprintw(panel, current_row, col_pid_x, "%-5d", app.semaphores->l[i].id);
     mvwprintw(panel, current_row, col_status_x, "%-2d",
               app.semaphores->l[i].value);
-    for (int j = col_time_x; j < app.semaphores->l[i].waiters_last; j++) {
-      mvwprintw(panel, current_row, i, "%d ", app.semaphores->l[i].waiters[j]);
+    for (int j = col_time_x - 1; j < app.semaphores->l[i].waiters_last; j++) {
+      mvwprintw(panel, current_row, i, "%d|", app.semaphores->l[i].waiters[j]);
     }
     current_row++;
   }
@@ -442,7 +445,7 @@ void render_log(char *statement) {
 
 void welcome_screen() {
   WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
-  int names_y = COLS / 4;
+  int names_y = LINES - 5;
   const char *createdBy = "Created By", *name1 = "CEN-s",
              *name2 = "Felipe-gsilva", *name3 = "marioluci0",
              *name4 = "RenanSpim";
@@ -497,8 +500,8 @@ void welcome_screen() {
   int quadrant_width = COLS / 4;
 
   mvwprintw(welcome, name_line_y,
-            (0 * quadrant_width) + (quadrant_width - strlen(name1)) / 2, "%d",
-            names_y);
+            (0 * quadrant_width) + (quadrant_width - strlen(name1)) / 2, "%s",
+            name1);
   mvwprintw(welcome, name_line_y,
             (1 * quadrant_width) + (quadrant_width - strlen(name2)) / 2, "%s",
             name2);

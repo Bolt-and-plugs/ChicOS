@@ -4,11 +4,13 @@ sint1
 424
 s
 
+V(s)
 exec 4000
-read 20
+read 2000
+P(s)
 exec 500
-read 30
 exec 5000
 exec 200
 exec 10000
+read 20
 write 20
