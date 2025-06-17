@@ -59,6 +59,7 @@ void clear_renderer() {
   }
   endwin();
   c_dealloc(app.rdr.output_buff);
+  c_dealloc(app.rdr.print_event_buff);
   app.rdr.active = false;
 }
 
@@ -259,30 +260,30 @@ char *sanitize_str(char *str) {
   return str;
 }
 
-void print_event(WINDOW *panel) {
-  app.rdr.print_event_buff[0] = '\0';
+// void print_event(WINDOW *panel) {
+//   app.rdr.print_event_buff[0] = '\0';
 
-  if (strcmp(app.rdr.output_buff, "init") != 0 && app.debug) {
-    mvwprintw(panel, 1, 2, "System Message: %-50s", sanitize_str(app.rdr.output_buff));
-    strcpy(app.rdr.output_buff, "init");
-  }
+//   if (strcmp(app.rdr.output_buff, "init") != 0 && app.debug) {
+//     mvwprintw(panel, 1, 2, "Printer Message: %-50s", sanitize_str(app.rdr.output_buff));
+//     strcpy(app.rdr.output_buff, "init");
+//   }
 
-  for (int i = 0; i < 5; i++) {
-    pop_from_print_queue(app.rdr.print_event_buff);
-    if (app.rdr.print_event_buff[0] == '\0')
-      break;
-    mvwprintw(panel, i + 1, 1, "%s", app.rdr.print_event_buff);
-  }
-}
+//   for (int i = 0; i < 5; i++) {
+//     pop_from_print_queue(app.rdr.print_event_buff);
+//     if (app.rdr.print_event_buff[0] == '\0')
+//       break;
+//     mvwprintw(panel, i + 1, 1, "%s", app.rdr.print_event_buff);
+//   }
+// }
 
 void render_left_bottom_panel() {
   WINDOW *panel = app.rdr.left_bottom;
   werase(panel);
   box(panel, 0, 0);
 
-  mvwprintw(panel, 0, 1, " System Logger: ");
+  mvwprintw(panel, 0, 1, "Printer: ");
 
-  print_event(panel);
+  // print_event(panel);
 
   wrefresh(panel);
 }
