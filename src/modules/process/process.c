@@ -101,8 +101,10 @@ void log_process(u32 pid) {
     break;
   }
   // DEBUG INFO
-  snprintf(res, 255, "process: %s\npid: %d\nstatus %s\nrw_count: %d\n", p.name,
-           p.pid, status, p.fb->h->rw_count);
+  char cut_name[120];
+  strncpy(cut_name, p.name, 120);
+  snprintf(res, 255, "process: %s\npid: %d\nstatus %s\nrw_count: %d\n",
+           cut_name, p.pid, status, p.fb->h->rw_count);
   c_info(res);
 }
 
@@ -139,12 +141,9 @@ void p_kill(u32 pid) {
 }
 
 void p_interrupt(u32 pid) {
-  // interrupt occurs every time the process quantum time goes to 0
   process *p = p_find(pid);
-
   sem_wait(&app.pcb.pcb_s);
-  // todo processo é incializado com time_to_run = TIME_SLICE
-  // p->time_to_run = QUANTUM_TIME;
+  p->time_to_run = 0;
   sem_post(&app.pcb.pcb_s);
 }
 

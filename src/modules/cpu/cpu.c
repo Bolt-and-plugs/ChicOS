@@ -101,8 +101,8 @@ void sys_call(events e, const char *str, ...) {
     semaphoreP(get_semaphore_by_name(sem), pid);
     break;
   case semaphore_v:
-    sscanf(buffer, "%c %d", &sem, &pid);
-    semaphoreV(get_semaphore_by_name(sem), pid);
+    sscanf(buffer, "%c", &sem);
+    semaphoreV(get_semaphore_by_name(sem));
     break;
   case print_request:
     add_to_print_queue((char *)buffer);
@@ -176,7 +176,7 @@ void exec_program(process *sint_process) {
     if (strcmp(command, "V") == 0) {
       semaphore_name = strtok(NULL, "(");
       semaphore_name = strtok(semaphore_name, ")");
-      sys_call(semaphore_v, "%c %d", semaphore_name[0], sint_process->pid);
+      sys_call(semaphore_v, "%c", semaphore_name[0]);
     } else if (strcmp(command, "P") == 0) {
       semaphore_name = strtok(NULL, "(");
       semaphore_name = strtok(semaphore_name, ")");

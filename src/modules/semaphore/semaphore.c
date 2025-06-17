@@ -5,12 +5,6 @@
 
 extern App app;
 
-u32 waiter_get(u32 *waiters) {
-  u32 pid;
-
-  return pid;
-}
-
 void waiter_push(semaphore *sem, u32 pid) {
   if ((sem->tail + 1) % DEFAULT_WAITERS_NUM == sem->head) {
     c_error(QUEUE_ERROR, "Waiters queue is full");
@@ -56,7 +50,7 @@ void semaphoreP(semaphore *s, u32 pid) {
   sem_post(&app.semaphores->mutex);
 }
 
-void semaphoreV(semaphore *s, u32 pid) {
+void semaphoreV(semaphore *s) {
   if (!s) {
     c_error(SEMAPHORE_POST_ERROR, "Semaphore does not exist");
     return;
