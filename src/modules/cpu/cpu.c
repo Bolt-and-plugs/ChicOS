@@ -60,13 +60,28 @@ void cpu_loop() {
 
     if (app.cpu.quantum_time == 7 && app.debug)
       interrupt_control(process_create, "resources/sint3");
+
+    if (app.cpu.quantum_time == 8 && app.debug)
+      interrupt_control(process_create, "resources/sint4");
+
+    if (app.cpu.quantum_time == 9 && app.debug)
+      interrupt_control(process_create, "resources/sint1");
+
+    if (app.cpu.quantum_time == 10 && app.debug)
+      interrupt_control(process_create, "resources/sint2");
+
+    if (app.cpu.quantum_time == 11 && app.debug)
+      interrupt_control(process_create, "resources/sint3");
+
+    if (app.cpu.quantum_time == 12 && app.debug)
+      interrupt_control(process_create, "resources/sint4");
   }
 }
 
 void sys_call(events e, const char *str, ...) {
   sem_wait(&app.cpu.cpu_s);
   char buffer[MAX_ADDRESS_SIZE];
-  u32 pid, time, bytes;
+  u32 pid, time, bytes, track;
   void *ptr;
   char str_buf[4096];
   char sem;
@@ -78,9 +93,9 @@ void sys_call(events e, const char *str, ...) {
 
   switch ((u8)e) {
   case disk_request:
-    sscanf(buffer, "%u %u", &pid, &time);
+    sscanf(buffer, "%u %u", &pid, &track);
     p_block(pid);
-    simulate_io(pid, time);
+    simulate_io(pid, track);
     break;
   case process_interrupt:
     sscanf(buffer, "%u", &pid);

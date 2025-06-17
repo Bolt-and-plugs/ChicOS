@@ -178,7 +178,7 @@ void render_right_top_panel() {
   if (filled > barw)
     filled = barw;
   char bar[barw + 1];
-  mvwprintw(p, 0, 1, "Memory Status:");
+  mvwprintw(p, 0, 1, " Memory Status: ");
   memset(bar, '=', filled);
   memset(bar + filled, '-', barw - filled);
   bar[barw] = '\0';
@@ -250,38 +250,12 @@ int read_path(WINDOW *p) {
   return 1;
 }
 
-char *sanitize_str(char *str) {
-  for (int i = 0; i < strlen(str); i++) {
-    if (str[i] == '\n' || str[i] == '-') {
-      str[i] = ' ';
-    }
-  }
-
-  return str;
-}
-
-// void print_event(WINDOW *panel) {
-//   app.rdr.print_event_buff[0] = '\0';
-
-//   if (strcmp(app.rdr.output_buff, "init") != 0 && app.debug) {
-//     mvwprintw(panel, 1, 2, "Printer Message: %-50s", sanitize_str(app.rdr.output_buff));
-//     strcpy(app.rdr.output_buff, "init");
-//   }
-
-//   for (int i = 0; i < 5; i++) {
-//     pop_from_print_queue(app.rdr.print_event_buff);
-//     if (app.rdr.print_event_buff[0] == '\0')
-//       break;
-//     mvwprintw(panel, i + 1, 1, "%s", app.rdr.print_event_buff);
-//   }
-// }
-
 void render_left_bottom_panel() {
   WINDOW *panel = app.rdr.left_bottom;
   werase(panel);
   box(panel, 0, 0);
 
-  mvwprintw(panel, 0, 1, "Printer: ");
+  mvwprintw(panel, 0, 1, " Printer: ");
 
   // print_event(panel);
 
@@ -308,7 +282,8 @@ void render_right_bottom_panel() {
 
 void render_right_mid_panel() {
   WINDOW *p = app.rdr.right_mid;
-  mvwprintw(p, 0, 1, " Disk Status | %d to be done ", app.disk.q.len);
+  mvwprintw(p, 0, 1, " Disk Status | %d to be done | %d curr track ",
+            app.disk.qr.len, app.disk.current_track);
 
   const int start_disk_y = 1;
   const int col_id_x = 2;
@@ -321,20 +296,20 @@ void render_right_mid_panel() {
   mvwprintw(p, start_disk_y, col_time_x, "Time to Run");
   wattroff(p, A_BOLD | A_UNDERLINE);
 
-  int current_row = 0;
-  for (int i = 0; i < app.disk.q.len; i++) {
+  int current_row = start_disk_y + 1;
+  for (int i = 0; i < app.disk.qr.len; i++) {
     char status[10];
-    mvwprintw(p, current_row, col_id_x, "%-3d", app.disk.q.queue[i].id);
-    mvwprintw(p, current_row, col_track_x, "%-5d", app.disk.q.queue[i].track);
+    mvwprintw(p, current_row, col_id_x, "%-3d", app.disk.qr.queue[i].id);
+    mvwprintw(p, current_row, col_track_x, "%-5d", app.disk.qr.queue[i].track);
     mvwprintw(p, current_row, col_time_x, "%-5d",
-              app.disk.q.queue[i].time_to_run);
+              app.disk.qr.queue[i].time_to_run);
     current_row++;
+  }
 
-    if (app.disk.q.len == 0) {
-      mvwprintw(p, current_row, col_id_x, "-----");
-      mvwprintw(p, current_row, col_track_x, "-----");
-      mvwprintw(p, current_row, col_time_x, "------");
-    }
+  if (app.disk.qr.len == 0) {
+    mvwprintw(p, current_row, col_id_x, "---");
+    mvwprintw(p, current_row, col_track_x, "-----");
+    mvwprintw(p, current_row, col_time_x, "-----");
   }
 
   wrefresh(p);
@@ -342,14 +317,28 @@ void render_right_mid_panel() {
 
 void init_renderer() {
   app.rdr.status_win = create_newwin(1, COLS, 0, 0);
-  app.rdr.left_panel = create_newwin(LINES - 11, COLS / 2, 1, 0);
-  app.rdr.right_top = create_newwin((LINES - 10) / 2, COLS / 2, 1, COLS / 2);
-  app.rdr.right_mid = create_newwin((LINES - 11) / 2, COLS / 2,
-                                    ((LINES - 11) / 2) + 2, COLS / 2);
+  int left_panel_height = LINES - 11;
+  int left_bottom_height = 10;
+  app.rdr.left_panel = create_newwin(left_panel_height, COLS / 2, 1, 0);
+  app.rdr.left_bottom =
+      create_newwin(left_bottom_height, COLS / 2, 1 + left_panel_height, 0);
+
+  const int RIGHT_BOTTOM_FIXED_HEIGHT = 6;
+
+  int start_y = 1;
+  int start_x = COLS / 2;
+  int width = COLS / 2;
+  int available_height = LINES - 1;
+  int remaining_height = available_height - RIGHT_BOTTOM_FIXED_HEIGHT;
+  int height_top = remaining_height / 2;
+  int height_mid = remaining_height - height_top;
+
+  app.rdr.right_top = create_newwin(height_top, width, start_y, start_x);
+  app.rdr.right_mid =
+      create_newwin(height_mid, width, start_y + height_top, start_x);
   app.rdr.right_bottom =
-      create_newwin(((LINES - 1) / 4) - 2, COLS / 2,
-                    1 + (LINES - ((LINES - 1) / 4) + 1), COLS / 2);
-  app.rdr.left_bottom = create_newwin(10, COLS / 2, LINES - 10, 0);
+      create_newwin(RIGHT_BOTTOM_FIXED_HEIGHT, width,
+                    start_y + height_top + height_mid, start_x);
 }
 
 void render_loop() {

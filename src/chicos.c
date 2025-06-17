@@ -40,6 +40,10 @@ void init_app(int mem_size, bool should_render) {
     c_crit_error(THREAD_INIT_ERROR, "Failed to create DISK thread");
   }
 
+  if (pthread_create(&app.printer.printer_t, NULL, init_printer, NULL) != 0) {
+    c_crit_error(THREAD_INIT_ERROR, "Failed to create PRINTER thread");
+  }
+
   if (!should_render) {
     c_info("Disabled UI");
     return;

@@ -4,7 +4,7 @@
 #include "../../defines.h"
 #include "../fs/synt.h"
 
-#define MAX_PCB 10
+#define MAX_PCB 11
 #define MAX_SIZE_PROC_NAME 32
 
 typedef enum {

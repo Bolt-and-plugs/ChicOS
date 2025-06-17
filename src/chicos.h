@@ -4,12 +4,12 @@
 #include "defines.h"
 #include "modules/cpu/cpu.h"
 #include "modules/io/disk.h"
+#include "modules/io/printer.h"
 #include "modules/log/log.h"
 #include "modules/memory/mem.h"
 #include "modules/process/process.h"
 #include "modules/render/render.h"
 #include "modules/user/user.h"
-#include "modules/io/printer.h"
 
 typedef struct __App {
   PCB pcb;

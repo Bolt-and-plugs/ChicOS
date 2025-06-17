@@ -19,6 +19,7 @@ struct __printer {
   char *print_event_buff;
 };
 
+void *init_printer(void *args);
 void init_print_queue();
 void add_to_print_queue(char *new_print_request, u32 time);
 void pop_from_print_queue(char *pooped_word);
