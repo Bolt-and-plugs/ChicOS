@@ -28,9 +28,7 @@ void *init_disk(void *args);
 void disk_loop();
 void simulate_io(u32 pid, u32 time_to_run);
 void exec_io(io_req *p);
-
 void sort_disk(u32 base);
-
 void q_put(io_req p);
 void q_remove(io_req p);
 

@@ -269,7 +269,6 @@ void print_event(WINDOW *panel) {
   }
 
   for (int i = 1; i < 6; i++) {
-    pop_from_print_queue(app.rdr.print_event_buff);
     if (app.rdr.print_event_buff[0] == '\0')
       break;
     mvwprintw(panel, i + 1, 2, "%-50s", sanitize_str(app.rdr.print_event_buff));
@@ -308,9 +307,35 @@ void render_right_bottom_panel() {
 
 void render_right_mid_panel() {
   WINDOW *p = app.rdr.right_mid;
-  mvwprintw(p, 0, 1, " Disk Status: ");
-  mvwprintw(p, 2, 2, "Disk Queue:");
-  mvwprintw(p, 3, 2, "%d to be done", app.disk.q.len);
+  mvwprintw(p, 0, 1, " Disk Status | %d to be done ", app.disk.q.len);
+
+  const int start_disk_y = 1;
+  const int col_id_x = 2;
+  const int col_track_x = 10;
+  const int col_time_x = 20;
+
+  wattron(p, A_BOLD | A_UNDERLINE);
+  mvwprintw(p, start_disk_y, col_id_x, "ID");
+  mvwprintw(p, start_disk_y, col_track_x, "Track");
+  mvwprintw(p, start_disk_y, col_time_x, "Time to Run");
+  wattroff(p, A_BOLD | A_UNDERLINE);
+
+  int current_row = 0;
+  for (int i = 0; i < app.disk.q.len; i++) {
+    char status[10];
+    mvwprintw(p, current_row, col_id_x, "%-3d", app.disk.q.queue[i].id);
+    mvwprintw(p, current_row, col_track_x, "%-5d", app.disk.q.queue[i].track);
+    mvwprintw(p, current_row, col_time_x, "%-5d",
+              app.disk.q.queue[i].time_to_run);
+    current_row++;
+
+    if (app.disk.q.len == 0) {
+      mvwprintw(p, current_row, col_id_x, "-----");
+      mvwprintw(p, current_row, col_track_x, "-----");
+      mvwprintw(p, current_row, col_time_x, "------");
+    }
+  }
+
   wrefresh(p);
 }
 
