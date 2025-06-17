@@ -9,6 +9,7 @@
 #include "modules/process/process.h"
 #include "modules/render/render.h"
 #include "modules/user/user.h"
+#include "modules/io/printer.h"
 
 typedef struct __App {
   PCB pcb;
@@ -21,6 +22,7 @@ typedef struct __App {
   renderer rdr;
   user *user;
   semaphore_list *semaphores;
+  printer printer;
 } App;
 
 void handle_signal(sig_atomic_t signal);
