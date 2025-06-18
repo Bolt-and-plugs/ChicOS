@@ -256,7 +256,7 @@ int read_path(WINDOW *p) {
 }
 
 void print_event(WINDOW *p) {
-  if (app.printer.printer_buff[0]) {
+  if (app.printer.active) {
     for (int i = 0; i < PRINTER_WINDOW; i++)
       mvwprintw(app.rdr.left_bottom, i + 2, 1, "%s",
                 sanitize_str(app.printer.printer_buff[i]));
