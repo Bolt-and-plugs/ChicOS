@@ -52,8 +52,6 @@ void init_app(int mem_size, bool should_render) {
   if (pthread_create(&app.mem->render_t, NULL, init_render, NULL) != 0) {
     c_crit_error(THREAD_INIT_ERROR, "Failed to create render thread");
   }
-
-  init_print_queue();
 }
 
 void clear_app(bool should_render) {
