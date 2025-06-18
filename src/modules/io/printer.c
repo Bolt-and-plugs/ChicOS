@@ -13,6 +13,7 @@ void *init_printer(void *args) {
   app.printer.head->prox = NULL;
   app.printer.tail = app.printer.head;
   app.printer.active = true;
+  app.printer.buff_last = -1;
   printer_loop();
   return NULL;
 }
@@ -25,10 +26,12 @@ void printer_loop() {
     if (app.printer.head != NULL) {
       while (app.printer.tail != NULL) {
         pop_from_print_queue(local_print_buff);
-        if (i < PRINTER_WINDOW)
+        if (i < PRINTER_WINDOW) {
           strcpy(app.printer.printer_buff[i], local_print_buff);
-        else {
+          app.printer.buff_last++;
+        } else {
           i = i % PRINTER_WINDOW;
+          app.printer.buff_last = 0;
         }
       }
       c_dealloc(local_print_buff);

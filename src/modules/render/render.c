@@ -266,7 +266,7 @@ int read_path(WINDOW *p) {
 }
 
 void print_event(WINDOW *p) {
-  if (app.printer.active) {
+  if (app.printer.active && app.printer.buff_last != -1) {
     for (int i = 0; i < PRINTER_WINDOW; i++)
       mvwprintw(p, i + 2, 1, "%s", sanitize_str(app.printer.printer_buff[i]));
   }
@@ -279,7 +279,7 @@ void render_left_bottom_panel() {
 
   mvwprintw(panel, 0, 1, " Printer: ");
 
-  //print_event(panel);
+  print_event(panel);
 
   wrefresh(panel);
 }
