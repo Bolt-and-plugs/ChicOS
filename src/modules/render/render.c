@@ -150,13 +150,16 @@ void render_left_panel() {
   wattroff(panel, A_BOLD | A_UNDERLINE);
 
   current_row = start_semaphore_y + 1;
+  int j;
   for (int i = 0; i < app.semaphores->last; i++) {
     mvwprintw(panel, current_row, col_name_x, "%c", app.semaphores->l[i].name);
     mvwprintw(panel, current_row, col_pid_x, "%-5d", app.semaphores->l[i].id);
     mvwprintw(panel, current_row, col_status_x, "%-2d",
               app.semaphores->l[i].value);
-    for (int j = col_time_x - 1; j < app.semaphores->l[i].waiters_last; j++) {
-      mvwprintw(panel, current_row, i, "%d|", app.semaphores->l[i].waiters[j]);
+    j = col_time_x - 1;
+    for (int k = app.semaphores->l->head; k != app.semaphores->l->tail; k = (k + 1)%DEFAULT_WAITERS_NUM) {
+      mvwprintw(panel, current_row, j, "%d|", app.semaphores->l[i].waiters[k]);
+      j+=2;
     }
     current_row++;
   }
@@ -255,13 +258,13 @@ int read_path(WINDOW *p) {
   return 1;
 }
 
-void print_event(WINDOW *p) {
+/*void print_event(WINDOW *p) {
   if (app.printer.printer_buff[0]) {
     for (int i = 0; i < PRINTER_WINDOW; i++)
       mvwprintw(app.rdr.left_bottom, i + 2, 1, "%s",
                 sanitize_str(app.printer.printer_buff[i]));
   }
-}
+}*/
 
 void render_left_bottom_panel() {
   WINDOW *panel = app.rdr.left_bottom;
@@ -270,7 +273,7 @@ void render_left_bottom_panel() {
 
   mvwprintw(panel, 0, 1, " Printer: ");
 
-  print_event(panel);
+//  print_event(panel);
 
   wrefresh(panel);
 }

@@ -1,4 +1,5 @@
 #include "semaphore.h"
+#include "../process/process.h"
 #include "../../chicos.h"
 #include "../log/log.h"
 #include "../memory/mem.h"
@@ -37,7 +38,8 @@ void semaphoreP(semaphore *s, u32 pid) {
   s->value--;
   if (s->value < 0) {
     waiter_push(s, pid);
-    app.pcb.process_stack[pid].status = WAITING;
+    process *p = p_find(pid);
+    p->status = WAITING;
   }
 }
 
@@ -49,10 +51,9 @@ void semaphoreV(semaphore *s) {
 
   s->value++;
   if (get_waiters_size(s) > 0) {
-    c_info("waiter's size:", get_waiters_size(s));
     u32 waking_pid = waiter_pop(s);
-    c_info("Waiter's PID:", waking_pid);
-    app.pcb.process_stack[waking_pid].status = READY;
+    process *waking_p = p_find(waking_pid);
+    waking_p->status = READY;
   }
 }
 
