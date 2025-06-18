@@ -10,7 +10,6 @@ exec 4000
 read 2000
 V(s)
 exec 500
-V(s)
 exec 5000
 exec 200
 exec 10000

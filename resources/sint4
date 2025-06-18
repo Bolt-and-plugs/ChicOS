@@ -9,10 +9,10 @@ read 20
 exec 500
 read 30
 exec 5000
-V(s)
-V(t)
-exec 200
+P(s)
 P(t)
+exec 200
+V(t)
 exec 10000
 write 20
-P(s)
+V(s)
