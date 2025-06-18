@@ -9,6 +9,10 @@ extern App app;
 
 void *init_printer(void *args) {
   sem_init(&app.printer.printer_s, 0, 1);
+  app.printer.head = c_alloc(sizeof(print_list));
+  app.printer.head->prox = NULL;
+  app.printer.tail = app.printer.head;
+  app.printer.active = true;
   printer_loop();
   return NULL;
 }
@@ -30,12 +34,6 @@ void printer_loop() {
       c_dealloc(local_print_buff);
     }
   }
-}
-
-void init_print_queue() {
-  app.printer.head = c_alloc(sizeof(print_list));
-  app.printer.head->prox = NULL;
-  app.printer.tail = app.printer.head;
 }
 
 void add_to_print_queue(char *new_print_request, u32 time) {

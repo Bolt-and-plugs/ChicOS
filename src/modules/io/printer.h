@@ -21,6 +21,7 @@ typedef struct __printer {
   print_list *tail;
   char printer_buff[PRINTER_WINDOW][MAX_PRINTER_OUTPUT];
   u8 buff_last;
+  bool active;
 } printer;
 
 void *init_printer(void *args);
