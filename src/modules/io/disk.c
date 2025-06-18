@@ -32,13 +32,29 @@ void sort_disk(u32 base) {
   }
 }
 
+void move_header(u32 target_track) {
+  sem_wait(&app.disk.disk_s);
+  if (target_track > app.disk.current_track) {
+    app.disk.current_track++;
+  }
+  if (target_track < app.disk.current_track) {
+    app.disk.current_track--;
+  }
+  sem_post(&app.disk.disk_s);
+}
+
 void disk_loop() {
   while (!app.loop_stop) {
-    sleep_ms(5);
+    sleep_ms(1);
     if (app.disk.qr.len > 1)
       sort_disk(app.disk.current_track);
-    if (app.disk.qr.len > 0)
-      exec_io(&app.disk.qr.queue[0]);
+    if (app.disk.qr.len > 0) {
+      if (app.disk.qr.queue[0].track == app.disk.current_track) {
+        exec_io(&app.disk.qr.queue[0]);
+        continue;
+      }
+      move_header(app.disk.qr.queue[0].track);
+    }
   }
 }
 
