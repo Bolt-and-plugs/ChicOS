@@ -9,22 +9,25 @@ extern App app;
 
 void *init_printer(void *args) {
   sem_init(&app.printer.printer_s, 0, 1);
-  app.printer.print_event_buff = c_alloc(4096);
   printer_loop();
   return NULL;
 }
 
 void printer_loop() {
   int i = 0;
-  char *print_buff = c_alloc(4096);
+  char *local_print_buff = c_alloc(MAX_PRINTER_OUTPUT);
   while (!app.loop_stop) {
     sleep_ms(5);
     if (app.printer.head != NULL) {
       while (app.printer.tail != NULL) {
-        pop_from_print_queue(print_buff);
-        mvwprintw(app.rdr.left_bottom, i + 2, 1, "%s", print_buff);
+        pop_from_print_queue(local_print_buff);
+        if (i < PRINTER_WINDOW)
+          strcpy(app.printer.printer_buff[i], local_print_buff);
+        else {
+          i = i % PRINTER_WINDOW;
+        }
       }
-      c_dealloc(print_buff);
+      c_dealloc(local_print_buff);
     }
   }
 }

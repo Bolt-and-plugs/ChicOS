@@ -228,9 +228,8 @@ void memory_load_req(process *p, u32 bytes) {
 
 void memory_load_finish(process *p) {
   char buffer[4096];
-  sscanf(buffer, "memory of process (pid=%d) loaded into %p", &p->pid,
+  c_info(buffer, "memory of process (pid=%d) loaded into %p", &p->pid,
          &p->address_space);
-  // 
 }
 
 bool is_mem_free(void *ptr) {

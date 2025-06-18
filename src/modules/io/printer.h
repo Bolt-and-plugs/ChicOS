@@ -1,11 +1,14 @@
 #include "../../defines.h"
 #include "ncurses.h"
 
+#define MAX_PRINTER_OUTPUT 4096
+#define PRINTER_WINDOW 5
+
 typedef struct __print_list print_list;
 typedef struct __printer printer;
 
 struct __print_list {
-  char print_args[4096];
+  char print_args[MAX_PRINTER_OUTPUT];
   u32 time;
   print_list *prox;
 };
@@ -16,7 +19,8 @@ struct __printer {
   sem_t printer_s;
   print_list *head;
   print_list *tail;
-  char *print_event_buff;
+  char printer_buff[PRINTER_WINDOW][MAX_PRINTER_OUTPUT];
+  u8 buff_last;
 };
 
 void *init_printer(void *args);

@@ -2,6 +2,7 @@
 #include "../../chicos.h"
 #include "../render/render.h"
 #include "stdio.h"
+#include "../utils/utils.h"
 
 extern App app;
 
@@ -18,19 +19,19 @@ void c_log(log_level level, status_code status, const char *str, ...) {
   if (!app.rdr.active) {
     switch (level) {
     case ERROR:
-      puts("\n/--------ERROR--------/");
+      printf("\n[ERROR ");
       break;
     case WARN:
-      puts("\n/--------WARN--------/");
+      printf("\n[WARN ");
       break;
     case INFO:
-      puts("\n/--------INFO--------/");
+      printf("\n[INFO ");
       break;
     case DEBUG:
-      puts("\n/--------DEBUG--------/");
+      printf("\n[DEBUG ");
       break;
     case CRIT_ERROR:
-      puts("\n/--------CRIT_ERROR--------/");
+      printf("\n[CRIT_ERROR ");
       break;
     default:
       break;
@@ -43,22 +44,22 @@ void c_log(log_level level, status_code status, const char *str, ...) {
     case -1:
       break;
     case 0:
-      printf("%d - SCHEDULER\n", status);
+      printf("| %d - SCHEDULER ", status);
       break;
     case 1:
-      printf("%d - Process Handling Context\n", status);
+      printf("| %d - Process Handling Context ", status);
       break;
     case 2:
-      printf("%d - CPU Related Context\n", status);
+      printf("| %d - CPU Related Context ", status);
       break;
     case 3:
-      printf("%d - Memory Status Context\n", status);
+      printf("| %d - Memory Status Context ", status);
       break;
     case 5:
-      printf("%d - User Status Context\n", status);
+      printf("| %d - User Status Context ", status);
       break;
     default:
-      printf("%d - Unknown Status\n", status);
+      printf("| %d - Unknown Status ", status);
     }
   }
 
@@ -70,11 +71,9 @@ void c_log(log_level level, status_code status, const char *str, ...) {
   va_end(arg_list);
   time_t clk = time(NULL);
   if (!app.rdr.active) {
-    printf("[%s] - %s", ctime(&clk), buffer);
-    puts("");
+    printf(" %s] \n %s\n", sanitize_str(ctime(&clk)), buffer);
   }
 
-  // TODO remove from here
-  if (app.rdr.active)
+  if (app.rdr.active && app.debug)
     render_log(buffer);
 }

@@ -4,6 +4,7 @@
 #include "../io/printer.h"
 #include "../memory/mem.h"
 #include "../user/user.h"
+#include "../utils/utils.h"
 #include <ctype.h>
 #include <locale.h>
 #include <pthread.h>
@@ -23,9 +24,7 @@ void bootstrap_ui() {
   sem_init(&app.rdr.renderer_s, 0, 1);
   app.rdr.active = true;
   app.rdr.output_buff = c_alloc(4096);
-  app.rdr.print_event_buff = c_alloc(4096);
   strcpy(app.rdr.output_buff, "init");
-  strcpy(app.rdr.print_event_buff, "init");
   setlocale(LC_ALL, "");
   initscr();
   cbreak();
@@ -59,7 +58,6 @@ void clear_renderer() {
   }
   endwin();
   c_dealloc(app.rdr.output_buff);
-  c_dealloc(app.rdr.print_event_buff);
   app.rdr.active = false;
 }
 
@@ -257,6 +255,14 @@ int read_path(WINDOW *p) {
   return 1;
 }
 
+void print_event(WINDOW *p) {
+  if (app.printer.printer_buff[0]) {
+    for (int i = 0; i < PRINTER_WINDOW; i++)
+      mvwprintw(app.rdr.left_bottom, i + 2, 1, "%s",
+                sanitize_str(app.printer.printer_buff[i]));
+  }
+}
+
 void render_left_bottom_panel() {
   WINDOW *panel = app.rdr.left_bottom;
   werase(panel);
@@ -264,7 +270,7 @@ void render_left_bottom_panel() {
 
   mvwprintw(panel, 0, 1, " Printer: ");
 
-  // print_event(panel);
+  print_event(panel);
 
   wrefresh(panel);
 }
@@ -289,7 +295,7 @@ void render_right_bottom_panel() {
 
 void render_right_mid_panel() {
   WINDOW *p = app.rdr.right_mid;
-  mvwprintw(p, 0, 1, " Disk Status | %d to be done | %d curr track ",
+  mvwprintw(p, 0, 1, " Disk Status | %d to be done | %05d curr track ",
             app.disk.qr.len, app.disk.current_track);
 
   const int start_disk_y = 1;
@@ -305,9 +311,8 @@ void render_right_mid_panel() {
 
   int current_row = start_disk_y + 1;
   for (int i = 0; i < app.disk.qr.len; i++) {
-    char status[10];
     mvwprintw(p, current_row, col_id_x, "%-3d", app.disk.qr.queue[i].id);
-    mvwprintw(p, current_row, col_track_x, "%-5d", app.disk.qr.queue[i].track);
+    mvwprintw(p, current_row, col_track_x, "%05d", app.disk.qr.queue[i].track);
     mvwprintw(p, current_row, col_time_x, "%-5d",
               app.disk.qr.queue[i].time_to_run);
     current_row++;

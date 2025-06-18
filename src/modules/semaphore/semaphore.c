@@ -49,9 +49,9 @@ void semaphoreV(semaphore *s) {
 
   s->value++;
   if (get_waiters_size(s) > 0) {
-    c_info("waiter size:", get_waiters_size(s));
+    c_info("waiter's size:", get_waiters_size(s));
     u32 waking_pid = waiter_pop(s);
-    c_info("PID DO WAITER:", waking_pid);
+    c_info("Waiter's PID:", waking_pid);
     app.pcb.process_stack[waking_pid].status = READY;
   }
 }
