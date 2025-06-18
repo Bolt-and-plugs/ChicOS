@@ -14,13 +14,16 @@
 extern App app;
 volatile sig_atomic_t resized = 0;
 
-void handle_resize(int sig) {
-  if (sig) {
+void handle_resize(int sig)
+{
+  if (sig)
+  {
     resized = 1;
   }
 }
 
-void bootstrap_ui() {
+void bootstrap_ui()
+{
   sem_init(&app.rdr.renderer_s, 0, 1);
   app.rdr.active = true;
   app.rdr.output_buff = c_alloc(4096);
@@ -36,20 +39,23 @@ void bootstrap_ui() {
   refresh();
 }
 
-WINDOW *create_newwin(int h, int w, int y, int x) {
+WINDOW *create_newwin(int h, int w, int y, int x)
+{
   WINDOW *win = newwin(h, w, y, x);
   box(win, 0, 0);
   wrefresh(win);
   return win;
 }
 
-void clear_renderer() {
+void clear_renderer()
+{
   delwin(app.rdr.status_win);
   delwin(app.rdr.left_panel);
   delwin(app.rdr.right_top);
   delwin(app.rdr.right_bottom);
   delwin(app.rdr.left_bottom);
-  if (!app.debug) {
+  if (!app.debug)
+  {
     WINDOW *goodbye = create_newwin(LINES, COLS, 0, 0);
     mvwprintw(goodbye, LINES / 2, (COLS - 10) / 2, "ATÉ MAIS!");
     wrefresh(goodbye);
@@ -61,7 +67,8 @@ void clear_renderer() {
   app.rdr.active = false;
 }
 
-void status_bar() {
+void status_bar()
+{
   WINDOW *s = app.rdr.status_win;
   werase(s);
   mvwprintw(s, 0, 0, "ChicOS(S) | %sPress CTRL+C to quit",
@@ -69,7 +76,8 @@ void status_bar() {
   wrefresh(s);
 }
 
-void render_left_panel() {
+void render_left_panel()
+{
   WINDOW *panel = app.rdr.left_panel;
 
   werase(panel);
@@ -94,9 +102,11 @@ void render_left_panel() {
   wattroff(panel, A_BOLD | A_UNDERLINE);
 
   int current_row = start_process_y + 1;
-  for (int i = 0; i < app.pcb.last; i++) {
+  for (int i = 0; i < app.pcb.last; i++)
+  {
     char status[10];
-    switch (app.pcb.process_stack[i].status) {
+    switch (app.pcb.process_stack[i].status)
+    {
     case RUNNING:
       strcpy(status, "RUNNING");
       break;
@@ -132,7 +142,8 @@ void render_left_panel() {
 
     current_row++;
   }
-  if (app.pcb.last == 0) {
+  if (app.pcb.last == 0)
+  {
     mvwprintw(panel, current_row, col_name_x, "------------");
     mvwprintw(panel, current_row, col_pid_x, "-----");
     mvwprintw(panel, current_row, col_status_x, "------");
@@ -151,20 +162,23 @@ void render_left_panel() {
 
   current_row = start_semaphore_y + 1;
   int j;
-  for (int i = 0; i < app.semaphores->last; i++) {
+  for (int i = 0; i < app.semaphores->last; i++)
+  {
     mvwprintw(panel, current_row, col_name_x, "%c", app.semaphores->l[i].name);
     mvwprintw(panel, current_row, col_pid_x, "%-5d", app.semaphores->l[i].id);
     mvwprintw(panel, current_row, col_status_x, "%-2d",
               app.semaphores->l[i].value);
     j = col_time_x - 1;
-    for (int k = app.semaphores->l->head; k != app.semaphores->l->tail; k = (k + 1)%DEFAULT_WAITERS_NUM) {
+    for (int k = app.semaphores->l[i].head; k != app.semaphores->l[i].tail; k = (k + 1) % DEFAULT_WAITERS_NUM)
+    {
       mvwprintw(panel, current_row, j, "%d|", app.semaphores->l[i].waiters[k]);
-      j+=2;
+      j += 2;
     }
     current_row++;
   }
 
-  if (app.semaphores->last == 0) {
+  if (app.semaphores->last == 0)
+  {
     mvwprintw(panel, current_row, col_name_x, "-");
     mvwprintw(panel, current_row, col_pid_x, "-----");
     mvwprintw(panel, current_row, col_status_x, "--");
@@ -174,7 +188,8 @@ void render_left_panel() {
   wrefresh(panel);
 }
 
-void render_right_top_panel() {
+void render_right_top_panel()
+{
   WINDOW *p = app.rdr.right_top;
   werase(p);
   box(p, 0, 0);
@@ -200,7 +215,8 @@ void render_right_top_panel() {
   wrefresh(p);
 }
 
-int read_path(WINDOW *p) {
+int read_path(WINDOW *p)
+{
   char path_buffer[MAX_ADDRESS_SIZE] = {0};
   int max_x;
   max_x = getmaxx(p);
@@ -220,22 +236,31 @@ int read_path(WINDOW *p) {
   u32 idx = 0;
   int ch;
 
-  while (1) {
+  while (1)
+  {
     ch = wgetch(p);
 
     if (ch == ERR)
       continue;
 
-    if (ch == '\n') {
+    if (ch == '\n')
+    {
       break;
-    } else if (ch == 27) {
+    }
+    else if (ch == 27)
+    {
       return 0;
-    } else if (ch == KEY_BACKSPACE || ch == 127 || ch == 8) {
-      if (idx > 0) {
+    }
+    else if (ch == KEY_BACKSPACE || ch == 127 || ch == 8)
+    {
+      if (idx > 0)
+      {
         idx--;
         path_buffer[idx] = '\0';
       }
-    } else if (idx < sizeof(path_buffer) - 1 && ch >= 32 && ch <= 126) {
+    }
+    else if (idx < sizeof(path_buffer) - 1 && ch >= 32 && ch <= 126)
+    {
       path_buffer[idx++] = ch;
       path_buffer[idx] = '\0';
     }
@@ -245,11 +270,14 @@ int read_path(WINDOW *p) {
     wrefresh(p);
   }
 
-  if (valid_path(path_buffer)) {
+  if (valid_path(path_buffer))
+  {
     interrupt_control(process_create, "%s", path_buffer);
     mvwprintw(p, 5, 1, "Last file opened: %s", path_buffer);
     wclrtoeol(p);
-  } else {
+  }
+  else
+  {
     mvwprintw(p, 4, 1, "Error: Invalid or non-existent file path.");
     wclrtoeol(p);
   }
@@ -258,27 +286,31 @@ int read_path(WINDOW *p) {
   return 1;
 }
 
-void print_event(WINDOW *p) {
-  if (app.printer.active) {
+void print_event(WINDOW *p)
+{
+  if (app.printer.active)
+  {
     for (int i = 0; i < PRINTER_WINDOW; i++)
       mvwprintw(app.rdr.left_bottom, i + 2, 1, "%s",
                 sanitize_str(app.printer.printer_buff[i]));
   }
 }
 
-void render_left_bottom_panel() {
+void render_left_bottom_panel()
+{
   WINDOW *panel = app.rdr.left_bottom;
   werase(panel);
   box(panel, 0, 0);
 
   mvwprintw(panel, 0, 1, " Printer: ");
 
-//  print_event(panel);
+  //  print_event(panel);
 
   wrefresh(panel);
 }
 
-void render_right_bottom_panel() {
+void render_right_bottom_panel()
+{
   WINDOW *p = app.rdr.right_bottom;
   box(p, 0, 0);
 
@@ -296,7 +328,8 @@ void render_right_bottom_panel() {
   wrefresh(p);
 }
 
-void render_right_mid_panel() {
+void render_right_mid_panel()
+{
   WINDOW *p = app.rdr.right_mid;
   mvwprintw(p, 0, 1, " Disk Status | %d to be done | %05d curr track ",
             app.disk.qr.len, app.disk.current_track);
@@ -313,7 +346,8 @@ void render_right_mid_panel() {
   wattroff(p, A_BOLD | A_UNDERLINE);
 
   int current_row = start_disk_y + 1;
-  for (int i = 0; i < app.disk.qr.len; i++) {
+  for (int i = 0; i < app.disk.qr.len; i++)
+  {
     mvwprintw(p, current_row, col_id_x, "%-3d", app.disk.qr.queue[i].id);
     mvwprintw(p, current_row, col_track_x, "%05d", app.disk.qr.queue[i].track);
     mvwprintw(p, current_row, col_time_x, "%-5d",
@@ -321,7 +355,8 @@ void render_right_mid_panel() {
     current_row++;
   }
 
-  if (app.disk.qr.len == 0) {
+  if (app.disk.qr.len == 0)
+  {
     mvwprintw(p, current_row, col_id_x, "---");
     mvwprintw(p, current_row, col_track_x, "-----");
     mvwprintw(p, current_row, col_time_x, "-----");
@@ -330,7 +365,8 @@ void render_right_mid_panel() {
   wrefresh(p);
 }
 
-void init_renderer() {
+void init_renderer()
+{
   app.rdr.status_win = create_newwin(1, COLS, 0, 0);
   int left_panel_height = LINES - 11;
   int left_bottom_height = 10;
@@ -356,11 +392,14 @@ void init_renderer() {
                     start_y + height_top + height_mid, start_x);
 }
 
-void render_loop() {
+void render_loop()
+{
   signal(SIGWINCH, handle_resize);
   nodelay(stdscr, TRUE);
-  while (!app.loop_stop) {
-    if (resized) {
+  while (!app.loop_stop)
+  {
+    if (resized)
+    {
       resized = 0;
       endwin();
       refresh();
@@ -380,7 +419,8 @@ void render_loop() {
   }
 }
 
-user get_credentials(WINDOW *win) {
+user get_credentials(WINDOW *win)
+{
   user login = {0};
   int y, x;
   getmaxyx(win, y, x);
@@ -405,12 +445,16 @@ user get_credentials(WINDOW *win) {
   u32 pos;
   wmove(p, 1, 1);
   wrefresh(p);
-  while ((ch = wgetch(p)) != '\n') {
-    if ((ch == KEY_BACKSPACE || ch == 127 || ch == 8) && pos > 0) {
+  while ((ch = wgetch(p)) != '\n')
+  {
+    if ((ch == KEY_BACKSPACE || ch == 127 || ch == 8) && pos > 0)
+    {
       pos--;
       mvwaddch(p, 1, pos + 1, ' ');
       wmove(p, 1, pos + 1);
-    } else if (isprint(ch) && pos < sizeof(login.password) - 1) {
+    }
+    else if (isprint(ch) && pos < sizeof(login.password) - 1)
+    {
       login.password[pos++] = ch;
       mvwaddch(p, 1, pos, '*');
     }
@@ -423,14 +467,16 @@ user get_credentials(WINDOW *win) {
   return login;
 }
 
-user *login_flow() {
+user *login_flow()
+{
   WINDOW *w = create_newwin(LINES - 1, COLS - 1, 0, 0);
   user login = {0};
   user *usr = NULL;
   char addr[MAX_ADDRESS_SIZE];
   bool logged_in = false;
 
-  while (!logged_in) {
+  while (!logged_in)
+  {
     memset(&login, 0, sizeof(login));
     werase(w);
     box(w, 0, 0);
@@ -442,7 +488,8 @@ user *login_flow() {
     bool file_exists = (access(addr, F_OK) == 0);
     usr = read_login_data(&login);
 
-    if (!file_exists) {
+    if (!file_exists)
+    {
       mvwprintw(w, 2, 2, "User does not exist. Creating one...");
       wrefresh(w);
       write_login_data(&login);
@@ -450,20 +497,27 @@ user *login_flow() {
       mvwprintw(w, 3, 2, usr->username, usr->password);
       wrefresh(w);
 
-      if (usr) {
+      if (usr)
+      {
         logged_in = true;
         mvwprintw(w, 3, 2, "Welcome, %s!", usr->username);
         wrefresh(w);
         napms(2000);
-      } else {
+      }
+      else
+      {
         mvwprintw(w, 3, 2, "Error creating user!");
         wrefresh(w);
         napms(2000);
       }
-    } else if (usr != NULL) {
+    }
+    else if (usr != NULL)
+    {
       app.user = usr;
       logged_in = true;
-    } else {
+    }
+    else
+    {
       mvwprintw(w, 2, 2, "Wrong password! Try again");
       wrefresh(w);
       napms(1000);
@@ -476,7 +530,8 @@ user *login_flow() {
   return usr;
 }
 
-void render_log(char *statement) {
+void render_log(char *statement)
+{
   sem_wait(&app.rdr.renderer_s);
   napms(100);
   if (app.rdr.output_buff)
@@ -484,21 +539,25 @@ void render_log(char *statement) {
   sem_post(&app.rdr.renderer_s);
 }
 
-void draw_dots(WINDOW *win, int repetitions) {
+void draw_dots(WINDOW *win, int repetitions)
+{
   int start_y = LINES / 2;
   int start_x = (COLS - 8) / 2 + 4;
   int delay_ms = 100;
   mvwprintw(win, start_y + 1, start_x - 8, "[            ]");
 
   wrefresh(win);
-  for (int i = 0; i < repetitions; i++) {
-    for (int k = 0; k < 12; k++) {
+  for (int i = 0; i < repetitions; i++)
+  {
+    for (int k = 0; k < 12; k++)
+    {
       mvwprintw(win, start_y + 1, start_x - 7 + k, ".");
       wrefresh(win);
       napms(delay_ms);
     }
     napms(300);
-    for (int k = 0; k < 12; k++) {
+    for (int k = 0; k < 12; k++)
+    {
       mvwprintw(win, start_y + 1, start_x - 7 + k, " ");
       wrefresh(win);
       napms(delay_ms / 2);
@@ -507,7 +566,8 @@ void draw_dots(WINDOW *win, int repetitions) {
   }
 }
 
-void welcome_screen() {
+void welcome_screen()
+{
   WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
   int names_y = LINES - 5;
   const char *createdBy = "Created By", *name1 = "CEN-s",
@@ -582,7 +642,8 @@ void welcome_screen() {
   delwin(welcome);
 }
 
-void *init_render(void *arg) {
+void *init_render(void *arg)
+{
   if (app.debug)
     c_info("%s", arg);
   bootstrap_ui();
