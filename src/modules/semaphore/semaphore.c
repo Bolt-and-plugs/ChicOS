@@ -90,7 +90,6 @@ int init_semaphore(char name, u32 value) {
   sem->name = name;
   sem->id = ++app.semaphores->max;
   sem->waiters = (u32 *)c_alloc(sizeof(u32) * (DEFAULT_WAITERS_NUM + value));
-  sem->waiters_last = 0;
   sem->head = 0;
   sem->tail = 0;
   sem->value = value;
