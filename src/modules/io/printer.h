@@ -4,16 +4,13 @@
 #define MAX_PRINTER_OUTPUT 4096
 #define PRINTER_WINDOW 5
 
-typedef struct __print_list print_list;
-typedef struct __printer printer;
-
-struct __print_list {
+typedef struct __print_list {
   char print_args[MAX_PRINTER_OUTPUT];
   u32 time;
-  print_list *prox;
-};
+  struct __print_list *prox;
+} print_list;
 
-struct __printer {
+typedef struct __printer {
   print_list queue;
   pthread_t printer_t;
   sem_t printer_s;
@@ -21,7 +18,7 @@ struct __printer {
   print_list *tail;
   char printer_buff[PRINTER_WINDOW][MAX_PRINTER_OUTPUT];
   u8 buff_last;
-};
+} printer;
 
 void *init_printer(void *args);
 void init_print_queue();
