@@ -4,12 +4,13 @@ sint1
 424
 s t
 
-print 1000
-V(s)
+print 500
+print 2000
 exec 4000
 read 2000
 P(s)
 exec 500
+V(s)
 exec 5000
 exec 200
 exec 10000

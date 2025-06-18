@@ -264,7 +264,7 @@ void print_event(WINDOW *p) {
       mvwprintw(app.rdr.left_bottom, i + 2, 1, "%s",
                 sanitize_str(app.printer.printer_buff[i]));
   }
-}*/
+}
 
 void render_left_bottom_panel() {
   WINDOW *panel = app.rdr.left_bottom;

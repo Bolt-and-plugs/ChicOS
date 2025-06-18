@@ -4,13 +4,8 @@ sint3
 424
 s t v h d
 
-exec 4000
-read 20
-exec 500
-read 30
-exec 5000
-V(s)
-exec 200
-exec 10000
-write 20
 P(s)
+exec 10000
+read 20
+write 20
+V(s)
