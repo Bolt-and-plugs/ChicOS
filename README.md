@@ -6,7 +6,7 @@
 
 This is a college Operating Systems class project, meanwhile a playground for us to taste the feeling of being a kernel programmer (roughly). For now, we do not have the instructions for what to follow, so, until then, this project will only handle some utilities and default operations we think a OS must implement. Later on, this will become (as we believe) a (not) fully functional OS simulator.
 
-![image](https://github.com/user-attachments/assets/4430d944-2fc1-41cc-825e-06771fad6faa)
+![image](https://github.com/user-attachments/assets/63cdfe62-b072-4660-9e18-0b31182a6a8f)
 
 
 # Testing the project
