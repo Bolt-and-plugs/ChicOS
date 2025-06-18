@@ -1,3 +1,6 @@
+#ifndef __PRINTER
+#define __PRINTER
+
 #include "../../defines.h"
 #include "ncurses.h"
 
@@ -25,3 +28,5 @@ void init_print_queue();
 void add_to_print_queue(char *new_print_request, u32 time);
 void pop_from_print_queue(char *pooped_word);
 void printer_loop();
+
+#endif
