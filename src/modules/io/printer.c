@@ -30,6 +30,7 @@ void printer_loop() {
         pop_from_print_queue(local_print_buff, time_print_buff);
         strcpy(app.printer.printer_buff[i], local_print_buff);
         app.printer.printer_time_buff[i] = *time_print_buff;
+        *time_print_buff--;
         app.printer.buff_last++;
         i++;
       }
