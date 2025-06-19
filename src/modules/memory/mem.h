@@ -7,6 +7,8 @@
 #define MB 1048576
 #define KB 1024
 
+#define SLAB_THRESHOLD 8 // bytes
+
 #define DEFAULT_MEMORY_SIZE MB
 #define PAGE_SIZE KB
 
@@ -17,12 +19,30 @@ typedef struct __page {
   bool used;
 } page;
 
+// TODO
+typedef struct __slab {
+  __slab *next;
+  void *free_list_head;
+  u32 free_chunk_count;
+} slab;
+
+typedef struct __slab_pool {
+  u32 object_size;
+  slab *full_slabs;
+  slab *partial_slabs;
+  slab *empty_slabs;
+  sem_t lock;
+} slab_pool;
+// -------
+
 typedef struct __page_table {
   u32 len;
   u32 free_page_num;
   u32 *free_stack;
   u32 free_stack_top;
   page *pages;
+  u32 clock_hand; // Add a clock hand index
+  slab_pool *p;
 } page_table;
 
 typedef struct __memory {
@@ -50,6 +70,8 @@ void clear_mem();
 
 void *c_alloc(u32 bytes);
 
+void *slab_c_alloc(u32 bytes);
+
 void *c_realloc(void *curr_region, u32 bytes);
 
 alloc_header *get_header(void *ptr);
@@ -71,5 +93,7 @@ void memory_load_finish(process *p);
 void memory_load_req(process *p, u32 bytes);
 
 int second_chance();
+
+int second_chance_clock();
 
 #endif
