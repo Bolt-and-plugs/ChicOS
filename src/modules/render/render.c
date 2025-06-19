@@ -267,8 +267,10 @@ int read_path(WINDOW *p) {
 
 void print_event(WINDOW *p) {
   if (app.printer.active && app.printer.buff_last != -1) {
-    for (int i = 0; i < PRINTER_WINDOW; i++)
-      mvwprintw(p, i + 2, 1, "%s", sanitize_str(app.printer.printer_buff[i]));
+    for (int i = 0; i < PRINTER_WINDOW; i++) {
+      mvwprintw(p, i+2, 1, "%s", sanitize_str(app.printer.printer_buff[i]));
+      mvwprintw(p, i+2, 37, "%d", app.printer.printer_time_buff[i]);
+    }
   }
 }
 

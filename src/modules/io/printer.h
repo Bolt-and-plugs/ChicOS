@@ -20,6 +20,7 @@ typedef struct __printer {
   print_list *head;
   print_list *tail;
   char printer_buff[PRINTER_WINDOW][MAX_PRINTER_OUTPUT];
+  u32 printer_time_buff[PRINTER_WINDOW];
   i16 buff_last;
   bool active;
 } printer;
@@ -27,7 +28,7 @@ typedef struct __printer {
 void *init_printer(void *args);
 void init_print_queue();
 void add_to_print_queue(char *new_print_request, u32 time);
-void pop_from_print_queue(char *pooped_word);
+void pop_from_print_queue(char *pooped_word, u32 *time_to_print);
 void printer_loop();
 
 #endif
