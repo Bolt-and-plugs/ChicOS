@@ -304,8 +304,7 @@ void render_right_bottom_panel() {
 
 void render_right_mid_panel() {
   WINDOW *p = app.rdr.right_mid;
-  mvwprintw(p, 0, 1, " Disk Status | %d to be done | %05d curr track ",
-            app.disk.qr.len, app.disk.current_track);
+  mvwprintw(p, 0, 1, " Disk Status | %d to be done ", app.disk.qr.len);
 
   const int start_disk_y = 1;
   const int col_id_x = 2;
@@ -326,7 +325,7 @@ void render_right_mid_panel() {
               app.disk.qr.queue[i].time_to_run);
     current_row++;
   }
-  
+
   for (int i = app.disk.qr.len; i < MAX_PCB; i++) {
     mvwprintw(p, current_row, col_id_x, "   ");
     mvwprintw(p, current_row, col_track_x, "     ");
@@ -340,6 +339,34 @@ void render_right_mid_panel() {
     mvwprintw(p, 2, col_time_x, "-----");
   }
 
+  int x;
+  x = getmaxx(p) - 1;
+  int current_track = app.disk.current_track;
+  int barw = x - 4;
+  if (barw < 1)
+    return;
+
+  int track_pos = (int)(((float)current_track / (float)TOTAL_TRACKS) * barw);
+
+  if (track_pos >= barw) {
+    track_pos = barw - 1;
+  }
+  if (track_pos < 0) {
+    track_pos = 0;
+  }
+
+  char bar_bg[barw + 1];
+  memset(bar_bg, '-', barw);
+  bar_bg[barw] = '\0';
+
+  mvwprintw(p, MAX_PCB + 1, 2, "Current Track: %d/%d", current_track,
+            TOTAL_TRACKS);
+
+  mvwprintw(p, MAX_PCB + 2, 2, "[%s]", bar_bg);
+
+  wattron(p, COLOR_PAIR(2));
+  mvwprintw(p, MAX_PCB + 2, 3 + track_pos, "=");
+  wattroff(p, COLOR_PAIR(2));
   wrefresh(p);
 }
 

@@ -65,10 +65,17 @@ void clear_mem() {
   c_info("%dB deallocated", mem_size);
 }
 
+void *slab_c_alloc(u32 bytes) {
+
+}
+
 void *c_alloc(u32 bytes) {
   c_info("Allocating %d bytes", bytes);
   if (bytes == 0)
     return NULL;
+
+  if (bytes <= SLAB_THRESHOLD)
+    return slab_c_alloc(bytes);
 
   u32 num_pages = (bytes + sizeof(alloc_header) + PAGE_SIZE - 1) / PAGE_SIZE;
 
@@ -252,7 +259,7 @@ bool is_mem_free(void *ptr) {
 }
 
 int second_chance() {
-  static int i = 0; // Variável estática marcando o ínicio da lista circular
+  static int i = 0;
   int curr = i;
 
   sem_wait(&app.mem->memory_s);
@@ -260,16 +267,13 @@ int second_chance() {
     c_info("Page %d", curr);
     page *p = &app.mem->pt.pages[curr];
     if (!(p->used)) {
-      p->used = false; // Usa a  segunda chance da página
+      p->used = false;
       sem_post(&app.mem->memory_s);
-      return (i = (curr + 1) %
-                  app.mem->pt.len); // Retorna o índice da página a ser
-                                    // substituída e atualiza o ínicio da lista
+      return (i = (curr + 1) % app.mem->pt.len);
     }
     p->used = false;
-    curr = (curr + 1) %
-           app.mem->pt.len; // Atualiza o valor da curr para a próxima página
-  } while (curr != i - 1); // Continua até voltar ao início da lista
+    curr = (curr + 1) % app.mem->pt.len;
+  } while (curr != i - 1);
   i = (curr + 1) % app.mem->pt.len;
 
   sem_post(&app.mem->memory_s);
