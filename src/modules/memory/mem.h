@@ -21,7 +21,7 @@ typedef struct __page {
 
 // TODO
 typedef struct __slab {
-  __slab *next;
+  struct __slab *next;
   void *free_list_head;
   u32 free_chunk_count;
 } slab;

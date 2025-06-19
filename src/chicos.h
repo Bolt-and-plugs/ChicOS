@@ -12,13 +12,14 @@
 #include "modules/user/user.h"
 
 typedef struct __App {
+  volatile sig_atomic_t loop_stop;
+  log_level min_log_level;
+  bool debug;
+
   PCB pcb;
   memory *mem;
   cpu cpu;
   disk disk;
-  volatile sig_atomic_t loop_stop;
-  log_level min_log_level;
-  bool debug;
   renderer rdr;
   user *user;
   semaphore_list *semaphores;
