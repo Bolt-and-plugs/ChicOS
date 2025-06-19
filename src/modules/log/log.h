@@ -37,6 +37,7 @@ typedef enum {
   INVALID_INPUT = 600,
   QUEUE_EMPTY = 700,
   QUEUE_ERROR = 701,
+  USER_HASH_ERROR = 800,
 
 } status_code;
 

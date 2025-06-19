@@ -10,7 +10,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES DEBUG)
-  set(CMAKE_C_FLAGS_DEBUG "-g3 -O0 -Wall -Wextra -Wpedantic -fsanitize=address")
+  add_compile_options(-g3 -O0 -Wall -Wextra -Wpedantic -fsanitize=address)
+  add_link_options(-fsanitize=address)
 endif()
 
 add_definitions(-DBUILD_TYPE="${CMAKE_BUILD_TYPE}")
@@ -21,17 +22,21 @@ file(GLOB TEST_FILES test/*.c)
 
 include_directories(src)
 
-find_package(Curses REQUIRED)
+find_package(PkgConfig REQUIRED)
 
-include_directories(${CURSES_INCLUDE_DIRS})
+# --- ALTERAÇÃO IMPORTANTE AQUI ---
+# Usamos IMPORTED_TARGET para criar alvos que contêm todas as informações necessárias.
+pkg_check_modules(SODIUM REQUIRED IMPORTED_TARGET libsodium)
+pkg_check_modules(NCURSES REQUIRED IMPORTED_TARGET ncurses)
 
 add_executable(${project_name} ${SRC_FILES} ${TEST_FILES} ${OS_MODULES})
 
-target_link_libraries(${project_name} ${CURSES_LIBRARIES})
-
-#enable_testing()
-#add_test(NAME ${project_name}_test COMMAND ${project_name}_test)
+# --- ALTERAÇÃO IMPORTANTE AQUI ---
+# Agora vinculamos aos alvos importados, que é a maneira mais robusta.
+target_link_libraries(${project_name}
+    PRIVATE
+        PkgConfig::SODIUM
+        PkgConfig::NCURSES
+)
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "C flags debug: ${CMAKE_C_FLAGS_DEBUG}")
-#message(STATUS "Test files: ${TEST_FILES}")

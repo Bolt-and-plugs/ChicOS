@@ -1,0 +1,2 @@
+USERNAME: username
+PASSWORD: $argon2id$v=19$m=65536,t=2,p=1$PBRCKmXLCgHJ+RxC+SW7Vg$ktfKjU0jmy3C7TZdFGOxIl2DL16zmPamSoCKU0Te9ro
