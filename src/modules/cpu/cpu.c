@@ -233,7 +233,9 @@ void exec_program(process *sint_process) {
         time = (u32)atoi(strtok(NULL, " "));
         sys_call(print_request, "%s %u", "A-impressora-imprime", time);
       } else {
-        c_error(DISK_FILE_READ_ERROR, "Found invalid command!: %s", command);
+        c_error(DISK_FILE_READ_ERROR,
+                "Found invalid command!: %s in process %u", command,
+                sint_process->pid);
       }
     }
     return;

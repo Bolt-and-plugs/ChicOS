@@ -106,7 +106,7 @@ void log_process(u32 pid) {
   // DEBUG INFO
   char cut_name[121];
   strncpy(cut_name, p.name, 120);
-  snprintf(res, 255, "process: %s\npid: %d\nstatus %s\nrw_count: %d\n",
+  snprintf(res, 255, "process: %s\tpid: %d\tstatus %s\trw_count: %d\n",
            cut_name, p.pid, status, p.fb->h->rw_count);
   c_info(res);
 }

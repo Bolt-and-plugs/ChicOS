@@ -75,7 +75,7 @@ void init_semaphore_list() {
 int init_semaphore(char name, u32 value) {
   for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++)
     if (app.semaphores->l[i].name == name) {
-      c_error(SEMAPHORE_INIT_ERROR, "Semaphore with name: %c already exists",
+      c_warn(SEMAPHORE_INIT_ERROR, "Semaphore with name: %c already exists",
               name);
       return -1;
     }

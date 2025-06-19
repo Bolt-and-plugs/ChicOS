@@ -78,7 +78,7 @@ void *c_alloc(u32 bytes) {
     return NULL;
   }
 
-  c_info("Pages to be allocated: %d\n Free pages: %d", num_pages,
+  c_info("Pages to be allocated: %d\t Free pages: %d", num_pages,
          app.mem->pt.free_page_num);
   if (num_pages > app.mem->pt.free_page_num || num_pages > app.mem->pt.len) {
     c_info("Not enough memory to allocate %d pages", num_pages);

@@ -1,8 +1,8 @@
 #include "log.h"
 #include "../../chicos.h"
 #include "../render/render.h"
-#include "stdio.h"
 #include "../utils/utils.h"
+#include "stdio.h"
 
 extern App app;
 
@@ -17,21 +17,23 @@ void c_log(log_level level, status_code status, const char *str, ...) {
     return;
 
   if (!app.rdr.active) {
+
+    puts("\n");
     switch (level) {
     case ERROR:
-      printf("\n[ERROR ");
+      printf("[\033[31;1;4mERROR\033[0m ");
       break;
     case WARN:
-      printf("\n[WARN ");
+      printf("[\033[93;1;4mWARN\033[0m ");
       break;
     case INFO:
-      printf("\n[INFO ");
+      printf("[\033[1;37;4mINFO\033[0m ");
       break;
     case DEBUG:
-      printf("\n[DEBUG ");
+      printf("[\033[94;1;4mDEBUG\033[0m ");
       break;
     case CRIT_ERROR:
-      printf("\n[CRIT_ERROR ");
+      printf("[\033[31;1;4mCRIT_ERROR\033[0m ");
       break;
     default:
       break;
@@ -47,19 +49,19 @@ void c_log(log_level level, status_code status, const char *str, ...) {
       printf("| %d - SCHEDULER ", status);
       break;
     case 1:
-      printf("| %d - Process Handling Context ", status);
+      printf("| %d - Process Handling Context | ", status);
       break;
     case 2:
-      printf("| %d - CPU Related Context ", status);
+      printf("| %d - CPU Related Context | ", status);
       break;
     case 3:
-      printf("| %d - Memory Status Context ", status);
+      printf("| %d - Memory Status Context | ", status);
       break;
     case 5:
-      printf("| %d - User Status Context ", status);
+      printf("| %d - User Status Context | ", status);
       break;
     default:
-      printf("| %d - Unknown Status ", status);
+      printf("| %d - Unknown Status | ", status);
     }
   }
 
@@ -71,7 +73,7 @@ void c_log(log_level level, status_code status, const char *str, ...) {
   va_end(arg_list);
   time_t clk = time(NULL);
   if (!app.rdr.active) {
-    printf(" %s] \n %s\n", sanitize_str(ctime(&clk)), buffer);
+    printf("%s]: %s\n", sanitize_str(ctime(&clk)), sanitize_str(buffer));
   }
 
   if (app.rdr.active && app.debug)
