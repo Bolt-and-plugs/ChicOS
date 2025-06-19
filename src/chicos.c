@@ -24,7 +24,7 @@ bool set_envvar(const char *mode) {
   return false;
 }
 
-void init_app(int mem_size, bool should_render) {
+void init_app(i32 mem_size, bool should_render) {
   srand(time(NULL));
   init_mem(mem_size);
   init_pcb();
@@ -101,7 +101,7 @@ void handle_args(int *args, int argc, char **argv) {
   // print help
   if (args[0] == HELP) {
     puts("Valid Arguments:");
-    puts("\t-ms, --mem-size -> (integer) Memory size in bytes");
+    //puts("\t-ms, --mem-size -> (integer) Memory size in bytes");
     puts("\t-nr, --no_render -> (store_true / bool) Disables UI rendering");
     exit(-1);
   }
@@ -115,8 +115,8 @@ int main(int argc, char **argv) {
 
   if (argc > 1) {
     handle_args(args, argc, argv);
-    if (args[1] && valid_int(args[1]))
-      mem_size = args[1];
+    //if (args[1] && valid_int(args[1]))
+    //  mem_size = (i32)args[1];
     if (args[2] && valid_int(args[2]))
       should_render = false;
   }

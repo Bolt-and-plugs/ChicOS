@@ -599,7 +599,7 @@ void welcome_screen() {
 
 void *init_render(void *arg) {
   if (app.debug)
-    c_info("%s", arg);
+    c_info("Initializing renderer %s", arg);
   bootstrap_ui();
   // app.user = login_flow();
   // if (!app.user) return NULL;
