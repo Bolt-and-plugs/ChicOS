@@ -21,20 +21,21 @@ void *init_printer(void *args) {
 void printer_loop() {
   int i = 0;
   char *local_print_buff = c_alloc(MAX_PRINTER_OUTPUT);
+  u32 *time_print_buff = c_alloc(sizeof(u32));
   while (!app.loop_stop) {
     sleep_ms(5);
     if (app.printer.head != NULL) {
-      while (app.printer.tail != NULL) {
-        pop_from_print_queue(local_print_buff);
-        if (i < PRINTER_WINDOW) {
-          strcpy(app.printer.printer_buff[i], local_print_buff);
-          app.printer.buff_last++;
-        } else {
-          i = i % PRINTER_WINDOW;
-          app.printer.buff_last = 0;
-        }
+
+      while (app.printer.tail != NULL && i < PRINTER_WINDOW) {
+        pop_from_print_queue(local_print_buff, time_print_buff);
+        strcpy(app.printer.printer_buff[i], local_print_buff);
+        app.printer.printer_time_buff[i] = *time_print_buff;
+        *time_print_buff--;
+        app.printer.buff_last++;
+        i++;
       }
       c_dealloc(local_print_buff);
+      c_dealloc(time_print_buff);
     }
   }
 }
@@ -42,22 +43,24 @@ void printer_loop() {
 void add_to_print_queue(char *new_print_request, u32 time) {
   print_list *new = c_alloc(sizeof(print_list));
   if (app.printer.head == NULL) {
-    // init_print_queue();
     strcpy(new->print_args, new_print_request);
+    new->time = time;
     app.printer.head = new;
     app.printer.tail = new;
     return;
   } else {
     strcpy(new->print_args, new_print_request);
+    new->time = time;
     app.printer.tail->prox = new;
     app.printer.tail = new;
   }
 }
 
-void pop_from_print_queue(char *popped_word) {
+void pop_from_print_queue(char *popped_word, u32 *time_to_print) {
   if (app.printer.head == NULL) {
     c_error(QUEUE_EMPTY, "The print queue is empty");
     strcpy(popped_word, "");
+    *time_to_print = -1;
     return;
   }
 
@@ -65,6 +68,7 @@ void pop_from_print_queue(char *popped_word) {
 
   strncpy(popped_word, to_del->print_args, 127);
   popped_word[127] = '\0';
+  *time_to_print = to_del->time;
   if (app.printer.head == app.printer.tail) {
     if (app.printer.head != NULL)
       c_dealloc(app.printer.head);
