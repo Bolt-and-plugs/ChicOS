@@ -268,8 +268,8 @@ int read_path(WINDOW *p) {
 void print_event(WINDOW *p) {
   if (app.printer.active && app.printer.buff_last != -1) {
     for (int i = 0; i < PRINTER_WINDOW; i++) {
-      mvwprintw(p, i+2, 1, "%s", sanitize_str(app.printer.printer_buff[i]));
-      mvwprintw(p, i+2, 37, "%d", app.printer.printer_time_buff[i]);
+      mvwprintw(p, i + 2, 1, "%s", sanitize_str(app.printer.printer_buff[i]));
+      mvwprintw(p, i + 2, 37, "%d", app.printer.printer_time_buff[i]);
     }
   }
 }
@@ -599,7 +599,7 @@ void welcome_screen() {
 
 void *init_render(void *arg) {
   if (app.debug)
-    c_info("Initializing renderer %s", arg);
+    c_info("%s", arg);
   bootstrap_ui();
   // app.user = login_flow();
   // if (!app.user) return NULL;
