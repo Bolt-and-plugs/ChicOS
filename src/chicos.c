@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
     if (args[2] && valid_int(args[2]))
       should_render = false;
   }
-
+  initialize_crypto();
   set_debug_mode();
   // main loop
   init_app(mem_size, should_render);

@@ -415,7 +415,7 @@ user get_credentials(WINDOW *win) {
   noecho();
   keypad(p, TRUE);
   int ch = 0;
-  u32 pos;
+  u32 pos = 0;
   wmove(p, 1, 1);
   wrefresh(p);
   while ((ch = wgetch(p)) != '\n') {
@@ -454,13 +454,13 @@ user *login_flow() {
 
     bool file_exists = (access(addr, F_OK) == 0);
     usr = read_login_data(&login);
-
+    
     if (!file_exists) {
       mvwprintw(w, 2, 2, "User does not exist. Creating one...");
       wrefresh(w);
       write_login_data(&login);
       usr = read_login_data(&login);
-      mvwprintw(w, 3, 2, usr->username, usr->password);
+      mvwprintw(w, 3, 2, "User '%s' created with password '%s'", usr->username, usr->password);
       wrefresh(w);
 
       if (usr) {
@@ -568,7 +568,7 @@ void welcome_screen() {
             "_______\\/////////__\\///____\\///__\\///_____\\////////_______\\/"
             "////_________\\///////////_____");
 
-  mvwprintw(welcome, LINES / 2, (COLS - 11) / 2, "Bem vindo!");
+  mvwprintw(welcome, LINES / 2, (COLS - 11) / 2, "Bem vindo %s!", app.user->username);
 
   mvwprintw(welcome, names_y, (COLS - strlen(createdBy)) / 2, "%s", createdBy);
 
@@ -599,8 +599,8 @@ void *init_render(void *arg) {
   if (app.debug)
     c_info("%s", arg);
   bootstrap_ui();
-  // app.user = login_flow();
-  // if (!app.user) return NULL;
+  app.user = login_flow();
+  if (!app.user) return NULL;
   welcome_screen();
   init_renderer();
   render_loop();
