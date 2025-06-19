@@ -268,8 +268,9 @@ int read_path(WINDOW *p) {
 void print_event(WINDOW *p) {
   if (app.printer.active && app.printer.buff_last != -1) {
     for (int i = 0; i < PRINTER_WINDOW; i++) {
-      mvwprintw(p, i+2, 1, "%s", sanitize_str(app.printer.printer_buff[i]));
-      mvwprintw(p, i+2, 37, "%d", app.printer.printer_time_buff[i]);
+      mvwprintw(p, i + 2, 1, "-25%s %d",
+                sanitize_str(app.printer.printer_buff[i]),
+                app.printer.printer_time_buff[i]);
     }
   }
 }
@@ -328,7 +329,7 @@ void render_right_mid_panel() {
               app.disk.qr.queue[i].time_to_run);
     current_row++;
   }
-  
+
   for (int i = app.disk.qr.len; i < MAX_PCB; i++) {
     mvwprintw(p, current_row, col_id_x, "   ");
     mvwprintw(p, current_row, col_track_x, "     ");
