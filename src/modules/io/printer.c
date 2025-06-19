@@ -19,24 +19,30 @@ void *init_printer(void *args) {
 }
 
 void printer_loop() {
-  int i = 0;
   char *local_print_buff = c_alloc(MAX_PRINTER_OUTPUT);
   u32 *time_print_buff = c_alloc(sizeof(u32));
   while (!app.loop_stop) {
+    int i=0;
     sleep_ms(5);
-    if (app.printer.head != NULL) {
-
-      while (app.printer.tail != NULL && i < PRINTER_WINDOW) {
+    if (app.printer.head != NULL && i < PRINTER_WINDOW) {
+      while (app.printer.head != NULL && i < PRINTER_WINDOW) {
         pop_from_print_queue(local_print_buff, time_print_buff);
         strcpy(app.printer.printer_buff[i], local_print_buff);
         app.printer.printer_time_buff[i] = *time_print_buff;
-        *time_print_buff--;
+        app.printer.printer_time_buff[i]--;
         app.printer.buff_last++;
         i++;
       }
-      c_dealloc(local_print_buff);
-      c_dealloc(time_print_buff);
     }
+    // else {
+    //   i = 0;
+    //   while(i <= app.printer.buff_last) {
+    //     app.printer.printer_time_buff[i]--;
+    //     i++;
+    //   }
+    // }
+    c_dealloc(local_print_buff);
+    c_dealloc(time_print_buff);
   }
 }
 
