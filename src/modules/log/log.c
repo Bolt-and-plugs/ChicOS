@@ -66,16 +66,13 @@ void c_log(log_level level, status_code status, const char *str, ...) {
     }
   }
 
-  char *buffer;
-  buffer = calloc(sizeof(char), 4096);
+  char buffer[4096];
   va_list arg_list;
   va_start(arg_list, str);
   vsnprintf(buffer, 255, str, arg_list);
   va_end(arg_list);
   if (!app.rdr.active)
     printf("%s\n", sanitize_str(buffer));
-
-  free(buffer);
 
   if (app.rdr.active && app.debug)
     render_log(buffer);
