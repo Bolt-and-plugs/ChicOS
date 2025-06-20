@@ -43,3 +43,8 @@ cmake --build target/
 ./target/ChicOS
 
 ```
+
+
+```sh
+ -nr, --no_render -> (store_true / bool) Disables UI rendering
+```
