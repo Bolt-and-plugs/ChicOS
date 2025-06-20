@@ -283,7 +283,7 @@ void render_left_bottom_panel() {
 
   mvwprintw(panel, 0, 1, " Printer: ");
 
-  add_to_print_queue(1000);
+  // add_to_print_queue(1000);
   // add_to_print_queue(812);
   // add_to_print_queue(188);
   // add_to_print_queue(1000);
