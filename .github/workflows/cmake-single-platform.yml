@@ -20,7 +20,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install Deps
-    - run: sudo apt install -y libsodium-dev libncurses5-dev libncursesw5-dev
+      run: sudo apt install -y libsodium-dev libncurses5-dev libncursesw5-dev
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/target -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
