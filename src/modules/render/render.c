@@ -322,8 +322,8 @@ void draw_disk_status(WINDOW *p, int current_track) {
   char bar_bg[barw + 1];
   memset(bar_bg, '-', barw);
   bar_bg[barw] = '\0';
-  mvwprintw(p, y - 3, 1, " Disk Head Position Tracker %05d/%05d",
-            current_track, TOTAL_TRACKS);
+  mvwprintw(p, y - 3, 1, " Disk Head Position Tracker %05d/%05d", current_track,
+            TOTAL_TRACKS);
   mvwprintw(p, y - 2, 2, "[%s]", bar_bg);
   wattron(p, COLOR_PAIR(2));
   mvwprintw(p, y - 2, 3 + track_pos, "=");
@@ -493,18 +493,17 @@ user *login_flow() {
       wrefresh(w);
       write_login_data(&login);
       usr = read_login_data(&login);
-      mvwprintw(w, LINES - 1, (COLS / 2) - (11 + strlen(usr->password)),
+      mvwprintw(w, LINES - 1, (COLS / 2) - (18 + strlen(usr->password)),
                 "User '%s' created with password '%s'", usr->username,
                 app.debug ? usr->password : "****");
       wrefresh(w);
 
       if (usr) {
         logged_in = true;
-        mvwprintw(w, 3, 2, "Welcome, %s!", usr->username);
-        wrefresh(w);
-        napms(2000);
       } else {
-        mvwprintw(w, 3, 2, "Error creating user!");
+        wattron(w, COLOR_PAIR(1));
+        mvwprintw(w, (LINES / 2) - 1, 2, "Error creating user!");
+        wattroff(w, COLOR_PAIR(1));
         wrefresh(w);
         napms(2000);
       }
@@ -512,7 +511,9 @@ user *login_flow() {
       app.user = usr;
       logged_in = true;
     } else {
+      wattron(w, COLOR_PAIR(1));
       mvwprintw(w, 2, 2, "Wrong password! Try again");
+      wattroff(w, COLOR_PAIR(1));
       wrefresh(w);
       napms(1000);
     }
