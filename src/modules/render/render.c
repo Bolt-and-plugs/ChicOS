@@ -270,7 +270,9 @@ void print_event(WINDOW *p) {
     for (int i = 0; i < PRINTER_WINDOW && app.printer.head != NULL; i++) {
       mvwprintw(p, i + 2, 1, "-25%s %d",
                 "Imprimindo:",
-                app.printer.printer_time_buff[i]);
+                app.printer.printer_time_buff[i]--);
+      if(app.printer.printer_time_buff[i] == 0)
+        mvwprintw(p, i + 2, 1, "                ");
     }
   }
 }
@@ -288,6 +290,7 @@ void render_left_bottom_panel() {
   // add_to_print_queue(1000);
   // add_to_print_queue(1000);
 
+  nodelay(panel, FALSE);
   print_event(panel);
 
   wrefresh(panel);
