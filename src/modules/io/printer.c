@@ -28,11 +28,15 @@ void printer_loop() {
       app.printer.buff_last++;
       i++;
     }
-    // i = 0;
-    // while(i <= app.printer.buff_last) {
-    //   app.printer.printer_time_buff[i]--;
-    //   i++;
-    // }
+    if(app.printer.printer_time_buff[0] > 0) {
+      app.printer.printer_time_buff[0]--;
+      continue;
+    }
+    for(int j=1;j<PRINTER_WINDOW;j++)
+    {
+      app.printer.printer_time_buff[j-1] = app.printer.printer_time_buff[j];
+    }
+    app.printer.printer_time_buff[4] = -1;
   }
 }
 

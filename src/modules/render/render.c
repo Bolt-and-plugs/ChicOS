@@ -283,13 +283,13 @@ void render_left_bottom_panel() {
 
   mvwprintw(panel, 0, 1, " Printer: ");
 
-  // add_to_print_queue(1000);
+  add_to_print_queue(1000);
   // add_to_print_queue(812);
   // add_to_print_queue(188);
   // add_to_print_queue(1000);
   // add_to_print_queue(1000);
 
-  nodelay(panel, FALSE);
+  //nodelay(panel, FALSE);
   print_event(panel);
 
   wrefresh(panel);
@@ -622,10 +622,12 @@ void *init_render(void *arg) {
   if (app.debug)
     c_info("Initializing renderer %s", arg);
   bootstrap_ui();
-  app.user = login_flow();
-  if (!app.user)
-    return NULL;
-  welcome_screen();
+  if(!app.debug) {
+    app.user = login_flow();
+    if (!app.user)
+      return NULL;
+    welcome_screen();
+  }
   init_renderer();
   render_loop();
   clear_renderer();
