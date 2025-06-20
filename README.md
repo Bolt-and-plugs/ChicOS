@@ -17,13 +17,13 @@ To test the project for yourself:
 
 debian/ubuntu
 ```sh
-sudo apt-get install libncurses5-dev libncursesw5-dev cmake
+sudo apt-get install libncurses5-dev libncursesw5-dev cmake libsodium-dev
 
 ```
 
 arch based
 ```sh 
-sudo pacman -S ncurses cmake
+sudo pacman -S ncurses cmake libsodium
 
 ```
 
