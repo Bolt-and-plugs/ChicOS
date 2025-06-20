@@ -10,7 +10,6 @@ extern App app;
 void *init_printer(void *args) {
   sem_init(&app.printer.printer_s, 0, 1);
   app.printer.head = NULL;
-  app.printer.head->prox = NULL;
   app.printer.tail = app.printer.head;
   app.printer.active = true;
   app.printer.buff_last = -1;
@@ -21,19 +20,19 @@ void *init_printer(void *args) {
 void printer_loop() {
   u32 time_print_buff;
   while (!app.loop_stop) {
-    int i=0;
-    sleep_ms(5);
-      while (app.printer.head != NULL && i < PRINTER_WINDOW) {
-        time_print_buff = pop_from_print_queue();
-        app.printer.printer_time_buff[i] = time_print_buff;
-        app.printer.buff_last++;
-        i++;
-      }
-      i = 0;
-      while(i <= app.printer.buff_last) {
-        app.printer.printer_time_buff[i]--;
-        i++;
-      }
+  int i=0;
+  sleep_ms(5);
+    while (app.printer.head != NULL && i < PRINTER_WINDOW) {
+      time_print_buff = pop_from_print_queue();
+      app.printer.printer_time_buff[i] = time_print_buff;
+      app.printer.buff_last++;
+      i++;
+    }
+    i = 0;
+    while(i <= app.printer.buff_last) {
+      app.printer.printer_time_buff[i]--;
+      i++;
+    }
   }
 }
 
