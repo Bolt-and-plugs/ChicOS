@@ -493,9 +493,9 @@ user *login_flow() {
       wrefresh(w);
       write_login_data(&login);
       usr = read_login_data(&login);
-      mvwprintw(w, LINES - 1, (COLS / 2) - (18 + strlen(usr->password)),
-                "User '%s' created with password '%s'", usr->username,
-                app.debug ? usr->password : "****");
+      // mvwprintw(w, LINES - 1, (COLS / 2) - (18 + strlen(usr->password)),
+      //           "User '%s' created with password '%s'", usr->username,
+      //           app.debug ? usr->password : "****");
       wrefresh(w);
 
       if (usr) {
@@ -647,6 +647,8 @@ void *init_render(void *arg) {
       return NULL;
     welcome_screen();
   }
+  app.user = login_flow(); 
+  if (!app.user) return NULL;
   init_renderer();
   render_loop();
   clear_renderer();

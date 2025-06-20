@@ -6,7 +6,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <sodium.h>
 
 #define LOG_FILE "auth.log"
 
@@ -95,6 +94,7 @@ void write_login_data(const user *u) {
             hashed_password);
     free(hashed_password);
   }
+  fflush(fp);
   fclose(fp);
 
   log_event("USER_CREATED", u->username);
@@ -143,13 +143,20 @@ user *read_login_data(const user *u) {
     }
 
     if (strcmp(local->username, u->username) == 0 &&
-        decrypt(u->password, local->password) == 0) {
+        decrypt(local->password, u->password) == true) {
         local->logged = true;
         log_event("LOGIN_SUCCESS", u->username);
         return local;
+    } else {
+      log_event("ERRO_AQUI", local->password);
     }
 
     log_event("LOGIN_FAIL", u->username);
+    log_event("LOGIN_FAIL", local->username);
+    log_event("LOGIN_FAIL", u->password);
+    log_event("LOGIN_FAIL", local->password);
+    if (decrypt(local->password, u->password) == true) log_event("CRIPTOGRAFIA", local->password);
+    
     c_dealloc(local);
     return NULL;
 }

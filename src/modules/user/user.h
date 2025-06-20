@@ -2,12 +2,13 @@
 #define __USER
 
 #include "../../defines.h"
+#include <sodium.h>
 
-#define MAX_LINE_LENGTH 64
+#define MAX_LINE_LENGTH 256
 
 typedef struct __user {
   char username[MAX_LINE_LENGTH];
-  char password[MAX_LINE_LENGTH];
+  char password[crypto_pwhash_STRBYTES];
   bool logged;
 } user;
 
