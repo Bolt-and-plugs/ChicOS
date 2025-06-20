@@ -57,6 +57,7 @@ void init_app(int mem_size, bool should_render) {
 void clear_app(bool should_render) {
   pthread_join(app.cpu.cpu_t, NULL);
   pthread_join(app.disk.disk_t, NULL);
+  pthread_join(app.printer.printer_t, NULL);
   if (should_render)
     pthread_join(app.mem->render_t, NULL);
   clear_pcb();
@@ -101,7 +102,7 @@ void handle_args(int *args, int argc, char **argv) {
   // print help
   if (args[0] == HELP) {
     puts("Valid Arguments:");
-    //puts("\t-ms, --mem-size -> (integer) Memory size in bytes");
+    // puts("\t-ms, --mem-size -> (integer) Memory size in bytes");
     puts("\t-nr, --no_render -> (store_true / bool) Disables UI rendering");
     exit(-1);
   }

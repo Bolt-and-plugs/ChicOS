@@ -24,15 +24,11 @@ include_directories(src)
 
 find_package(PkgConfig REQUIRED)
 
-# --- ALTERAÇÃO IMPORTANTE AQUI ---
-# Usamos IMPORTED_TARGET para criar alvos que contêm todas as informações necessárias.
 pkg_check_modules(SODIUM REQUIRED IMPORTED_TARGET libsodium)
 pkg_check_modules(NCURSES REQUIRED IMPORTED_TARGET ncurses)
 
 add_executable(${project_name} ${SRC_FILES} ${TEST_FILES} ${OS_MODULES})
 
-# --- ALTERAÇÃO IMPORTANTE AQUI ---
-# Agora vinculamos aos alvos importados, que é a maneira mais robusta.
 target_link_libraries(${project_name}
     PRIVATE
         PkgConfig::SODIUM

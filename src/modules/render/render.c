@@ -265,17 +265,14 @@ int read_path(WINDOW *p) {
 }
 
 void print_event(WINDOW *p) {
-  if (app.printer.active && app.printer.buff_last != -1) {
-    for (int i = 0; i < PRINTER_WINDOW && app.printer.head != NULL; i++) {
-      mvwprintw(p, i + 2, 1, "-25%s %d",
-                "Imprimindo:",
-                app.printer.printer_time_buff[i]--);
-      if(app.printer.printer_time_buff[i] == 0)
-        mvwprintw(p, i + 2, 1, "                ");
-    }
+  print_list *buff = get_print_time(); // This function is now thread-safe.
+  if (app.printer.active && buff != NULL) {
+    mvwprintw(p, 2, 2, "Process %u Printing for: %u", buff->pid, buff->time);
+  } else {
+
+    mvwprintw(p, 2, 2, "Printer is empty          ");
   }
 }
-
 void render_left_bottom_panel() {
   WINDOW *panel = app.rdr.left_bottom;
   werase(panel);
@@ -283,13 +280,7 @@ void render_left_bottom_panel() {
 
   mvwprintw(panel, 0, 1, " Printer: ");
 
-  add_to_print_queue(1000);
-  // add_to_print_queue(812);
-  // add_to_print_queue(188);
-  // add_to_print_queue(1000);
-  // add_to_print_queue(1000);
-
-  //nodelay(panel, FALSE);
+  // nodelay(panel, FALSE);
   print_event(panel);
 
   wrefresh(panel);
@@ -300,7 +291,7 @@ void render_right_bottom_panel() {
   box(p, 0, 0);
 
   mvwprintw(p, 0, 1, " User Input: ");
-  mvwprintw(p, 1, 1, "Press 'p' and enter a path of a file");
+  mvwprintw(p, 1, 2, "Press 'p' and enter a path of a file");
 
   char char_to_stop = wgetch(p);
   echo();
@@ -622,7 +613,7 @@ void *init_render(void *arg) {
   if (app.debug)
     c_info("Initializing renderer %s", arg);
   bootstrap_ui();
-  if(!app.debug) {
+  if (!app.debug) {
     app.user = login_flow();
     if (!app.user)
       return NULL;
