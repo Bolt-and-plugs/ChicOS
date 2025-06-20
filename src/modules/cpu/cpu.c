@@ -124,11 +124,11 @@ void sys_call(events e, const char *str, ...) {
     break;
   case print_request:
     sscanf(buffer, "%s %u", str_buf, &time);
-    add_to_print_queue(str_buf, time);
+    add_to_print_queue(time);
     break;
   case print_finish:
     sscanf(buffer, "%s %u", str_buf, &time);
-    add_to_print_queue(str_buf, time);
+    add_to_print_queue(time);
     break;
   }
   sem_post(&app.cpu.cpu_s);
@@ -169,11 +169,11 @@ void interrupt_control(events e, const char *str, ...) {
     break;
   case print_request:
     sscanf(buffer, "%s %u", str_buf, &time);
-    add_to_print_queue(str_buf, time);
+    add_to_print_queue(time);
     break;
   case print_finish:
     sscanf(buffer, "%s %u", str_buf, &time);
-    add_to_print_queue(str_buf, time);
+    add_to_print_queue(time);
     break;
   }
   sem_post(&app.cpu.cpu_s);

@@ -269,7 +269,7 @@ void print_event(WINDOW *p) {
   if (app.printer.active && app.printer.buff_last != -1) {
     for (int i = 0; i < PRINTER_WINDOW && app.printer.head != NULL; i++) {
       mvwprintw(p, i + 2, 1, "-25%s %d",
-                sanitize_str(app.printer.printer_buff[i]),
+                "Imprimindo:",
                 app.printer.printer_time_buff[i]);
     }
   }
