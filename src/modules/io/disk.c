@@ -59,6 +59,11 @@ void disk_loop() {
 }
 
 void simulate_io(u32 pid, u32 track) {
+  if (track > TOTAL_TRACKS) {
+    c_crit_error(DISK_MISS, "Track %u does not exists ", track);
+    return;
+  }
+
   io_req p = {.time_to_run = DISK_SLICE, .id = pid, .track = track};
   q_put(p);
 }

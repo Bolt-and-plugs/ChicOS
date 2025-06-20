@@ -5,6 +5,7 @@
 #include "../process/process.h"
 
 #define DISK_SLICE 4000
+#define TOTAL_TRACKS 20000
 
 typedef struct __io_req {
   u32 id;

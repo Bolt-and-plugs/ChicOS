@@ -304,10 +304,35 @@ void render_right_bottom_panel() {
   wrefresh(p);
 }
 
+void draw_disk_status(WINDOW *p, int current_track) {
+  int y, x;
+  getmaxyx(p, y, x);
+
+  int barw = x - 5;
+  if (barw < 2)
+    return;
+
+  int track_pos = (int)(((float)current_track / (float)(TOTAL_TRACKS)) * barw);
+
+  if (track_pos >= barw)
+    track_pos = barw - 1;
+  if (track_pos < 0)
+    track_pos = 0;
+
+  char bar_bg[barw + 1];
+  memset(bar_bg, '-', barw);
+  bar_bg[barw] = '\0';
+  mvwprintw(p, y - 3, 1, " Disk Head Position Tracker %05d/%05d",
+            current_track, TOTAL_TRACKS);
+  mvwprintw(p, y - 2, 2, "[%s]", bar_bg);
+  wattron(p, COLOR_PAIR(2));
+  mvwprintw(p, y - 2, 3 + track_pos, "=");
+  wattroff(p, COLOR_PAIR(2));
+}
+
 void render_right_mid_panel() {
   WINDOW *p = app.rdr.right_mid;
-  mvwprintw(p, 0, 1, " Disk Status | %d to be done | %05d curr track ",
-            app.disk.qr.len, app.disk.current_track);
+  mvwprintw(p, 0, 1, " Disk Status | %d to be done", app.disk.qr.len);
 
   const int start_disk_y = 1;
   const int col_id_x = 2;
@@ -341,6 +366,8 @@ void render_right_mid_panel() {
     mvwprintw(p, 2, col_track_x, "-----");
     mvwprintw(p, 2, col_time_x, "-----");
   }
+
+  draw_disk_status(p, app.disk.current_track);
 
   wrefresh(p);
 }
