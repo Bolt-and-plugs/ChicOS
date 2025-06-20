@@ -4,7 +4,6 @@
 #include "../io/printer.h"
 #include "../memory/mem.h"
 #include "../user/user.h"
-#include "../utils/utils.h"
 #include <ctype.h>
 #include <locale.h>
 #include <pthread.h>
@@ -65,7 +64,7 @@ void status_bar() {
   WINDOW *s = app.rdr.status_win;
   werase(s);
   mvwprintw(s, 0, 0, "ChicOS(S) | %sPress CTRL+C to quit",
-            app.debug ? "Debug Mode | " : "");
+            app.debug ? "Debug Mode | " : app.user->username);
   wrefresh(s);
 }
 
@@ -411,6 +410,8 @@ user get_credentials(WINDOW *win) {
   getmaxyx(win, y, x);
   int w = 40, sx = (x - w) / 2;
   werase(win);
+
+  print_logo(win);
   box(win, 0, 0);
   mvwprintw(win, y / 2 - 2, sx, "Username:");
   WINDOW *u = derwin(win, 3, w - 10, y / 2 - 1, sx);
@@ -450,6 +451,7 @@ user get_credentials(WINDOW *win) {
 
 user *login_flow() {
   WINDOW *w = create_newwin(LINES - 1, COLS - 1, 0, 0);
+
   user login = {0};
   user *usr = NULL;
   char addr[MAX_ADDRESS_SIZE];
@@ -466,13 +468,16 @@ user *login_flow() {
 
     bool file_exists = (access(addr, F_OK) == 0);
     usr = read_login_data(&login);
-    
+
     if (!file_exists) {
-      mvwprintw(w, 2, 2, "User does not exist. Creating one...");
+      mvwprintw(w, LINES - 2, (COLS / 2) - 11,
+                "User does not exist. Creating one...");
       wrefresh(w);
       write_login_data(&login);
       usr = read_login_data(&login);
-      mvwprintw(w, 3, 2, "User '%s' created with password '%s'", usr->username, usr->password);
+      mvwprintw(w, LINES - 1, (COLS / 2) - (11 + strlen(usr->password)),
+                "User '%s' created with password '%s'", usr->username,
+                app.debug ? usr->password : "****");
       wrefresh(w);
 
       if (usr) {
@@ -532,6 +537,49 @@ void draw_dots(WINDOW *win, int repetitions) {
   }
 }
 
+void print_logo(WINDOW *p) {
+  mvwprintw(
+      p, 2, (COLS - 98) / 2,
+      "________/\\\\\\\\\\\\\\\\\\__/\\\\\\___________________________________/"
+      "\\\\\\\\\\__________/\\\\\\\\\\\\\\\\\\\\\\___        ");
+  mvwprintw(p, 3, (COLS - 98) / 2,
+            " _____/\\\\\\////////__\\/\\\\\\_________________________________/"
+            "\\\\\\///\\\\\\______/\\\\\\/////////\\\\\\_       ");
+  mvwprintw(p, 4, (COLS - 98) / 2,
+            "  "
+            "___/\\\\\\/___________\\/\\\\\\__________/\\\\\\_________________/"
+            "\\\\\\/__\\///\\\\\\___\\//\\\\\\______\\///__      ");
+  mvwprintw(
+      p, 5, (COLS - 98) / 2,
+      "   "
+      "__/\\\\\\_____________\\/\\\\\\_________\\///______/\\\\\\\\\\\\\\\\__/"
+      "\\\\\\______\\//\\\\\\___\\////\\\\\\_________     ");
+  mvwprintw(
+      p, 6, (COLS - 98) / 2,
+      "    "
+      "_\\/\\\\\\_____________\\/\\\\\\\\\\\\\\\\\\\\___/\\\\\\___/\\\\\\//////"
+      "__\\/\\\\\\_______\\/\\\\\\______\\////\\\\\\______    ");
+  mvwprintw(
+      p, 7, (COLS - 98) / 2,
+      "     "
+      "_\\//\\\\\\____________\\/\\\\\\/////\\\\\\_\\/\\\\\\__/"
+      "\\\\\\_________\\//\\\\\\______/\\\\\\__________\\////\\\\\\___   ");
+  mvwprintw(
+      p, 8, (COLS - 98) / 2,
+      "      "
+      "__\\///\\\\\\__________\\/\\\\\\___\\/\\\\\\_\\/\\\\\\_\\//"
+      "\\\\\\_________\\///\\\\\\__/\\\\\\_____/\\\\\\______\\//\\\\\\__  ");
+  mvwprintw(p, 9, (COLS - 98) / 2,
+            "       "
+            "____\\////\\\\\\\\\\\\\\\\\\_\\/\\\\\\___\\/\\\\\\_\\/\\\\\\__\\//"
+            "/\\\\\\\\\\\\\\\\____\\///\\\\\\\\\\/_____\\///"
+            "\\\\\\\\\\\\\\\\\\\\\\/___ ");
+  mvwprintw(p, 10, (COLS - 98) / 2,
+            "        "
+            "_______\\/////////__\\///____\\///__\\///_____\\////////_______\\/"
+            "////_________\\///////////_____");
+}
+
 void welcome_screen() {
   WINDOW *welcome = create_newwin(LINES, COLS, 0, 0);
   int names_y = LINES - 5;
@@ -539,48 +587,11 @@ void welcome_screen() {
              *name2 = "Felipe-gsilva", *name3 = "marioluci0",
              *name4 = "RenanSpim";
 
-  mvwprintw(
-      welcome, 2, (COLS - 98) / 2,
-      "________/\\\\\\\\\\\\\\\\\\__/\\\\\\___________________________________/"
-      "\\\\\\\\\\__________/\\\\\\\\\\\\\\\\\\\\\\___        ");
-  mvwprintw(welcome, 3, (COLS - 98) / 2,
-            " _____/\\\\\\////////__\\/\\\\\\_________________________________/"
-            "\\\\\\///\\\\\\______/\\\\\\/////////\\\\\\_       ");
-  mvwprintw(welcome, 4, (COLS - 98) / 2,
-            "  "
-            "___/\\\\\\/___________\\/\\\\\\__________/\\\\\\_________________/"
-            "\\\\\\/__\\///\\\\\\___\\//\\\\\\______\\///__      ");
-  mvwprintw(
-      welcome, 5, (COLS - 98) / 2,
-      "   "
-      "__/\\\\\\_____________\\/\\\\\\_________\\///______/\\\\\\\\\\\\\\\\__/"
-      "\\\\\\______\\//\\\\\\___\\////\\\\\\_________     ");
-  mvwprintw(
-      welcome, 6, (COLS - 98) / 2,
-      "    "
-      "_\\/\\\\\\_____________\\/\\\\\\\\\\\\\\\\\\\\___/\\\\\\___/\\\\\\//////"
-      "__\\/\\\\\\_______\\/\\\\\\______\\////\\\\\\______    ");
-  mvwprintw(
-      welcome, 7, (COLS - 98) / 2,
-      "     "
-      "_\\//\\\\\\____________\\/\\\\\\/////\\\\\\_\\/\\\\\\__/"
-      "\\\\\\_________\\//\\\\\\______/\\\\\\__________\\////\\\\\\___   ");
-  mvwprintw(
-      welcome, 8, (COLS - 98) / 2,
-      "      "
-      "__\\///\\\\\\__________\\/\\\\\\___\\/\\\\\\_\\/\\\\\\_\\//"
-      "\\\\\\_________\\///\\\\\\__/\\\\\\_____/\\\\\\______\\//\\\\\\__  ");
-  mvwprintw(welcome, 9, (COLS - 98) / 2,
-            "       "
-            "____\\////\\\\\\\\\\\\\\\\\\_\\/\\\\\\___\\/\\\\\\_\\/\\\\\\__\\//"
-            "/\\\\\\\\\\\\\\\\____\\///\\\\\\\\\\/_____\\///"
-            "\\\\\\\\\\\\\\\\\\\\\\/___ ");
-  mvwprintw(welcome, 10, (COLS - 98) / 2,
-            "        "
-            "_______\\/////////__\\///____\\///__\\///_____\\////////_______\\/"
-            "////_________\\///////////_____");
+  print_logo(welcome);
 
-  mvwprintw(welcome, LINES / 2, (COLS - 11) / 2, "Bem vindo %s!", app.user->username);
+  mvwprintw(welcome, LINES / 2,
+            ((COLS - 11) / 2) - strlen(app.user->username) / 2, "Bem vindo %s!",
+            app.user->username);
 
   mvwprintw(welcome, names_y, (COLS - strlen(createdBy)) / 2, "%s", createdBy);
 
@@ -612,7 +623,8 @@ void *init_render(void *arg) {
     c_info("Initializing renderer %s", arg);
   bootstrap_ui();
   app.user = login_flow();
-  if (!app.user) return NULL;
+  if (!app.user)
+    return NULL;
   welcome_screen();
   init_renderer();
   render_loop();
