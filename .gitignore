@@ -6,6 +6,7 @@ auth.log
 cmake-build-debug
 cmake-build-release
 
+
 # compile outputs
 target/
 build/

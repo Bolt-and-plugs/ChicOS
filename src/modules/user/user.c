@@ -33,7 +33,11 @@ void log_event(const char *event, const char *username) {
 }
 
 void retrieve_addr(const user *u, char *dest, size_t addr_sz) {
+#ifdef __linux__
   mkdir("resources/data", 0755);
+#else
+    mkdir("resources/data");
+#endif
   snprintf(dest, addr_sz, "resources/data/%s.us", u->username);
 }
 

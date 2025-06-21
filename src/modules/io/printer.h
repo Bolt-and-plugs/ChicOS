@@ -2,7 +2,6 @@
 #define __PRINTER
 
 #include "../../defines.h"
-#include "ncurses.h"
 
 #define PRINTER_WINDOW 5
 
