@@ -399,7 +399,7 @@ void init_renderer() {
 }
 
 void render_loop() {
-  signal(SIGWINCH, handle_resize);
+  signal(SIGINT, handle_resize);
   nodelay(stdscr, TRUE);
   while (!app.loop_stop) {
     if (resized) {

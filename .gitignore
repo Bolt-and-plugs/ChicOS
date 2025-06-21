@@ -2,6 +2,9 @@
 .cache
 compile_commands.json
 auth.log
+.idea
+cmake-build-release
+cmake-build-debug
 
 # compile outputs
 target/

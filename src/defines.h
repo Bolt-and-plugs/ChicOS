@@ -8,7 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __linux__
 #include <sys/wait.h>
+#endif
 #include <unistd.h>
 #include <time.h>
 

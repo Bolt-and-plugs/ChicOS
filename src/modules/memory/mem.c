@@ -1,7 +1,6 @@
 #include "mem.h"
 #include "../../chicos.h"
 #include "../log/log.h"
-#include <ncurses.h>
 #include <stdbool.h>
 
 extern App app;

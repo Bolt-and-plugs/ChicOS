@@ -2,7 +2,6 @@
 #define _LOG
 
 #include "../../defines.h"
-#include "ncurses.h"
 #include <stdarg.h>
 
 typedef enum { DEBUG, INFO, WARN, ERROR, CRIT_ERROR } log_level;
