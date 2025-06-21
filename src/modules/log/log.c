@@ -66,7 +66,7 @@ void c_log(log_level level, status_code status, const char *str, ...) {
     }
   }
 
-  char buffer[4096];
+  char buffer[DEFAULT_BUFFER_SIZE];
   va_list arg_list;
   va_start(arg_list, str);
   vsnprintf(buffer, 255, str, arg_list);

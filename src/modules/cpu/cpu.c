@@ -83,7 +83,7 @@ void sys_call(events e, const char *str, ...) {
   char buffer[MAX_ADDRESS_SIZE];
   u32 pid, time, bytes, track;
   void *ptr;
-  char str_buf[4096];
+  char str_buf[DEFAULT_BUFFER_SIZE];
   char sem;
 
   va_list arg_list;

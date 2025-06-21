@@ -22,7 +22,7 @@ void handle_resize(int sig) {
 void bootstrap_ui() {
   sem_init(&app.rdr.renderer_s, 0, 1);
   app.rdr.active = true;
-  app.rdr.output_buff = c_alloc(4096);
+  app.rdr.output_buff = c_alloc(DEFAULT_BUFFER_SIZE);
   strcpy(app.rdr.output_buff, "init");
   setlocale(LC_ALL, "");
   initscr();

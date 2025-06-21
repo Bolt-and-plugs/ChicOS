@@ -35,4 +35,12 @@ target_link_libraries(${project_name}
         PkgConfig::NCURSES
 )
 
+
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+if (CMAKE_BUILD_TYPE MATCHES DEBUG)
+enable_testing()
+  message(STATUS "Starting tests")
+  add_executable(run_memory_test test/memory_test.c)
+  add_test(NAME memory_test COMMAND run_memory_test) 
+endif()

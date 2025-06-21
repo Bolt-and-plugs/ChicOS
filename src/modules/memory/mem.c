@@ -227,7 +227,7 @@ void memory_load_req(process *p, u32 bytes) {
 }
 
 void memory_load_finish(process *p) {
-  char buffer[4096];
+  char buffer[DEFAULT_BUFFER_SIZE];
   c_info(buffer, "memory of process (pid=%d) loaded into %p", &p->pid,
          &p->address_space);
 }
