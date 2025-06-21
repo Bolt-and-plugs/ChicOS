@@ -36,7 +36,7 @@ void retrieve_addr(const user *u, char *dest, size_t addr_sz) {
 #ifdef __linux__
   mkdir("resources/data", 0755);
 #else
-    mdkir("resources/data");
+    mkdir("resources/data");
 #endif
   snprintf(dest, addr_sz, "resources/data/%s.us", u->username);
 }
