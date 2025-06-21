@@ -647,7 +647,6 @@ void *init_render(void *arg) {
       return NULL;
     welcome_screen();
   }
-  if (!app.user) return NULL;
   init_renderer();
   render_loop();
   clear_renderer();
