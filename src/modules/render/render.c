@@ -399,7 +399,11 @@ void init_renderer() {
 }
 
 void render_loop() {
+#ifdef __linux__
+  signal(SIGWINCH, handle_resize);
+#else
   signal(SIGINT, handle_resize);
+#endif
   nodelay(stdscr, TRUE);
   while (!app.loop_stop) {
     if (resized) {
@@ -647,7 +651,6 @@ void *init_render(void *arg) {
       return NULL;
     welcome_screen();
   }
-  if (!app.user) return NULL;
   init_renderer();
   render_loop();
   clear_renderer();
