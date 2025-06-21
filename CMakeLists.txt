@@ -21,7 +21,7 @@ add_definitions(-DBUILD_TYPE="${CMAKE_BUILD_TYPE}")
 
 file(GLOB OS_MODULES src/modules/*/*.c)
 file(GLOB SRC_FILES src/*.c)
-file(GLOB TEST_FILES test/*.c)
+#file(GLOB TEST_FILES test/*.c)
 
 include_directories(src)
 
@@ -64,15 +64,14 @@ target_link_libraries(${project_name}
         PkgConfig::NCURSES
 )
 
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-
 if (WIN32)
   add_custom_command(
           TARGET ${project_name} POST_BUILD
           COMMAND ${CMAKE_COMMAND} -E copy_if_different
           "${SODIUM_ROOT}/bin/libsodium-26.dll"
           $<TARGET_FILE_DIR:${project_name}>
-          # The line for pdcurses.dll has been removed because it's a static library.
           COMMENT "Copying required DLLs..."
   )
 endif()
+
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")

@@ -65,7 +65,7 @@ void clear_app(bool should_render) {
 }
 
 void set_debug_mode() {
-  //  set debug mode
+//  set debug mode
 #ifdef BUILD_TYPE
   bool debug = set_envvar(BUILD_TYPE);
   if (debug)
@@ -87,7 +87,7 @@ void handle_args(int *args, int argc, char **argv) {
 
     // sets memory size on args
     if (strcmp(str_arg, "--mem-size") == 0 || strcmp(str_arg, "-ms") == 0) {
-      int val = atoi(argv[i + 1]);
+      u32 val = atoi(argv[i + 1]);
       if (val <= 0 || val >= 4 * MB || !valid_int(val)) {
         c_crit_error(MEM_ERROR, "Bad system length");
       }
@@ -102,7 +102,7 @@ void handle_args(int *args, int argc, char **argv) {
   // print help
   if (args[0] == HELP) {
     puts("Valid Arguments:");
-    // puts("\t-ms, --mem-size -> (integer) Memory size in bytes");
+    puts("\t-ms, --mem-size -> (integer) Memory size in bytes");
     puts("\t-nr, --no_render -> (store_true / bool) Disables UI rendering");
     exit(-1);
   }
@@ -121,9 +121,9 @@ int main(int argc, char **argv) {
     if (args[2] && valid_int(args[2]))
       should_render = false;
   }
-  initialize_crypto();
   set_debug_mode();
   // main loop
+  initialize_crypto();
   init_app(mem_size, should_render);
   clear_app(should_render);
   return 0;

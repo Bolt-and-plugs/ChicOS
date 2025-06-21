@@ -1,8 +1,8 @@
 #include "semaphore.h"
-#include "../process/process.h"
 #include "../../chicos.h"
 #include "../log/log.h"
 #include "../memory/mem.h"
+#include "../process/process.h"
 
 extern App app;
 
@@ -58,11 +58,11 @@ void semaphoreV(semaphore *s) {
 }
 
 void init_semaphore_list() {
-  app.semaphores = (semaphore_list *)c_alloc(sizeof(semaphore_list));
+  app.semaphores = c_alloc(sizeof(semaphore_list));
   if (!app.semaphores) {
-    c_error(SEMAPHORE_INIT_ERROR, "Failed to initialize semaphore list");
-    return;
+    c_crit_error(SEMAPHORE_INIT_ERROR, "Failed to initialize semaphore list");
   }
+
   app.semaphores->last = 0;
   for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++) {
     app.semaphores->l[i].id = 0;
@@ -76,7 +76,7 @@ int init_semaphore(char name, u32 value) {
   for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++)
     if (app.semaphores->l[i].name == name) {
       c_warn(SEMAPHORE_INIT_ERROR, "Semaphore with name: %c already exists",
-              name);
+             name);
       return -1;
     }
 
