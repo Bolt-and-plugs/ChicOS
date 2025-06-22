@@ -23,6 +23,11 @@ sudo pacman -S ncurses cmake libsodium
 
 ```
 
+windows
+just install [cmake](https://cmake.org/download/) and follow the rest
+
+---
+
 Then, compile the code with cmake:
 
 
