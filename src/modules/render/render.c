@@ -280,7 +280,6 @@ void render_left_bottom_panel() {
 
   mvwprintw(panel, 0, 1, " Printer: ");
 
-  // nodelay(panel, FALSE);
   print_event(panel);
 
   wrefresh(panel);

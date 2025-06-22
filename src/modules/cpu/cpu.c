@@ -7,11 +7,10 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 extern App app;
 
-void *init_cpu(void *arg) {
+void *init_cpu(const void *arg) {
   if (arg)
     c_info(arg);
   app.cpu.quantum_time = 0;
@@ -21,8 +20,6 @@ void *init_cpu(void *arg) {
 }
 
 void cpu_loop() {
-  process *running_process;
-
   while (!app.loop_stop) {
     if (app.debug)
       sleep_ms(1000);
@@ -34,7 +31,7 @@ void cpu_loop() {
     scheduler_no_running();
     scheduler_kill_process();
 
-    running_process = scheduler_get_process();
+    process* running_process = scheduler_get_process();
     if (running_process) {
       exec_program(running_process);
       log_process(running_process->pid);
@@ -78,7 +75,7 @@ void cpu_loop() {
   }
 }
 
-void sys_call(events e, const char *str, ...) {
+void sys_call(const events e, const char *str, ...) {
   sem_wait(&app.cpu.cpu_s);
   char buffer[MAX_ADDRESS_SIZE];
   u32 pid, time, bytes, track;
@@ -127,12 +124,15 @@ void sys_call(events e, const char *str, ...) {
     add_to_print_queue(time, pid);
     break;
   case print_finish:
+    pop_print();
+    break;
+  default:
     break;
   }
   sem_post(&app.cpu.cpu_s);
 }
 
-void interrupt_control(events e, const char *str, ...) {
+void interrupt_control(const events e, const char *str, ...) {
   sem_wait(&app.cpu.cpu_s);
   char buffer[MAX_ADDRESS_SIZE];
   u32 time;
@@ -169,6 +169,9 @@ void interrupt_control(events e, const char *str, ...) {
     add_to_print_queue(time, pid);
     break;
   case print_finish:
+    pop_print();
+    break;
+  default:
     break;
   }
   sem_post(&app.cpu.cpu_s);

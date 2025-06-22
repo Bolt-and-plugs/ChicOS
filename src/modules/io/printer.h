@@ -26,5 +26,6 @@ void add_to_print_queue(u32 time, u32 pid);
 print_list *pop_from_print_queue();
 void printer_loop();
 print_list *get_print_time();
+void pop_print();
 
 #endif
