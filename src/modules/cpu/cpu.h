@@ -33,7 +33,7 @@ typedef struct __cpu {
   sem_t cpu_s;
 } cpu;
 
-void *init_cpu(const void *arg);
+void *init_cpu(void *arg);
 
 void cpu_loop();
 

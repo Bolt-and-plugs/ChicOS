@@ -10,7 +10,7 @@
 
 extern App app;
 
-void *init_cpu(const void *arg) {
+void *init_cpu(void *arg) {
   if (arg)
     c_info(arg);
   app.cpu.quantum_time = 0;

@@ -31,6 +31,7 @@ void bootstrap_ui() {
   start_color();
   init_pair(1, COLOR_RED, COLOR_BLACK);
   init_pair(2, COLOR_GREEN, COLOR_BLACK);
+  init_pair(4, COLOR_CYAN, COLOR_BLACK);
   curs_set(0);
   refresh();
 }
@@ -63,8 +64,8 @@ void clear_renderer() {
 void status_bar() {
   WINDOW *s = app.rdr.status_win;
   werase(s);
-  mvwprintw(s, 0, 0, "ChicOS(S) | %sPress CTRL+C to quit",
-            app.debug ? "Debug Mode | " : app.user->username);
+  mvwprintw(s, 0, 0, "ChicOS(S) | %s | Press CTRL+C to quit",
+            app.debug ? "Debug Mode" : app.user->username);
   wrefresh(s);
 }
 
@@ -435,11 +436,11 @@ user get_credentials(WINDOW *win) {
   print_logo(win);
   box(win, 0, 0);
   mvwprintw(win, y / 2 - 2, sx, "Username:");
-  WINDOW *u = derwin(win, 3, w - 10, y / 2 - 1, sx);
+  WINDOW *u = derwin(win, 3, w - 8, y / 2 - 1, sx);
   box(u, 0, 0);
   wrefresh(u);
   mvwprintw(win, y / 2 + 2, sx, "Password:");
-  WINDOW *p = derwin(win, 3, w - 10, y / 2 + 3, sx);
+  WINDOW *p = derwin(win, 3, w - 8, y / 2 + 3, sx);
   box(p, 0, 0);
   wrefresh(p);
   wrefresh(win);
@@ -496,9 +497,6 @@ user *login_flow() {
       wrefresh(w);
       write_login_data(&login);
       usr = read_login_data(&login);
-      // mvwprintw(w, LINES - 1, (COLS / 2) - (18 + strlen(usr->password)),
-      //           "User '%s' created with password '%s'", usr->username,
-      //           app.debug ? usr->password : "****");
       wrefresh(w);
 
       if (usr) {
@@ -515,7 +513,7 @@ user *login_flow() {
       logged_in = true;
     } else {
       wattron(w, COLOR_PAIR(1));
-      mvwprintw(w, 2, 2, "Wrong password! Try again");
+      mvwprintw(w, (LINES / 2) + 1, (COLS - 42) / 2, "Wrong password! Try again");
       wattroff(w, COLOR_PAIR(1));
       wrefresh(w);
       napms(1000);
@@ -611,9 +609,12 @@ void welcome_screen() {
 
   print_logo(welcome);
 
-  mvwprintw(welcome, LINES / 2,
-            ((COLS - 11) / 2) - strlen(app.user->username) / 2, "Bem vindo %s!",
-            app.user->username);
+  mvwprintw(welcome, (LINES / 2) - 1, ((COLS - 11) / 2), "Bem vindo!");
+
+  wattron(welcome, COLOR_PAIR(4));
+  mvwprintw(welcome, LINES / 2, (COLS - (strlen(app.user->username) + 2)) / 2,
+            "%s", app.user->username);
+  wattroff(welcome, COLOR_PAIR(4));
 
   mvwprintw(welcome, names_y, (COLS - strlen(createdBy)) / 2, "%s", createdBy);
 
