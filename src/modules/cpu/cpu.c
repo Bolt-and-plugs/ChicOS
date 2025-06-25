@@ -172,27 +172,23 @@ void exec_process(process *p) {
     case semaphore_v:
       sys_call(semaphore_v, "%c %u", p->c.it[p->c.PC].sem_name, p->pid);
       break;
-    case process_exec:
+    case process_exec: {
       bool repeat = false;
-      if (p->c.it[p->c.PC].remaining_time > TIME_SLICE) {
-        p->c.it[p->c.PC].remaining_time -= TIME_SLICE;
-        repeat = true;
-        l_time = p->time_to_run;
-      } else {
+      if (p->c.it[p->c.PC].remaining_time < TIME_SLICE) {
         p->time_to_run = p->c.it[p->c.PC].remaining_time;
-        p->c.it[p->c.PC].remaining_time = 0;
-        l_time = p->time_to_run;
       }
 
+      if (p->time_to_run >= MAX_TIME_MORE_PAGES)
+        p->address_space =
+            c_realloc(p->address_space, KB + (sizeof(page) * p->time_to_run));
+
+      u32 l_time = p->time_to_run;
       sem_wait(&app.cpu.cpu_s);
       sleep_ms_with_time(l_time, &p->time_to_run);
-      if (p->c.it[p->c.PC].remaining_time >= MAX_TIME_MORE_PAGES)
-        p->address_space =
-            c_realloc(p->address_space, KB + (sizeof(page) * l_time));
+      p->c.it[p->c.PC].remaining_time -= l_time;
       sem_post(&app.cpu.cpu_s);
-      if (p->c.it[p->c.PC].remaining_time > 0)
-        p->c.PC--;
       break;
+    }
     case disk_request:
       sem_wait(&app.cpu.cpu_s);
       p->fb->h->rw_count++;
