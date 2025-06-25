@@ -20,7 +20,7 @@ typedef enum {
 
 typedef struct __instruction {
   events e;
-  u32 time_to_run;
+  u32 remaining_time;
   u32 fp_pos;
   char sem_name;
 } instruction;

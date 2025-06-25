@@ -87,7 +87,7 @@ void init_code_section(process *p) {
 
     if (c->e == print_request || c->e == disk_request || c->e == process_exec) {
       time = atoi(strtok(NULL, " "));
-      c->time_to_run = time;
+      c->remaining_time = time;
       continue;
     }
 
