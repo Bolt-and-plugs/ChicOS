@@ -1,5 +1,6 @@
 #include "process.h"
 #include "../../chicos.h"
+#include "../fs/synt.h"
 #include "../log/log.h"
 #include "../memory/mem.h"
 
@@ -21,6 +22,21 @@ void clear_pcb(void) {
   }
 }
 
+events retrieve_event(const char *command) {
+  events e;
+  if (strcmp(command, "V") == 0)
+    return semaphore_v;
+  if (strcmp(command, "P") == 0)
+    return semaphore_p;
+  if (strcmp(command, "exec") == 0)
+    return process_exec;
+  if (strcmp(command, "write") == 0 || strcmp(command, "read") == 0)
+    return disk_request;
+  if (strcmp(command, "print") == 0)
+    return print_request;
+  return process_kill;
+}
+
 u32 get_pid(u32 seed) {
   bool exists = false;
 
@@ -29,6 +45,63 @@ u32 get_pid(u32 seed) {
       exists = true;
 
   return !exists ? app.cpu.quantum_time : get_pid(app.cpu.quantum_time + 1);
+}
+
+void init_code_section(process *p) {
+  int i = 0;
+  char aux[16], sem_aux[16], buff[16], *semaphore_name, *command;
+  u32 time;
+
+  if (p->fb->fp == NULL) {
+    c_error(DISK_OPEN_ERROR, "Syntax buffer file not open properly!");
+    return;
+  }
+
+  if (feof((p->fb->fp))) {
+    sys_call(process_kill, "%u", p->pid);
+    return;
+  }
+
+  p->c.it = (void *)p->address_space;
+  p->c.PC = 0;
+  p->c.size = (u32)sizeof(p->address_space) / INSTRUCTION_SIZE;
+
+  fgets(aux, sizeof(aux), p->fb->fp);
+  while (!feof(p->fb->fp)) {
+    if (i * INSTRUCTION_SIZE >= p->c.size - 1) {
+      c_error(CODE_SECTION_FAULT, "Code section for pid %u is too big!",
+              p->pid);
+      return;
+    }
+
+    if (!fgets(aux, sizeof(aux), p->fb->fp))
+      break;
+    strcpy(sem_aux, aux);
+    command = strtok(sem_aux, "(");
+    command = strtok(sem_aux, " ");
+
+    instruction *c = &p->c.it[i++];
+
+    c->fp_pos = ftell(p->fb->fp);
+    c->e = retrieve_event(command);
+
+    if (c->e == print_request || c->e == disk_request || c->e == process_exec) {
+      time = atoi(strtok(NULL, " "));
+      c->time_to_run = time;
+      continue;
+    }
+
+    if (c->e == semaphore_v || c->e == semaphore_p) {
+      semaphore_name = strtok(aux, "(");
+      semaphore_name = strtok(NULL, "(");
+      semaphore_name = strtok(semaphore_name, ")");
+      c->sem_name = semaphore_name[0];
+      continue;
+    }
+
+  }
+
+  p->c.last = i;
 }
 
 u32 p_create(char *address) {
@@ -59,10 +132,13 @@ u32 p_create(char *address) {
   strcpy(p.name, name);
   p.fb = open_file(addr);
 
+  init_code_section(&p);
+
   sem_wait(&app.pcb.pcb_s);
   app.pcb.process_stack[app.pcb.curr++] = p;
   app.pcb.last++;
   sem_post(&app.pcb.pcb_s);
+
   return p.pid;
 }
 

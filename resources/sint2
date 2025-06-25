@@ -4,6 +4,7 @@ sint2
 424
 s t f
 
+P(s)
 exec 4000
 read 20
 exec 500

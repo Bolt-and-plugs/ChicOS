@@ -6,7 +6,6 @@
 #include "../utils/utils.h"
 
 #include <stdio.h>
-#include <string.h>
 
 extern App app;
 
@@ -33,45 +32,23 @@ void cpu_loop() {
 
     process *running_process = scheduler_get_process();
     if (running_process) {
-      exec_program(running_process);
+      exec_process(running_process);
       log_process(running_process->pid);
     }
 
-    if (app.cpu.quantum_time == 1 && app.debug)
-      interrupt_control(process_create, "resources/sint1");
+    for (int i = 1; i <= 3; i++) {
+      if (app.cpu.quantum_time == 1 * i && app.debug)
+        interrupt_control(process_create, "resources/sint1");
 
-    if (app.cpu.quantum_time == 2 && app.debug)
-      interrupt_control(process_create, "resources/sint1");
+      if (app.cpu.quantum_time == 2 * i && app.debug)
+        interrupt_control(process_create, "resources/sint2");
 
-    if (app.cpu.quantum_time == 3 && app.debug)
-      interrupt_control(process_create, "resources/sint3");
+      if (app.cpu.quantum_time == 3 * i && app.debug)
+        interrupt_control(process_create, "resources/sint3");
 
-    if (app.cpu.quantum_time == 4 && app.debug)
-      interrupt_control(process_create, "resources/sint4");
-
-    if (app.cpu.quantum_time == 5 && app.debug)
-      interrupt_control(process_create, "resources/sint1");
-
-    if (app.cpu.quantum_time == 6 && app.debug)
-      interrupt_control(process_create, "resources/sint2");
-
-    if (app.cpu.quantum_time == 7 && app.debug)
-      interrupt_control(process_create, "resources/sint3");
-
-    if (app.cpu.quantum_time == 8 && app.debug)
-      interrupt_control(process_create, "resources/sint4");
-
-    if (app.cpu.quantum_time == 9 && app.debug)
-      interrupt_control(process_create, "resources/sint1");
-
-    if (app.cpu.quantum_time == 10 && app.debug)
-      interrupt_control(process_create, "resources/sint2");
-
-    if (app.cpu.quantum_time == 11 && app.debug)
-      interrupt_control(process_create, "resources/sint3");
-
-    if (app.cpu.quantum_time == 12 && app.debug)
-      interrupt_control(process_create, "resources/sint4");
+      if (app.cpu.quantum_time == 4 * i && app.debug)
+        interrupt_control(process_create, "resources/sint4");
+    }
   }
 }
 
@@ -177,89 +154,53 @@ void interrupt_control(const events e, const char *str, ...) {
   sem_post(&app.cpu.cpu_s);
 }
 
-void exec_program(process *sint_process) {
-  char *semaphore_name, *command, aux[16], sem_aux[16];
-  u32 time;
-
-  if (sint_process->fb->fp == NULL) {
-    c_error(DISK_OPEN_ERROR, "File not open properly!");
+void exec_process(process *p) {
+  if (p->time_to_run <= 0) {
+    sys_call(process_interrupt, "%u", p->pid);
     return;
   }
 
-  if (feof((sint_process->fb->fp))) {
-    sys_call(process_kill, "%u", sint_process->pid);
-    return;
-  }
-
-  if (sint_process->time_to_run <= 0 ||
-      sint_process->curr_ist.time_to_run <= 0) {
-    sys_call(process_interrupt, "%u", sint_process->pid);
-    return;
-  }
-
-  while (!feof((sint_process->fb->fp)) || sint_process->time_to_run > 0) {
-    if (!fgets(aux, sizeof(aux), sint_process->fb->fp)) {
-      sys_call(process_kill, "%u", sint_process->pid);
-      return;
+  u32 l_time;
+  for (int i = 0; i < p->c.last; i++) {
+    if (p->time_to_run <= 0) {
+      sys_call(process_interrupt, "");
     }
+    switch ((events)p->c.it[i].e) {
+    case semaphore_p:
+      sys_call(semaphore_p, "%c %u", p->c.it[i].sem_name, p->pid);
+      break;
+    case semaphore_v:
+      sys_call(semaphore_v, "%c %u", p->c.it[i].sem_name, p->pid);
+      break;
+    case process_exec:
 
-    strcpy(sem_aux, aux);
-    command = strtok(sem_aux, "(");
+      if (p->c.it[i].time_to_run > TIME_SLICE) {
+        l_time = TIME_SLICE;
+        p->c.it->time_to_run -= TIME_SLICE;
 
-    if (strcmp(command, "V") == 0) {
-      semaphore_name = strtok(NULL, "(");
-      semaphore_name = strtok(semaphore_name, ")");
-      sint_process->curr_ist.e = semaphore_v;
-      sys_call(semaphore_v, "%c", semaphore_name[0]);
-    } else if (strcmp(command, "P") == 0) {
-      semaphore_name = strtok(NULL, "(");
-      semaphore_name = strtok(semaphore_name, ")");
-      sint_process->curr_ist.e = semaphore_p;
-      sys_call(semaphore_p, "%c %u", semaphore_name[0], sint_process->pid);
-    } else {
-      command = strtok(aux, " ");
-      if (strcmp(command, "exec") == 0) {
-        time = atoi(strtok(NULL, " "));
-        u32 l_time = time > TIME_SLICE ? TIME_SLICE : time;
-        sint_process->curr_ist.e = process_exec;
-        sint_process->curr_ist.time_to_run =
-            sint_process->curr_ist.time_to_run == 0
-                ? time
-                : sint_process->curr_ist.time_to_run - TIME_SLICE;
-        sem_wait(&app.cpu.cpu_s);
-        sleep_ms_with_time(l_time, &sint_process->time_to_run);
-        if (time >= MAX_TIME_MORE_PAGES)
-          sint_process->address_space = c_realloc(sint_process->address_space,
-                                                  KB + (sizeof(page) * l_time));
-        sem_post(&app.cpu.cpu_s);
-        return;
-      } else if (strcmp(command, "write") == 0) {
-        sem_wait(&app.cpu.cpu_s);
-        sint_process->fb->h->rw_count++;
-        sem_post(&app.cpu.cpu_s);
-        time = (u32)atoi(strtok(NULL, " "));
-        sint_process->curr_ist.e = disk_request;
-        sint_process->curr_ist.time_to_run = time;
-        sys_call(disk_request, "%u %u", sint_process->pid, time);
-      } else if (strcmp(command, "read") == 0) {
-        sem_wait(&app.cpu.cpu_s);
-        sint_process->fb->h->rw_count++;
-        sem_post(&app.cpu.cpu_s);
-        time = (u32)atoi(strtok(NULL, " "));
-        sint_process->curr_ist.e = disk_request;
-        sint_process->curr_ist.time_to_run = time;
-        sys_call(disk_request, "%u %u", sint_process->pid, time);
-      } else if (strcmp(command, "print") == 0) {
-        time = (u32)atoi(strtok(NULL, " "));
-        sint_process->curr_ist.e = print_request;
-        sint_process->curr_ist.time_to_run = time;
-        sys_call(print_request, "%u %u", sint_process->pid, time);
-      } else {
-        c_error(DISK_FILE_READ_ERROR,
-                "Found invalid command!: %s in process %u", command,
-                sint_process->pid);
-      }
+      } else
+        l_time = p->c.it->time_to_run;
+
+      sem_wait(&app.cpu.cpu_s);
+      sleep_ms_with_time(l_time, &p->time_to_run);
+      if (p->c.it[i].time_to_run >= MAX_TIME_MORE_PAGES)
+        p->address_space =
+            c_realloc(p->address_space, KB + (sizeof(page) * l_time));
+      sem_post(&app.cpu.cpu_s);
+      break;
+    case disk_request:
+      sem_wait(&app.cpu.cpu_s);
+      p->fb->h->rw_count++;
+      sem_post(&app.cpu.cpu_s);
+      sys_call(disk_request, "%u %u", p->pid, p->c.it[i].time_to_run);
+      break;
+    case print_request:
+      sys_call(print_request, "%u %u", p->pid, p->c.it[i].time_to_run);
+      break;
+    default:
+      c_error(DISK_FILE_READ_ERROR, "Found invalid command in process %u",
+              p->pid);
+      break;
     }
-    return;
   }
 }

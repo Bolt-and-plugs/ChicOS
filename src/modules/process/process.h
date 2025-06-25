@@ -6,6 +6,7 @@
 
 #define MAX_PCB 11
 #define MAX_SIZE_PROC_NAME 32
+#define INSTRUCTION_SIZE 16
 
 typedef enum {
   NEW = -2,
@@ -21,7 +22,15 @@ typedef struct __instruction {
   events e;
   u32 time_to_run;
   u32 fp_pos;
+  char sem_name;
 } instruction;
+
+typedef struct __code_section {
+  instruction *it;
+  u32 PC;
+  u32 size;
+  u32 last;
+} code_section;
 
 typedef struct __process {
   char name[MAX_ADDRESS_SIZE];
@@ -32,7 +41,7 @@ typedef struct __process {
   void *address_space;
   // disk
   synt_buffer *fb;
-  instruction curr_ist;
+  code_section c;
 } process;
 
 typedef struct __PCB {

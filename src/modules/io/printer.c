@@ -37,7 +37,7 @@ void printer_loop()
         }
 
         if (app.printer.printer_buffer == NULL && app.printer.head != NULL)
-            interrupt_control(print_finish, NULL);
+            interrupt_control(print_finish, "");
     }
 }
 
