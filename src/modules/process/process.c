@@ -152,7 +152,6 @@ void p_interrupt(u32 pid) {
 
 void p_block(u32 pid) {
   process *p = p_find(pid);
-
   sem_wait(&app.pcb.pcb_s);
   p->status = BLOCKED;
   p->time_to_run = 0;

@@ -17,6 +17,12 @@ typedef enum {
   WAITING = 4,
 } p_status;
 
+typedef struct __instruction {
+  events e;
+  u32 time_to_run;
+  u32 fp_pos;
+} instruction;
+
 typedef struct __process {
   char name[MAX_ADDRESS_SIZE];
   u32 pid;
@@ -26,6 +32,7 @@ typedef struct __process {
   void *address_space;
   // disk
   synt_buffer *fb;
+  instruction curr_ist;
 } process;
 
 typedef struct __PCB {

@@ -4,6 +4,7 @@ sint1
 424
 s t
 
+exec 20000
 print 1000
 P(s)
 exec 4000

@@ -31,7 +31,7 @@ void cpu_loop() {
     scheduler_no_running();
     scheduler_kill_process();
 
-    process* running_process = scheduler_get_process();
+    process *running_process = scheduler_get_process();
     if (running_process) {
       exec_program(running_process);
       log_process(running_process->pid);
@@ -186,6 +186,17 @@ void exec_program(process *sint_process) {
     return;
   }
 
+  if (feof((sint_process->fb->fp))) {
+    sys_call(process_kill, "%u", sint_process->pid);
+    return;
+  }
+
+  if (sint_process->time_to_run <= 0 ||
+      sint_process->curr_ist.time_to_run <= 0) {
+    sys_call(process_interrupt, "%u", sint_process->pid);
+    return;
+  }
+
   while (!feof((sint_process->fb->fp)) || sint_process->time_to_run > 0) {
     if (!fgets(aux, sizeof(aux), sint_process->fb->fp)) {
       sys_call(process_kill, "%u", sint_process->pid);
@@ -198,16 +209,23 @@ void exec_program(process *sint_process) {
     if (strcmp(command, "V") == 0) {
       semaphore_name = strtok(NULL, "(");
       semaphore_name = strtok(semaphore_name, ")");
+      sint_process->curr_ist.e = semaphore_v;
       sys_call(semaphore_v, "%c", semaphore_name[0]);
     } else if (strcmp(command, "P") == 0) {
       semaphore_name = strtok(NULL, "(");
       semaphore_name = strtok(semaphore_name, ")");
+      sint_process->curr_ist.e = semaphore_p;
       sys_call(semaphore_p, "%c %u", semaphore_name[0], sint_process->pid);
     } else {
       command = strtok(aux, " ");
       if (strcmp(command, "exec") == 0) {
         time = atoi(strtok(NULL, " "));
         u32 l_time = time > TIME_SLICE ? TIME_SLICE : time;
+        sint_process->curr_ist.e = process_exec;
+        sint_process->curr_ist.time_to_run =
+            sint_process->curr_ist.time_to_run == 0
+                ? time
+                : sint_process->curr_ist.time_to_run - TIME_SLICE;
         sem_wait(&app.cpu.cpu_s);
         sleep_ms_with_time(l_time, &sint_process->time_to_run);
         if (time >= MAX_TIME_MORE_PAGES)
@@ -220,15 +238,21 @@ void exec_program(process *sint_process) {
         sint_process->fb->h->rw_count++;
         sem_post(&app.cpu.cpu_s);
         time = (u32)atoi(strtok(NULL, " "));
+        sint_process->curr_ist.e = disk_request;
+        sint_process->curr_ist.time_to_run = time;
         sys_call(disk_request, "%u %u", sint_process->pid, time);
       } else if (strcmp(command, "read") == 0) {
         sem_wait(&app.cpu.cpu_s);
         sint_process->fb->h->rw_count++;
         sem_post(&app.cpu.cpu_s);
         time = (u32)atoi(strtok(NULL, " "));
+        sint_process->curr_ist.e = disk_request;
+        sint_process->curr_ist.time_to_run = time;
         sys_call(disk_request, "%u %u", sint_process->pid, time);
       } else if (strcmp(command, "print") == 0) {
         time = (u32)atoi(strtok(NULL, " "));
+        sint_process->curr_ist.e = print_request;
+        sint_process->curr_ist.time_to_run = time;
         sys_call(print_request, "%u %u", sint_process->pid, time);
       } else {
         c_error(DISK_FILE_READ_ERROR,
@@ -236,17 +260,6 @@ void exec_program(process *sint_process) {
                 sint_process->pid);
       }
     }
-    return;
-  }
-
-  // kill or interrupt process
-  if (feof((sint_process->fb->fp))) {
-    sys_call(process_kill, "%u", sint_process->pid);
-    return;
-  }
-
-  if (sint_process->time_to_run <= 0) {
-    sys_call(process_interrupt, "%u", sint_process->pid);
     return;
   }
 }
