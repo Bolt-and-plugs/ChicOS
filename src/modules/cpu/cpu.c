@@ -161,29 +161,33 @@ void exec_process(process *p) {
   }
 
   u32 l_time;
-  for (int i = 0; i < p->c.last; i++) {
-    if (p->time_to_run <= 0) {
+  bool control = false;
+  for (; p->c.PC < p->c.last; p->c.PC++) {
+    if (p->time_to_run <= 0 || control) {
       sys_call(process_interrupt, "");
     }
-    switch ((events)p->c.it[i].e) {
+    switch ((events)p->c.it[p->c.PC].e) {
     case semaphore_p:
-      sys_call(semaphore_p, "%c %u", p->c.it[i].sem_name, p->pid);
+      sys_call(semaphore_p, "%c %u", p->c.it[p->c.PC].sem_name, p->pid);
       break;
     case semaphore_v:
-      sys_call(semaphore_v, "%c %u", p->c.it[i].sem_name, p->pid);
+      sys_call(semaphore_v, "%c %u", p->c.it[p->c.PC].sem_name, p->pid);
       break;
     case process_exec:
 
-      if (p->c.it[i].time_to_run > TIME_SLICE) {
+      if (p->c.it[p->c.PC].time_to_run > TIME_SLICE) {
         l_time = TIME_SLICE;
         p->c.it->time_to_run -= TIME_SLICE;
-
+        p->c.PC--;
       } else
         l_time = p->c.it->time_to_run;
 
       sem_wait(&app.cpu.cpu_s);
-      sleep_ms_with_time(l_time, &p->time_to_run);
-      if (p->c.it[i].time_to_run >= MAX_TIME_MORE_PAGES)
+      if (p->time_to_run > TIME_SLICE)
+        control = true;
+      else 
+        sleep_ms_with_time(l_time, &p->time_to_run);
+      if (p->c.it[p->c.PC].time_to_run >= MAX_TIME_MORE_PAGES)
         p->address_space =
             c_realloc(p->address_space, KB + (sizeof(page) * l_time));
       sem_post(&app.cpu.cpu_s);
@@ -192,10 +196,10 @@ void exec_process(process *p) {
       sem_wait(&app.cpu.cpu_s);
       p->fb->h->rw_count++;
       sem_post(&app.cpu.cpu_s);
-      sys_call(disk_request, "%u %u", p->pid, p->c.it[i].time_to_run);
+      sys_call(disk_request, "%u %u", p->pid, p->c.it[p->c.PC].time_to_run);
       break;
     case print_request:
-      sys_call(print_request, "%u %u", p->pid, p->c.it[i].time_to_run);
+      sys_call(print_request, "%u %u", p->pid, p->c.it[p->c.PC].time_to_run);
       break;
     default:
       c_error(DISK_FILE_READ_ERROR, "Found invalid command in process %u",
