@@ -162,9 +162,6 @@ void exec_process(process *p) {
 
   u32 l_time;
   for (; p->c.PC < p->c.last; p->c.PC++) {
-    if (p->time_to_run <= 0) {
-      sys_call(process_interrupt, "");
-    }
     switch ((events)p->c.it[p->c.PC].e) {
     case semaphore_p:
       sys_call(semaphore_p, "%c %u", p->c.it[p->c.PC].sem_name, p->pid);
@@ -178,22 +175,23 @@ void exec_process(process *p) {
         p->time_to_run = p->c.it[p->c.PC].remaining_time;
       }
 
-      if (p->time_to_run >= MAX_TIME_MORE_PAGES)
-        p->address_space =
-            c_realloc(p->address_space, KB + (sizeof(page) * p->time_to_run));
 
       u32 l_time = p->time_to_run;
       sem_wait(&app.cpu.cpu_s);
       sleep_ms_with_time(l_time, &p->time_to_run);
       p->c.it[p->c.PC].remaining_time -= l_time;
       sem_post(&app.cpu.cpu_s);
+
+      if (l_time >= MAX_TIME_MORE_PAGES)
+        p->address_space =
+            c_realloc(p->address_space, KB + (sizeof(page) * l_time));
       break;
     }
     case disk_request:
       sem_wait(&app.cpu.cpu_s);
       p->fb->h->rw_count++;
       sem_post(&app.cpu.cpu_s);
-      sys_call(disk_request, "%u %u", p->pid, p->c.it[p->c.PC].remaining_time);
+      sys_call(disk_request, "%u %u", p->pid, p->c.it[p->c.PC].remaining_time); // time means track here
       break;
     case print_request:
       sys_call(print_request, "%u %u", p->pid, p->c.it[p->c.PC].remaining_time);
