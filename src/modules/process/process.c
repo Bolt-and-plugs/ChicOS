@@ -98,7 +98,6 @@ void init_code_section(process *p) {
       c->sem_name = semaphore_name[0];
       continue;
     }
-
   }
 
   p->c.last = i;
@@ -126,7 +125,8 @@ u32 p_create(char *address) {
   process p = {.pid = app.pcb.last_pid++,
                .status = NEW,
                .address_space = NULL,
-               .time_to_run = TIME_SLICE};
+               .time_to_run = TIME_SLICE,
+               .h_used = 0};
   memory_load_req(&p, KB);
 
   strcpy(p.name, name);

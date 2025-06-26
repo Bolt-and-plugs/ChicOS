@@ -37,6 +37,7 @@ typedef struct __process {
   u32 pid;
   p_status status;
   u32 time_to_run;
+  u8 h_used;
   // memory
   void *address_space;
   // disk

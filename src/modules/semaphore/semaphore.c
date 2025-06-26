@@ -53,7 +53,9 @@ void semaphoreV(semaphore *s) {
   if (get_waiters_size(s) > 0) {
     u32 waking_pid = waiter_pop(s);
     process *waking_p = p_find(waking_pid);
+    sem_wait(&app.pcb.pcb_s);
     waking_p->status = READY;
+    sem_post(&app.pcb.pcb_s);
   }
 }
 

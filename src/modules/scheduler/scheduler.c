@@ -25,7 +25,7 @@ void scheduler_no_running() {
 }
 
 process *scheduler_get_process() {
-  if (!app.pcb.process_stack[0].address_space) {
+  if (!&app.pcb.process_stack[0]) {
     c_info("No process currently running");
     return NULL;
   }
@@ -41,8 +41,10 @@ process *scheduler_get_process() {
     if (candidate->status == BLOCKED || candidate->status == WAITING)
       continue;
 
-    if (!selected ||
-        candidate->fb->h->rw_count < selected->fb->h->rw_count) {
+    if (!selected || candidate->fb->h->rw_count < selected->fb->h->rw_count) {
+      selected = candidate;
+    } else if (candidate->h_used < selected->h_used &&
+               candidate->fb->h->rw_count == selected->fb->h->rw_count) {
       selected = candidate;
     } else if (candidate->fb->h->rw_count == selected->fb->h->rw_count &&
                candidate->pid < selected->pid) {

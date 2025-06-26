@@ -36,19 +36,17 @@ void cpu_loop() {
       log_process(running_process->pid);
     }
 
-    for (int i = 1; i <= 3; i++) {
-      if (app.cpu.quantum_time == 1 * i && app.debug)
-        interrupt_control(process_create, "resources/sint1");
+    if (app.cpu.quantum_time == 1 && app.debug)
+      interrupt_control(process_create, "resources/sint1");
 
-      if (app.cpu.quantum_time == 2 * i && app.debug)
-        interrupt_control(process_create, "resources/sint2");
+    if (app.cpu.quantum_time == 2 && app.debug)
+      interrupt_control(process_create, "resources/sint2");
 
-      if (app.cpu.quantum_time == 3 * i && app.debug)
-        interrupt_control(process_create, "resources/sint3");
+    if (app.cpu.quantum_time == 3 && app.debug)
+      interrupt_control(process_create, "resources/sint3");
 
-      if (app.cpu.quantum_time == 4 * i && app.debug)
-        interrupt_control(process_create, "resources/sint4");
-    }
+    if (app.cpu.quantum_time == 4 && app.debug)
+      interrupt_control(process_create, "resources/sint4");
   }
 }
 
@@ -161,45 +159,59 @@ void exec_process(process *p) {
   }
 
   u32 l_time;
-  for (; p->c.PC < p->c.last; p->c.PC++) {
-    switch ((events)p->c.it[p->c.PC].e) {
-    case semaphore_p:
-      sys_call(semaphore_p, "%c %u", p->c.it[p->c.PC].sem_name, p->pid);
-      break;
-    case semaphore_v:
-      sys_call(semaphore_v, "%c %u", p->c.it[p->c.PC].sem_name, p->pid);
-      break;
-    case process_exec: {
-      bool repeat = false;
-      if (p->c.it[p->c.PC].remaining_time < TIME_SLICE) {
-        p->time_to_run = p->c.it[p->c.PC].remaining_time;
-      }
-
-
-      u32 l_time = p->time_to_run;
-      sem_wait(&app.cpu.cpu_s);
-      sleep_ms_with_time(l_time, &p->time_to_run);
-      p->c.it[p->c.PC].remaining_time -= l_time;
-      sem_post(&app.cpu.cpu_s);
-
-      if (l_time >= MAX_TIME_MORE_PAGES)
-        p->address_space =
-            c_realloc(p->address_space, KB + (sizeof(page) * l_time));
-      break;
-    }
-    case disk_request:
-      sem_wait(&app.cpu.cpu_s);
-      p->fb->h->rw_count++;
-      sem_post(&app.cpu.cpu_s);
-      sys_call(disk_request, "%u %u", p->pid, p->c.it[p->c.PC].remaining_time); // time means track here
-      break;
-    case print_request:
-      sys_call(print_request, "%u %u", p->pid, p->c.it[p->c.PC].remaining_time);
-      break;
-    default:
-      c_error(DISK_FILE_READ_ERROR, "Found invalid command in process %u",
-              p->pid);
-      break;
-    }
+  if (p->c.PC == p->c.last - 1) {
+    sys_call(process_kill, "%u", p->pid);
   }
+
+  switch ((events)p->c.it[p->c.PC].e) {
+  case semaphore_p:
+    sys_call(semaphore_p, "%c %u", p->c.it[p->c.PC].sem_name, p->pid);
+    break;
+  case semaphore_v:
+    sys_call(semaphore_v, "%c %u", p->c.it[p->c.PC].sem_name, p->pid);
+    break;
+  case process_exec: {
+    if (p->c.it[p->c.PC].remaining_time < TIME_SLICE) {
+      sem_wait(&app.pcb.pcb_s);
+      p->time_to_run = p->c.it[p->c.PC].remaining_time;
+      sem_post(&app.pcb.pcb_s);
+    }
+
+    u32 l_time = p->time_to_run;
+    sem_wait(&app.cpu.cpu_s);
+    sleep_ms_with_time(l_time, &p->time_to_run);
+    sem_post(&app.cpu.cpu_s);
+
+    sem_wait(&app.pcb.pcb_s);
+    p->h_used++;
+    p->c.it[p->c.PC].remaining_time -= l_time;
+    sem_post(&app.pcb.pcb_s);
+
+    if (l_time >= MAX_TIME_MORE_PAGES)
+      p->address_space =
+          c_realloc(p->address_space, KB + (sizeof(page) * l_time));
+
+    if (p->c.it[p->c.PC].remaining_time > 0)
+      return;
+
+    break;
+  }
+  case disk_request:
+    sem_wait(&app.cpu.cpu_s);
+    p->fb->h->rw_count++;
+    sem_post(&app.cpu.cpu_s);
+    sys_call(disk_request, "%u %u", p->pid,
+             p->c.it[p->c.PC].remaining_time); // time means track here
+    break;
+  case print_request:
+    sys_call(print_request, "%u %u", p->pid, p->c.it[p->c.PC].remaining_time);
+    break;
+  default:
+    c_error(DISK_FILE_READ_ERROR, "Found invalid command in process %u",
+            p->pid);
+    break;
+  }
+
+  p->c.PC++;
+  return;
 }
