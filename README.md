@@ -1,6 +1,11 @@
 # ChicOS(S)
 
-This is a college Operating Systems class project, meanwhile a playground for us to taste the feeling of being a kernel programmer (roughly). For now, we do not have the instructions for what to follow, so, until then, this project will only handle some utilities and default operations we think a OS must implement. Later on, this will become (as we believe) a (not) fully functional OS simulator.
+This is a college Operating Systems class project, meanwhile a playground for us to taste the feeling of being a kernel programmer (roughly). It represents a Operating System Simulator with the following features:
+- Round Robin Scheduler
+- Process API
+- Disk and Printer Simulation
+- Memory API (alloc and dealloc) inside a fixed memory pool
+- Semaphore simulation for synthetic programs
 
 ![image](https://github.com/user-attachments/assets/63cdfe62-b072-4660-9e18-0b31182a6a8f)
 
