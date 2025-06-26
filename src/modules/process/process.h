@@ -63,5 +63,6 @@ void p_interrupt(u32 pid);
 process *p_find(u32 pid);
 void p_block(u32 pid);
 void p_unblock(u32 pid);
+void p_realloc(void *curr_region, u32 bytes, process *p);
 
 #endif

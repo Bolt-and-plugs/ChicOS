@@ -24,5 +24,4 @@ synt_buffer *open_file(const char *address);
 void exec_file(synt_buffer *file);
 void close_file(synt_buffer *fb);
 bool valid_path(const char *path);
-
 #endif

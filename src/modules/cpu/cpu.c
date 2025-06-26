@@ -36,17 +36,9 @@ void cpu_loop() {
       log_process(running_process->pid);
     }
 
-    if (app.cpu.quantum_time == 1 && app.debug)
-      interrupt_control(process_create, "resources/sint1");
-
-    if (app.cpu.quantum_time == 2 && app.debug)
-      interrupt_control(process_create, "resources/sint2");
-
-    if (app.cpu.quantum_time == 3 && app.debug)
-      interrupt_control(process_create, "resources/sint3");
-
-    if (app.cpu.quantum_time == 4 && app.debug)
-      interrupt_control(process_create, "resources/sint4");
+    if (app.cpu.quantum_time == 1 && app.debug) {
+      interrupt_control(process_create, "resources/sint5");
+    }
   }
 }
 
@@ -160,7 +152,7 @@ void exec_process(process *p) {
   }
 
   u32 l_time;
-  if (p->c.PC == p->c.last - 1) {
+  if (p->c.PC == p->c.last) {
     sys_call(process_kill, "%u", p->pid);
   }
 
@@ -190,14 +182,14 @@ void exec_process(process *p) {
 
     if (l_time >= MAX_TIME_MORE_PAGES) {
       sem_wait(&app.pcb.pcb_s);
-      p->address_space = c_realloc(
-          p->address_space, sizeof(p->address_space) + (sizeof(page) * l_time));
+      p_realloc(
+          p->address_space, sizeof(p->address_space) + (sizeof(page) * l_time), p);
+
       sem_post(&app.pcb.pcb_s);
     }
 
     if (p->c.it[p->c.PC].remaining_time > 0)
       return;
-
     c_debug(CPU_STATUS, "Process %u runned for %u", p->pid, l_time);
     break;
   }
