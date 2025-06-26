@@ -5,7 +5,7 @@ sint3
 s t v h d
 
 P(v)
-exec 10000
+exec 20000
 read 20
 write 20
 V(v)
