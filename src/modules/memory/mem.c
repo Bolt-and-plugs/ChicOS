@@ -77,7 +77,7 @@ void *c_alloc(u32 bytes) {
     return NULL;
   }
 
-  c_info("Pages to be allocated: %d\t Free pages: %d", num_pages,
+  c_info("Pages to be allocated: %d | Free pages: %d", num_pages,
          app.mem->pt.free_page_num);
   if (num_pages > app.mem->pt.free_page_num || num_pages > app.mem->pt.len) {
     c_info("Not enough memory to allocate %d pages", num_pages);
@@ -161,13 +161,15 @@ void *c_realloc(void *curr_region, u32 bytes) {
 
   void *buffer = c_alloc(total_size);
   if (!buffer) {
-    c_error(MEM_REALLOC_FAIL, "Failed to realloc %d + %d bytes", old_size,
+    c_error(MEM_REALLOC_FAIL, "failed to realloc %d + %d bytes", old_size,
             bytes);
     return NULL;
   }
 
   memcpy(buffer, curr_region, old_size);
   c_dealloc(curr_region);
+
+  c_info("region %p reallocated %d to %d bytes", buffer, old_size, bytes);
 
   return buffer;
 }
@@ -251,7 +253,7 @@ bool is_mem_free(void *ptr) {
 }
 
 int second_chance() {
-  static int i = 0; // Variável estática marcando o ínicio da lista circular
+  static int i = 0;
   int curr = i;
 
   sem_wait(&app.mem->memory_s);
@@ -259,11 +261,9 @@ int second_chance() {
     c_info("Page %d", curr);
     page *p = &app.mem->pt.pages[curr];
     if (!(p->used)) {
-      p->used = false; // Usa a  segunda chance da página
+      p->used = false;
       sem_post(&app.mem->memory_s);
-      return (i = (curr + 1) %
-                  app.mem->pt.len); // Retorna o índice da página a ser
-                                    // substituída e atualiza o ínicio da lista
+      return (i = (curr + 1) % app.mem->pt.len);
     }
     p->used = false;
     curr = (curr + 1) %

@@ -9,7 +9,7 @@ void scheduler_no_running() {
   for (int i = 0; i < app.pcb.last; i++) {
     sem_wait(&app.pcb.pcb_s);
     if (app.pcb.process_stack[i].status == RUNNING) {
-      c_info("proccess %s (%d) was running and is now ready\n",
+      c_info("process %s (%d) was running and is now ready\n",
              app.pcb.process_stack->name, i);
 
       app.pcb.process_stack[i].status = READY;
@@ -49,7 +49,7 @@ process *scheduler_get_process() {
   }
 
   if (!selected) {
-    c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "No runnable process found");
+    c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, " No runnable process found");
     return NULL;
   }
 

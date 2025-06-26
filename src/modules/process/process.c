@@ -49,7 +49,7 @@ u32 get_pid(u32 seed) {
 
 void init_code_section(process *p) {
   int i = 0;
-  char aux[16], sem_aux[16], buff[16], *semaphore_name, *command;
+  char aux[16], sem_aux[16], *semaphore_name, *command;
   u32 time;
 
   if (p->fb->fp == NULL) {
@@ -81,7 +81,6 @@ void init_code_section(process *p) {
     command = strtok(sem_aux, " ");
 
     instruction *c = &p->c.it[i++];
-
     c->fp_pos = ftell(p->fb->fp);
     c->e = retrieve_event(command);
 
@@ -182,7 +181,7 @@ void log_process(u32 pid) {
   // DEBUG INFO
   char cut_name[121];
   strncpy(cut_name, p.name, 120);
-  snprintf(res, 255, "process: %s\tpid: %d\tstatus %s\trw_count: %d\n",
+  snprintf(res, 255, "process: %s | pid: %d | status %s | rw_count: %d",
            cut_name, p.pid, status, p.fb->h->rw_count);
   c_info(res);
 }

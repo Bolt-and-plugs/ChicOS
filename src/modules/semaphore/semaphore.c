@@ -39,7 +39,10 @@ void semaphoreP(semaphore *s, u32 pid) {
   if (s->value < 0) {
     waiter_push(s, pid);
     process *p = p_find(pid);
+    sem_wait(&app.pcb.pcb_s);
     p->status = WAITING;
+    p->time_to_run = 0;
+    sem_post(&app.pcb.pcb_s);
   }
 }
 

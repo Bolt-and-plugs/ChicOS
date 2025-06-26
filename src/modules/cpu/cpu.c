@@ -21,7 +21,7 @@ void *init_cpu(void *arg) {
 void cpu_loop() {
   while (!app.loop_stop) {
     if (app.debug)
-      sleep_ms(1000);
+      sleep_ms(10);
     else
       sleep_ms(5000);
 
@@ -109,7 +109,7 @@ void sys_call(const events e, const char *str, ...) {
 
 void interrupt_control(const events e, const char *str, ...) {
   sem_wait(&app.cpu.cpu_s);
-  char buffer[MAX_ADDRESS_SIZE];
+  char buffer[MAX_ADDRESS_SIZE], str_buf[4096];
   u32 time;
   va_list arg_list;
   va_start(arg_list, str);
@@ -128,7 +128,8 @@ void interrupt_control(const events e, const char *str, ...) {
     p_interrupt(pid);
     break;
   case process_create:
-    pid = p_create((char *)buffer);
+    sscanf(buffer, "%s", str_buf);
+    pid = p_create(str_buf);
     log_process(pid);
     break;
   case process_kill:
@@ -187,13 +188,17 @@ void exec_process(process *p) {
     p->c.it[p->c.PC].remaining_time -= l_time;
     sem_post(&app.pcb.pcb_s);
 
-    if (l_time >= MAX_TIME_MORE_PAGES)
-      p->address_space =
-          c_realloc(p->address_space, KB + (sizeof(page) * l_time));
+    if (l_time >= MAX_TIME_MORE_PAGES) {
+      sem_wait(&app.pcb.pcb_s);
+      p->address_space = c_realloc(
+          p->address_space, sizeof(p->address_space) + (sizeof(page) * l_time));
+      sem_post(&app.pcb.pcb_s);
+    }
 
     if (p->c.it[p->c.PC].remaining_time > 0)
       return;
 
+    c_debug(CPU_STATUS, "Process %u runned for %u", p->pid, l_time);
     break;
   }
   case disk_request:
