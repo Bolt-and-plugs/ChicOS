@@ -16,8 +16,7 @@ typedef struct __printer {
   sem_t printer_s;
   print_list *head;
   print_list *tail;
-  u32 printer_time_buff[PRINTER_WINDOW];
-  i16 buff_last;
+  u32 printer_time_buff;
   bool active;
 } printer;
 
