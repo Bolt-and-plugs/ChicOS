@@ -258,7 +258,7 @@ void p_realloc(void *curr_region, u32 bytes, process *p) {
 
   u32 PC = p->c.PC;
   instruction *it = c_alloc(sizeof(instruction));
-  memcpy(it, &p->c.it[p->c.PC], INSTRUCTION_SIZE);
+  *it = p->c.it[PC];
   u32 last = p->c.last;
   u32 size = p->c.size;
 
