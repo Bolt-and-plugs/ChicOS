@@ -6,6 +6,11 @@ This is a college Operating Systems class project, meanwhile a playground for us
 - Disk and Printer Simulation
 - Memory API (alloc and dealloc) inside a fixed memory pool
 - Semaphore simulation for synthetic programs
+- UI for better visualization
+- Adaptative UI (Ui adapt to screen)
+- To get help type
+    ./target/ChicOS -h
+- Logger for operations
 
 ![image](https://github.com/user-attachments/assets/63cdfe62-b072-4660-9e18-0b31182a6a8f)
 
