@@ -6,6 +6,8 @@
 extern App app;
 
 void *init_disk(void *args) {
+  if (args)
+    c_info(args);
   sem_init(&app.disk.disk_s, 0, 1);
   app.disk.qr.len = 0;
   app.disk.current_track = 0;
@@ -76,7 +78,7 @@ void exec_io(io_req *p) {
     return;
   }
 
-  q_remove(local_p);
+  q_remove();
   interrupt_control(disk_finish, "%u", local_p.id);
 }
 
@@ -84,7 +86,7 @@ void q_put(io_req p) {
   app.disk.qr.queue[app.disk.qr.len] = p;
   app.disk.qr.len++;
 }
-void q_remove(io_req p) {
+void q_remove() {
   int i;
   for (i = 0; i < app.disk.qr.len - 1; i++) {
     app.disk.qr.queue[i] = app.disk.qr.queue[i + 1];

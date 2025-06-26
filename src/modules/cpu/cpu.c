@@ -37,7 +37,16 @@ void cpu_loop() {
     }
 
     if (app.cpu.quantum_time == 1 && app.debug) {
-      interrupt_control(process_create, "resources/sint5");
+      interrupt_control(process_create, "resources/sint1");
+    }
+    if (app.cpu.quantum_time == 2 && app.debug) {
+      interrupt_control(process_create, "resources/sint2");
+    }
+    if (app.cpu.quantum_time == 3 && app.debug) {
+      interrupt_control(process_create, "resources/sint3");
+    }
+    if (app.cpu.quantum_time == 4 && app.debug) {
+      interrupt_control(process_create, "resources/sint4");
     }
   }
 }
@@ -151,7 +160,6 @@ void exec_process(process *p) {
     return;
   }
 
-  u32 l_time;
   if (p->c.PC == p->c.last) {
     sys_call(process_kill, "%u", p->pid);
   }

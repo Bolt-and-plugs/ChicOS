@@ -513,7 +513,8 @@ user *login_flow() {
       logged_in = true;
     } else {
       wattron(w, COLOR_PAIR(1));
-      mvwprintw(w, (LINES / 2) + 1, (COLS - 42) / 2, "Wrong password! Try again");
+      mvwprintw(w, (LINES / 2) + 1, (COLS - 42) / 2,
+                "Wrong password! Try again");
       wattroff(w, COLOR_PAIR(1));
       wrefresh(w);
       napms(1000);

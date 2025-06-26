@@ -4,5 +4,5 @@ sint1
 424
 s t
 
-exec 3000
+exec 10000
 print 1000

@@ -23,7 +23,6 @@ void clear_pcb(void) {
 }
 
 events retrieve_event(const char *command) {
-  events e;
   if (strcmp(command, "V") == 0)
     return semaphore_v;
   if (strcmp(command, "P") == 0)
@@ -68,7 +67,7 @@ void init_code_section(process *p) {
 
   fgets(aux, sizeof(aux), p->fb->fp);
   while (!feof(p->fb->fp)) {
-    if (i * INSTRUCTION_SIZE >= p->c.size - 1) {
+    if ((u32)i * INSTRUCTION_SIZE >= p->c.size - 1) {
       c_error(CODE_SECTION_FAULT, "Code section for pid %u is too big!",
               p->pid);
       return;
@@ -258,7 +257,7 @@ void p_realloc(void *curr_region, u32 bytes, process *p) {
 
   u32 PC = p->c.PC;
   instruction *it = c_alloc(sizeof(instruction));
-  memcpy(it, &p->c.it[p->c.PC], INSTRUCTION_SIZE);
+  *it = p->c.it[PC];
   u32 last = p->c.last;
   u32 size = p->c.size;
 
@@ -271,7 +270,7 @@ void p_realloc(void *curr_region, u32 bytes, process *p) {
   init_code_section(p);
 
   p->c.PC = PC;
-  memcpy(p->c.it, it, INSTRUCTION_SIZE);
+  p->c.it[PC] = *it;
   p->c.last = last;
   p->c.size = size;
 
