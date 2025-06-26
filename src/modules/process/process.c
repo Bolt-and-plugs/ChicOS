@@ -271,7 +271,7 @@ void p_realloc(void *curr_region, u32 bytes, process *p) {
   init_code_section(p);
 
   p->c.PC = PC;
-  memcpy(p->c.it, it, INSTRUCTION_SIZE);
+  p->c.it[PC] = *it;
   p->c.last = last;
   p->c.size = size;
 
