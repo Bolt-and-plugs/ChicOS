@@ -23,7 +23,6 @@ void clear_pcb(void) {
 }
 
 events retrieve_event(const char *command) {
-  events e;
   if (strcmp(command, "V") == 0)
     return semaphore_v;
   if (strcmp(command, "P") == 0)
@@ -68,7 +67,7 @@ void init_code_section(process *p) {
 
   fgets(aux, sizeof(aux), p->fb->fp);
   while (!feof(p->fb->fp)) {
-    if (i * INSTRUCTION_SIZE >= p->c.size - 1) {
+    if ((u32)i * INSTRUCTION_SIZE >= p->c.size - 1) {
       c_error(CODE_SECTION_FAULT, "Code section for pid %u is too big!",
               p->pid);
       return;

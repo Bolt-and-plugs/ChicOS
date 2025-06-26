@@ -10,7 +10,7 @@
 App app;
 
 void handle_signal(sig_atomic_t signal) {
-  app.loop_stop = 1;
+  app.loop_stop = signal;
   c_info("Stopping loops");
 }
 
@@ -76,7 +76,7 @@ void set_debug_mode() {
 
 void handle_args(int *args, int argc, char **argv) {
   for (int i = 1; i < argc; i++) {
-    const char* str_arg = argv[i];
+    const char *str_arg = argv[i];
 
     if (strcmp(str_arg, "--help") == 0 || strcmp(str_arg, "-h") == 0) {
       args[0] = HELP;

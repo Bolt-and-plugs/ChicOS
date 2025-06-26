@@ -160,7 +160,6 @@ void exec_process(process *p) {
     return;
   }
 
-  u32 l_time;
   if (p->c.PC == p->c.last) {
     sys_call(process_kill, "%u", p->pid);
   }

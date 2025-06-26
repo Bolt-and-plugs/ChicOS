@@ -1,6 +1,5 @@
 #include "utils.h"
 #include "assert.h"
-#include "math.h"
 #include "stdint.h"
 
 void sleep_ms(u32 ms) { usleep(ms * 1000); }
