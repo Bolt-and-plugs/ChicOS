@@ -1,7 +1,6 @@
 #include "mem.h"
 #include "../../chicos.h"
 #include "../log/log.h"
-#include <stdbool.h>
 
 extern App app;
 
@@ -114,20 +113,19 @@ void *c_alloc(u32 bytes) {
 
     if (!contiguos_region)
       continue;
-    if (contiguos_region) {
-      c_info("Found %d contiguos pages at range %d - %d", num_pages, i,
-             num_pages + i);
-      ptr = (void *)((char *)app.mem->pool + (i * PAGE_SIZE));
-      app.mem->pt.free_page_num -= num_pages;
-      for (u32 j = i; j < i + num_pages; j++) {
-        app.mem->pt.pages[j].free = false;
-        app.mem->pt.pages[j].used = true;
-      }
-      alloc_header *h_ptr = ptr;
-      h_ptr->id = i;
-      h_ptr->page_num = num_pages;
-      break;
+    c_info("Found %d contiguous pages at range %d - %d", num_pages, i,
+           num_pages + i);
+    ptr = (void*)((char*)app.mem->pool + (i * PAGE_SIZE));
+    app.mem->pt.free_page_num -= num_pages;
+    for (u32 j = i; j < i + num_pages; j++)
+    {
+      app.mem->pt.pages[j].free = false;
+      app.mem->pt.pages[j].used = true;
     }
+    alloc_header* h_ptr = ptr;
+    h_ptr->id = i;
+    h_ptr->page_num = num_pages;
+    break;
   }
 
   if (!ptr) {
