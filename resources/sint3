@@ -4,8 +4,8 @@ sint3
 424
 s t v h d
 
-P(s)
+P(v)
 exec 10000
 read 20
 write 20
-V(s)
+V(v)

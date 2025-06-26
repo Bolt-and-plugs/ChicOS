@@ -1,5 +1,6 @@
 #include "process.h"
 #include "../../chicos.h"
+#include "../fs/synt.h"
 #include "../log/log.h"
 #include "../memory/mem.h"
 
@@ -21,6 +22,21 @@ void clear_pcb(void) {
   }
 }
 
+events retrieve_event(const char *command) {
+  events e;
+  if (strcmp(command, "V") == 0)
+    return semaphore_v;
+  if (strcmp(command, "P") == 0)
+    return semaphore_p;
+  if (strcmp(command, "exec") == 0)
+    return process_exec;
+  if (strcmp(command, "write") == 0 || strcmp(command, "read") == 0)
+    return disk_request;
+  if (strcmp(command, "print") == 0)
+    return print_request;
+  return process_kill;
+}
+
 u32 get_pid(u32 seed) {
   bool exists = false;
 
@@ -29,6 +45,61 @@ u32 get_pid(u32 seed) {
       exists = true;
 
   return !exists ? app.cpu.quantum_time : get_pid(app.cpu.quantum_time + 1);
+}
+
+void init_code_section(process *p) {
+  int i = 0;
+  char aux[16], sem_aux[16], *semaphore_name, *command;
+  u32 time;
+
+  if (p->fb->fp == NULL) {
+    c_error(DISK_OPEN_ERROR, "Syntax buffer file not open properly!");
+    return;
+  }
+
+  if (feof((p->fb->fp))) {
+    sys_call(process_kill, "%u", p->pid);
+    return;
+  }
+
+  p->c.it = (void *)p->address_space;
+  p->c.PC = 0;
+  p->c.size = (u32)sizeof(p->address_space) / INSTRUCTION_SIZE;
+
+  fgets(aux, sizeof(aux), p->fb->fp);
+  while (!feof(p->fb->fp)) {
+    if (i * INSTRUCTION_SIZE >= p->c.size - 1) {
+      c_error(CODE_SECTION_FAULT, "Code section for pid %u is too big!",
+              p->pid);
+      return;
+    }
+
+    if (!fgets(aux, sizeof(aux), p->fb->fp))
+      break;
+    strcpy(sem_aux, aux);
+    command = strtok(sem_aux, "(");
+    command = strtok(sem_aux, " ");
+
+    instruction *c = &p->c.it[i++];
+    c->fp_pos = ftell(p->fb->fp);
+    c->e = retrieve_event(command);
+
+    if (c->e == print_request || c->e == disk_request || c->e == process_exec) {
+      time = atoi(strtok(NULL, " "));
+      c->remaining_time = time;
+      continue;
+    }
+
+    if (c->e == semaphore_v || c->e == semaphore_p) {
+      semaphore_name = strtok(aux, "(");
+      semaphore_name = strtok(NULL, "(");
+      semaphore_name = strtok(semaphore_name, ")");
+      c->sem_name = semaphore_name[0];
+      continue;
+    }
+  }
+
+  p->c.last = i;
 }
 
 u32 p_create(char *address) {
@@ -53,16 +124,20 @@ u32 p_create(char *address) {
   process p = {.pid = app.pcb.last_pid++,
                .status = NEW,
                .address_space = NULL,
-               .time_to_run = TIME_SLICE};
+               .time_to_run = TIME_SLICE,
+               .h_used = 0};
   memory_load_req(&p, KB);
 
   strcpy(p.name, name);
   p.fb = open_file(addr);
 
+  init_code_section(&p);
+
   sem_wait(&app.pcb.pcb_s);
   app.pcb.process_stack[app.pcb.curr++] = p;
   app.pcb.last++;
   sem_post(&app.pcb.pcb_s);
+
   return p.pid;
 }
 
@@ -106,7 +181,7 @@ void log_process(u32 pid) {
   // DEBUG INFO
   char cut_name[121];
   strncpy(cut_name, p.name, 120);
-  snprintf(res, 255, "process: %s\tpid: %d\tstatus %s\trw_count: %d\n",
+  snprintf(res, 255, "process: %s | pid: %d | status %s | rw_count: %d",
            cut_name, p.pid, status, p.fb->h->rw_count);
   c_info(res);
 }
@@ -152,7 +227,6 @@ void p_interrupt(u32 pid) {
 
 void p_block(u32 pid) {
   process *p = p_find(pid);
-
   sem_wait(&app.pcb.pcb_s);
   p->status = BLOCKED;
   p->time_to_run = 0;
@@ -164,4 +238,50 @@ void p_unblock(u32 pid) {
   sem_wait(&app.pcb.pcb_s);
   p->status = READY;
   sem_post(&app.pcb.pcb_s);
+}
+
+void p_realloc(void *curr_region, u32 bytes, process *p) {
+  if (!curr_region) {
+    c_error(MEM_REALLOC_FAIL, "NULL pointer passed to realloc");
+    return;
+  }
+
+  alloc_header *h_ptr = get_header(curr_region);
+  if (!h_ptr) {
+    c_error(MEM_REALLOC_FAIL, "No valid header found for memory: %p",
+            curr_region);
+    return;
+  }
+
+  u32 old_size = h_ptr->page_num * PAGE_SIZE - sizeof(alloc_header);
+  u32 total_size = old_size + bytes;
+
+  u32 PC = p->c.PC;
+  instruction *it = c_alloc(sizeof(instruction));
+  memcpy(it, &p->c.it[p->c.PC], INSTRUCTION_SIZE);
+  u32 last = p->c.last;
+  u32 size = p->c.size;
+
+  fseek(p->fb->fp, 0, SEEK_SET);
+  read_header(p->fb);
+
+  c_dealloc(curr_region);
+  void *buffer = c_alloc(total_size);
+  p->address_space = buffer;
+  init_code_section(p);
+
+  p->c.PC = PC;
+  memcpy(p->c.it, it, INSTRUCTION_SIZE);
+  p->c.last = last;
+  p->c.size = size;
+
+  c_dealloc(it);
+
+  if (!buffer) {
+    c_error(MEM_REALLOC_FAIL, "failed to realloc %d + %d bytes", old_size,
+            bytes);
+    return;
+  }
+
+  c_info("region %p reallocated %d to %d bytes", buffer, old_size, bytes);
 }

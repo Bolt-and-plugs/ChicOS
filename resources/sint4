@@ -13,6 +13,6 @@ P(s)
 P(t)
 exec 200
 V(t)
-exec 10000
+exec 1000
 write 20
 V(s)

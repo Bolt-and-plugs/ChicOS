@@ -4,6 +4,7 @@ sint1
 424
 s t
 
+exec 2000
 print 1000
 P(s)
 exec 4000
@@ -12,7 +13,6 @@ V(s)
 exec 500
 exec 5000
 exec 200
-exec 10000
 read 20
 print 1000
 write 20

@@ -2,7 +2,6 @@
 #define _LOG
 
 #include "../../defines.h"
-#include "ncurses.h"
 #include <stdarg.h>
 
 typedef enum { DEBUG, INFO, WARN, ERROR, CRIT_ERROR } log_level;
@@ -17,7 +16,9 @@ typedef enum {
   PROCESS_OUT_OF_LIST = 101,
   PROCESS_CREATION_ERROR = 102,
   PROCESS_DELETION_ERROR = 103,
+  CODE_SECTION_FAULT = 104,
   CPU_ERROR = 200,
+  CPU_STATUS = 201,
   MEM_STATUS = 300,
   MEM_ERROR = 301,
   MEM_FULL = 302,
@@ -29,6 +30,7 @@ typedef enum {
   DISK_FILE_READ_ERROR = 401,
   DISK_FILE_WRITE_ERROR = 402,
   DISK_OPEN_ERROR = 403,
+  DISK_MISS = 404,
   SEMAPHORE_ERROR = 500,
   SEMAPHORE_INIT_ERROR = 501,
   SEMAPHORE_POST_ERROR = 502,

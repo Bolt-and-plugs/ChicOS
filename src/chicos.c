@@ -24,7 +24,7 @@ bool set_envvar(const char *mode) {
   return false;
 }
 
-void init_app(int mem_size, bool should_render) {
+void init_app(const int mem_size, const bool should_render) {
   srand(time(NULL));
   init_mem(mem_size);
   init_pcb();
@@ -54,9 +54,10 @@ void init_app(int mem_size, bool should_render) {
   }
 }
 
-void clear_app(bool should_render) {
+void clear_app(const bool should_render) {
   pthread_join(app.cpu.cpu_t, NULL);
   pthread_join(app.disk.disk_t, NULL);
+  pthread_join(app.printer.printer_t, NULL);
   if (should_render)
     pthread_join(app.mem->render_t, NULL);
   clear_pcb();
@@ -64,7 +65,7 @@ void clear_app(bool should_render) {
 }
 
 void set_debug_mode() {
-  //  set debug mode
+//  set debug mode
 #ifdef BUILD_TYPE
   bool debug = set_envvar(BUILD_TYPE);
   if (debug)
@@ -74,10 +75,8 @@ void set_debug_mode() {
 }
 
 void handle_args(int *args, int argc, char **argv) {
-  char *str_arg;
-
   for (int i = 1; i < argc; i++) {
-    str_arg = argv[i];
+    const char* str_arg = argv[i];
 
     if (strcmp(str_arg, "--help") == 0 || strcmp(str_arg, "-h") == 0) {
       args[0] = HELP;
@@ -86,8 +85,8 @@ void handle_args(int *args, int argc, char **argv) {
 
     // sets memory size on args
     if (strcmp(str_arg, "--mem-size") == 0 || strcmp(str_arg, "-ms") == 0) {
-      int val = atoi(argv[i + 1]);
-      if (val <= 0 || val >= 4 * MB || !valid_int(val)) {
+      const u32 val = atoi(argv[i + 1]);
+      if (val <= 0 || val >= 4 * MB) {
         c_crit_error(MEM_ERROR, "Bad system length");
       }
       args[1] = val;
@@ -101,7 +100,7 @@ void handle_args(int *args, int argc, char **argv) {
   // print help
   if (args[0] == HELP) {
     puts("Valid Arguments:");
-    //puts("\t-ms, --mem-size -> (integer) Memory size in bytes");
+    puts("\t-ms, --mem-size -> (integer) Memory size in bytes");
     puts("\t-nr, --no_render -> (store_true / bool) Disables UI rendering");
     exit(-1);
   }
@@ -120,9 +119,9 @@ int main(int argc, char **argv) {
     if (args[2] && valid_int(args[2]))
       should_render = false;
   }
-  initialize_crypto();
   set_debug_mode();
   // main loop
+  initialize_crypto();
   init_app(mem_size, should_render);
   clear_app(should_render);
   return 0;

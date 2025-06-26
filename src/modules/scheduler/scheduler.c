@@ -6,57 +6,57 @@
 extern App app;
 
 void scheduler_no_running() {
-  for (int i = 1; i < MAX_PCB; i++) {
-    if (!app.pcb.process_stack[i].address_space) {
-      continue;
-    }
-
-    if (!is_mem_free(app.pcb.process_stack[i].address_space))
-      break;
-
+  for (int i = 0; i < app.pcb.last; i++) {
+    sem_wait(&app.pcb.pcb_s);
     if (app.pcb.process_stack[i].status == RUNNING) {
-      c_info("proccess %s (%d) was running and is now ready\n",
+      c_info("process %s (%d) was running and is now ready\n",
              app.pcb.process_stack->name, i);
-      sem_wait(&app.pcb.pcb_s);
+
       app.pcb.process_stack[i].status = READY;
-      sem_post(&app.pcb.pcb_s);
     }
+    sem_post(&app.pcb.pcb_s);
   }
 }
 
 process *scheduler_get_process() {
-  if (!app.pcb.process_stack[0].address_space) {
+  if (app.pcb.last == 0) {
     c_info("No process currently running");
     return NULL;
   }
 
   process *selected = NULL;
 
-  for (int i = 0; i < MAX_PCB; i++) {
+  for (int i = 0; i < app.pcb.last; i++) {
+    sem_wait(&app.pcb.pcb_s);
     process *candidate = &app.pcb.process_stack[i];
 
-    if (!candidate->address_space || is_mem_free(candidate->address_space))
+    if (candidate->status == BLOCKED || candidate->status == WAITING) {
+      sem_post(&app.pcb.pcb_s);
       continue;
+    }
 
-    if (candidate->status == BLOCKED || candidate->status == WAITING)
-      continue;
-
-    if (!selected ||
-        candidate->fb->h->rw_count < selected->fb->h->rw_count) {
+    if (!selected || candidate->fb->h->rw_count < selected->fb->h->rw_count) {
+      selected = candidate;
+    } else if (candidate->h_used < selected->h_used &&
+               candidate->fb->h->rw_count == selected->fb->h->rw_count) {
       selected = candidate;
     } else if (candidate->fb->h->rw_count == selected->fb->h->rw_count &&
                candidate->pid < selected->pid) {
       selected = candidate;
     }
+
+    sem_post(&app.pcb.pcb_s);
   }
 
   if (!selected) {
-    c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, "No runnable process found");
+    c_error(SCHEDULER_PROCESS_OUT_OF_BOUNDS, " No runnable process found");
     return NULL;
   }
 
+  sem_wait(&app.pcb.pcb_s);
   selected->status = RUNNING;
   selected->time_to_run = TIME_SLICE;
+  sem_post(&app.pcb.pcb_s);
   return selected;
 }
 

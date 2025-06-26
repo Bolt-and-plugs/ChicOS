@@ -1,8 +1,8 @@
 #include "semaphore.h"
-#include "../process/process.h"
 #include "../../chicos.h"
 #include "../log/log.h"
 #include "../memory/mem.h"
+#include "../process/process.h"
 
 extern App app;
 
@@ -39,7 +39,10 @@ void semaphoreP(semaphore *s, u32 pid) {
   if (s->value < 0) {
     waiter_push(s, pid);
     process *p = p_find(pid);
+    sem_wait(&app.pcb.pcb_s);
     p->status = WAITING;
+    p->time_to_run = 0;
+    sem_post(&app.pcb.pcb_s);
   }
 }
 
@@ -53,16 +56,18 @@ void semaphoreV(semaphore *s) {
   if (get_waiters_size(s) > 0) {
     u32 waking_pid = waiter_pop(s);
     process *waking_p = p_find(waking_pid);
+    sem_wait(&app.pcb.pcb_s);
     waking_p->status = READY;
+    sem_post(&app.pcb.pcb_s);
   }
 }
 
 void init_semaphore_list() {
-  app.semaphores = (semaphore_list *)c_alloc(sizeof(semaphore_list));
+  app.semaphores = c_alloc(sizeof(semaphore_list));
   if (!app.semaphores) {
-    c_error(SEMAPHORE_INIT_ERROR, "Failed to initialize semaphore list");
-    return;
+    c_crit_error(SEMAPHORE_INIT_ERROR, "Failed to initialize semaphore list");
   }
+
   app.semaphores->last = 0;
   for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++) {
     app.semaphores->l[i].id = 0;
@@ -76,7 +81,7 @@ int init_semaphore(char name, u32 value) {
   for (int i = 0; i < MAX_SIZE_SEMAPHORES; i++)
     if (app.semaphores->l[i].name == name) {
       c_warn(SEMAPHORE_INIT_ERROR, "Semaphore with name: %c already exists",
-              name);
+             name);
       return -1;
     }
 

@@ -31,6 +31,7 @@ void bootstrap_ui() {
   start_color();
   init_pair(1, COLOR_RED, COLOR_BLACK);
   init_pair(2, COLOR_GREEN, COLOR_BLACK);
+  init_pair(4, COLOR_CYAN, COLOR_BLACK);
   curs_set(0);
   refresh();
 }
@@ -63,8 +64,8 @@ void clear_renderer() {
 void status_bar() {
   WINDOW *s = app.rdr.status_win;
   werase(s);
-  mvwprintw(s, 0, 0, "ChicOS(S) | %sPress CTRL+C to quit",
-            app.debug ? "Debug Mode | " : app.user->username);
+  mvwprintw(s, 0, 0, "ChicOS(S) | %s | Press CTRL+C to quit",
+            app.debug ? "Debug Mode" : app.user->username);
   wrefresh(s);
 }
 
@@ -265,17 +266,14 @@ int read_path(WINDOW *p) {
 }
 
 void print_event(WINDOW *p) {
-  if (app.printer.active && app.printer.buff_last != -1) {
-    for (int i = 0; i < PRINTER_WINDOW && app.printer.head != NULL; i++) {
-      mvwprintw(p, i + 2, 1, "-25%s %d",
-                "Imprimindo:",
-                app.printer.printer_time_buff[i]--);
-      if(app.printer.printer_time_buff[i] == 0)
-        mvwprintw(p, i + 2, 1, "                ");
-    }
+  print_list *buff = get_print_time(); // This function is now thread-safe.
+  if (app.printer.active && buff != NULL) {
+    mvwprintw(p, 2, 2, "Process %u Printing for: %u", buff->pid, buff->time);
+  } else {
+
+    mvwprintw(p, 2, 2, "Printer is empty          ");
   }
 }
-
 void render_left_bottom_panel() {
   WINDOW *panel = app.rdr.left_bottom;
   werase(panel);
@@ -283,13 +281,6 @@ void render_left_bottom_panel() {
 
   mvwprintw(panel, 0, 1, " Printer: ");
 
-  // add_to_print_queue(1000);
-  // add_to_print_queue(812);
-  // add_to_print_queue(188);
-  // add_to_print_queue(1000);
-  // add_to_print_queue(1000);
-
-  //nodelay(panel, FALSE);
   print_event(panel);
 
   wrefresh(panel);
@@ -300,7 +291,7 @@ void render_right_bottom_panel() {
   box(p, 0, 0);
 
   mvwprintw(p, 0, 1, " User Input: ");
-  mvwprintw(p, 1, 1, "Press 'p' and enter a path of a file");
+  mvwprintw(p, 1, 2, "Press 'p' and enter a path of a file");
 
   char char_to_stop = wgetch(p);
   echo();
@@ -313,10 +304,35 @@ void render_right_bottom_panel() {
   wrefresh(p);
 }
 
+void draw_disk_status(WINDOW *p, int current_track) {
+  int y, x;
+  getmaxyx(p, y, x);
+
+  int barw = x - 5;
+  if (barw < 2)
+    return;
+
+  int track_pos = (int)(((float)current_track / (float)(TOTAL_TRACKS)) * barw);
+
+  if (track_pos >= barw)
+    track_pos = barw - 1;
+  if (track_pos < 0)
+    track_pos = 0;
+
+  char bar_bg[barw + 1];
+  memset(bar_bg, '-', barw);
+  bar_bg[barw] = '\0';
+  mvwprintw(p, y - 3, 1, " Disk Head Position Tracker %05d/%05d", current_track,
+            TOTAL_TRACKS);
+  mvwprintw(p, y - 2, 2, "[%s]", bar_bg);
+  wattron(p, COLOR_PAIR(2));
+  mvwprintw(p, y - 2, 3 + track_pos, "=");
+  wattroff(p, COLOR_PAIR(2));
+}
+
 void render_right_mid_panel() {
   WINDOW *p = app.rdr.right_mid;
-  mvwprintw(p, 0, 1, " Disk Status | %d to be done | %05d curr track ",
-            app.disk.qr.len, app.disk.current_track);
+  mvwprintw(p, 0, 1, " Disk Status | %d to be done", app.disk.qr.len);
 
   const int start_disk_y = 1;
   const int col_id_x = 2;
@@ -351,6 +367,8 @@ void render_right_mid_panel() {
     mvwprintw(p, 2, col_time_x, "-----");
   }
 
+  draw_disk_status(p, app.disk.current_track);
+
   wrefresh(p);
 }
 
@@ -381,7 +399,11 @@ void init_renderer() {
 }
 
 void render_loop() {
+#ifdef __linux__
   signal(SIGWINCH, handle_resize);
+#else
+  signal(SIGINT, handle_resize);
+#endif
   nodelay(stdscr, TRUE);
   while (!app.loop_stop) {
     if (resized) {
@@ -414,11 +436,11 @@ user get_credentials(WINDOW *win) {
   print_logo(win);
   box(win, 0, 0);
   mvwprintw(win, y / 2 - 2, sx, "Username:");
-  WINDOW *u = derwin(win, 3, w - 10, y / 2 - 1, sx);
+  WINDOW *u = derwin(win, 3, w - 8, y / 2 - 1, sx);
   box(u, 0, 0);
   wrefresh(u);
   mvwprintw(win, y / 2 + 2, sx, "Password:");
-  WINDOW *p = derwin(win, 3, w - 10, y / 2 + 3, sx);
+  WINDOW *p = derwin(win, 3, w - 8, y / 2 + 3, sx);
   box(p, 0, 0);
   wrefresh(p);
   wrefresh(win);
@@ -475,18 +497,14 @@ user *login_flow() {
       wrefresh(w);
       write_login_data(&login);
       usr = read_login_data(&login);
-      mvwprintw(w, LINES - 1, (COLS / 2) - (11 + strlen(usr->password)),
-                "User '%s' created with password '%s'", usr->username,
-                app.debug ? usr->password : "****");
       wrefresh(w);
 
       if (usr) {
         logged_in = true;
-        mvwprintw(w, 3, 2, "Welcome, %s!", usr->username);
-        wrefresh(w);
-        napms(2000);
       } else {
-        mvwprintw(w, 3, 2, "Error creating user!");
+        wattron(w, COLOR_PAIR(1));
+        mvwprintw(w, (LINES / 2) - 1, 2, "Error creating user!");
+        wattroff(w, COLOR_PAIR(1));
         wrefresh(w);
         napms(2000);
       }
@@ -494,7 +512,9 @@ user *login_flow() {
       app.user = usr;
       logged_in = true;
     } else {
-      mvwprintw(w, 2, 2, "Wrong password! Try again");
+      wattron(w, COLOR_PAIR(1));
+      mvwprintw(w, (LINES / 2) + 1, (COLS - 42) / 2, "Wrong password! Try again");
+      wattroff(w, COLOR_PAIR(1));
       wrefresh(w);
       napms(1000);
     }
@@ -589,9 +609,12 @@ void welcome_screen() {
 
   print_logo(welcome);
 
-  mvwprintw(welcome, LINES / 2,
-            ((COLS - 11) / 2) - strlen(app.user->username) / 2, "Bem vindo %s!",
-            app.user->username);
+  mvwprintw(welcome, (LINES / 2) - 1, ((COLS - 11) / 2), "Bem vindo!");
+
+  wattron(welcome, COLOR_PAIR(4));
+  mvwprintw(welcome, LINES / 2, (COLS - (strlen(app.user->username) + 2)) / 2,
+            "%s", app.user->username);
+  wattroff(welcome, COLOR_PAIR(4));
 
   mvwprintw(welcome, names_y, (COLS - strlen(createdBy)) / 2, "%s", createdBy);
 
@@ -622,7 +645,7 @@ void *init_render(void *arg) {
   if (app.debug)
     c_info("Initializing renderer %s", arg);
   bootstrap_ui();
-  if(!app.debug) {
+  if (!app.debug) {
     app.user = login_flow();
     if (!app.user)
       return NULL;
