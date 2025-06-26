@@ -21,7 +21,7 @@ void *init_cpu(void *arg) {
 void cpu_loop() {
   while (!app.loop_stop) {
     if (app.debug)
-      sleep_ms(10);
+      sleep_ms(1000);
     else
       sleep_ms(5000);
 
