@@ -2,15 +2,14 @@
 
 This is a college Operating Systems class project, meanwhile a playground for us to taste the feeling of being a kernel programmer (roughly). It represents a Operating System Simulator with the following features:
 - Round Robin Scheduler
-- Process API
-- Disk and Printer Simulation
+- Process API (create, interrupt, kill and so on)
+- Disk and Printer Simulation (with SSTF and FIFO politics)
 - Memory API (alloc and dealloc) inside a fixed memory pool
 - Semaphore simulation for synthetic programs
 - UI for better visualization
+- Single User handling (with password auth)
 - Adaptative UI (Ui adapt to screen)
-- To get help type
-    ./target/ChicOS -h
-- Logger for operations
+- Built-in Logger
 
 ![image](https://github.com/user-attachments/assets/63cdfe62-b072-4660-9e18-0b31182a6a8f)
 
@@ -34,8 +33,9 @@ sudo pacman -S ncurses cmake libsodium
 ```
 
 windows
-
+```sh
 just install [cmake](https://cmake.org/download/) and follow the rest
+```
 
 ---
 
@@ -56,7 +56,7 @@ cmake --build target/
 
 ```
 
-
+- To get help type
 ```sh
- -nr, --no_render -> (store_true / bool) Disables UI rendering
+    ./target/ChicOS -h
 ```
