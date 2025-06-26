@@ -62,12 +62,10 @@ void init_code_section(process *p) {
     return;
   }
 
-
   p->c.it = (void *)p->address_space;
   p->c.PC = 0;
   p->c.size = (u32)sizeof(p->address_space) / INSTRUCTION_SIZE;
 
-    
   fgets(aux, sizeof(aux), p->fb->fp);
   while (!feof(p->fb->fp)) {
     if (i * INSTRUCTION_SIZE >= p->c.size - 1) {
@@ -99,7 +97,6 @@ void init_code_section(process *p) {
       c->sem_name = semaphore_name[0];
       continue;
     }
-      
   }
 
   p->c.last = i;
@@ -243,8 +240,8 @@ void p_unblock(u32 pid) {
   sem_post(&app.pcb.pcb_s);
 }
 
-void p_realloc(void *curr_region, u32 bytes, process* p){
-    if (!curr_region) {
+void p_realloc(void *curr_region, u32 bytes, process *p) {
+  if (!curr_region) {
     c_error(MEM_REALLOC_FAIL, "NULL pointer passed to realloc");
     return;
   }
@@ -258,10 +255,10 @@ void p_realloc(void *curr_region, u32 bytes, process* p){
 
   u32 old_size = h_ptr->page_num * PAGE_SIZE - sizeof(alloc_header);
   u32 total_size = old_size + bytes;
-  
+
   u32 PC = p->c.PC;
-  instruction* it = c_alloc(sizeof(instruction));
-  memcpy(it, p->c.it, sizeof(it));
+  instruction *it = c_alloc(sizeof(instruction));
+  memcpy(it, &p->c.it[p->c.PC], INSTRUCTION_SIZE);
   u32 last = p->c.last;
   u32 size = p->c.size;
 
@@ -269,12 +266,12 @@ void p_realloc(void *curr_region, u32 bytes, process* p){
   read_header(p->fb);
 
   c_dealloc(curr_region);
-  void* buffer =  c_alloc(total_size);  
+  void *buffer = c_alloc(total_size);
   p->address_space = buffer;
   init_code_section(p);
 
   p->c.PC = PC;
-  memcpy(p->c.it, it, sizeof(it));
+  memcpy(p->c.it, it, INSTRUCTION_SIZE);
   p->c.last = last;
   p->c.size = size;
 
@@ -283,7 +280,7 @@ void p_realloc(void *curr_region, u32 bytes, process* p){
   if (!buffer) {
     c_error(MEM_REALLOC_FAIL, "failed to realloc %d + %d bytes", old_size,
             bytes);
-    return NULL;
+    return;
   }
 
   c_info("region %p reallocated %d to %d bytes", buffer, old_size, bytes);
