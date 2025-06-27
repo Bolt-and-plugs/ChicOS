@@ -33,9 +33,8 @@ sudo pacman -S ncurses cmake libsodium
 ```
 
 windows
-```sh
-just install [cmake](https://cmake.org/download/) and follow the rest
-```
+
+> just install [cmake](https://cmake.org/download/) and follow the rest
 
 ---
 
