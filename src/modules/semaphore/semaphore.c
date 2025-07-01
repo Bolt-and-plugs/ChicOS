@@ -35,6 +35,7 @@ void semaphoreP(semaphore *s, u32 pid) {
     return;
   }
 
+  sem_wait(&app.semaphores->mutex);
   s->value--;
   if (s->value < 0) {
     waiter_push(s, pid);
@@ -44,6 +45,7 @@ void semaphoreP(semaphore *s, u32 pid) {
     p->time_to_run = 0;
     sem_post(&app.pcb.pcb_s);
   }
+  sem_post(&app.semaphores->mutex);
 }
 
 void semaphoreV(semaphore *s) {
@@ -52,6 +54,7 @@ void semaphoreV(semaphore *s) {
     return;
   }
 
+  sem_wait(&app.semaphores->mutex);
   s->value++;
   if (get_waiters_size(s) > 0) {
     u32 waking_pid = waiter_pop(s);
@@ -60,6 +63,8 @@ void semaphoreV(semaphore *s) {
     waking_p->status = READY;
     sem_post(&app.pcb.pcb_s);
   }
+
+  sem_post(&app.semaphores->mutex);
 }
 
 void init_semaphore_list() {
